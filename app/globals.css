@@ -1,17 +1,27 @@
 @import "tailwindcss";
 
+/* ===== Variables base ===== */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Colores personalizados */
+  --color-bg: #081423;
+  --color-border: #1e293b;
+  --color-text: #ffffff;
+  --color-placeholder: #64748b;
+  --color-primary: #3b82f6;
 }
 
+/* ===== Tema inline ===== */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-geist-sans, Arial, Helvetica, sans-serif);
+  --font-mono: var(--font-geist-mono, monospace);
 }
 
+/* ===== Dark mode ===== */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -19,8 +29,80 @@
   }
 }
 
+/* ===== Base ===== */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #06111f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #60a5fa;
+}
+
+/* ===== Selección ===== */
+::selection {
+  background: #3b82f6;
+  color: white;
+}
+
+::-moz-selection {
+  background: #3b82f6;
+  color: white;
+}
+
+/* ===== COMPONENTES REUTILIZABLES ===== */
+
+/* Caja base */
+.box {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 2px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;;
+}
+
+/* Input */
+.box-input-icon {
+  height: 3rem;
+  padding-left: 2.75rem;
+  padding-right: 3rem;
+}
+
+.box-input {
+  height: 3rem;
+  padding-right: 1rem;
+  padding-left: 1rem;
+}
+
+/* Placeholder */
+.box-input::placeholder {
+  color: var(--color-placeholder);
+}
+
+/* Estados */
+.box:focus {
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.box:hover {
+  border-color: rgba(5, 82, 207, 0.4);
 }

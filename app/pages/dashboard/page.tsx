@@ -26,7 +26,7 @@ type StatCardProps = {
 };
 
 const StatCard = ({ title, value, badge, badgeColor, icon }: StatCardProps) => (
-  <div className="rounded-2xl border border-[#173156] bg-[#08152b] p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.01)]">
+  <div className="rounded-2xl border-2 border-[#173156] bg-[#08152b] p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.01)]">
     <div className="mb-5 flex items-start justify-between">
       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0c2143]">
         {icon}
@@ -48,7 +48,7 @@ const QuickAction = ({
   icon: React.ReactNode;
   title: string;
 }) => (
-  <button className="flex h-32 flex-col items-center justify-center rounded-2xl border border-[#173156] bg-[#0c1933] text-center transition hover:border-blue-500/40 hover:bg-[#102246]">
+  <button className="flex h-32 flex-col items-center justify-center rounded-2xl border-2 border-[#173156] bg-[#0c1933] text-center transition hover:border-blue-500/40 hover:bg-[#102246]">
     <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#0f2347] text-blue-400">
       {icon}
     </div>
@@ -85,7 +85,7 @@ const TopClient = ({
 
 const LineChartMock = () => {
   return (
-    <div className="relative h-[320px] w-full overflow-hidden rounded-2xl border border-[#173156] bg-[#08152b] p-6">
+    <div className="relative h-[320px] w-full overflow-hidden rounded-2xl border-2 border-[#173156] bg-[#08152b] p-6">
       <div className="mb-6 flex items-center justify-between">
         <h3 className="text-[20px] font-bold text-white">Tendencia de Ingresos</h3>
         <div className="flex items-center gap-4 text-sm">
@@ -177,7 +177,7 @@ const RecentTable = () => {
   ];
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#173156] bg-[#08152b]">
+    <div className="overflow-hidden rounded-2xl border-2 border-[#173156] bg-[#08152b]">
       <div className="flex items-center justify-between border-b border-[#173156] px-6 py-5">
         <h3 className="text-[20px] font-bold text-white">Actividad Reciente</h3>
         <button className="text-sm font-semibold text-blue-400 hover:text-blue-300">
@@ -250,7 +250,7 @@ export default function DashboardFacturaPro() {
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button className="flex h-12 items-center justify-center gap-2 rounded-2xl border border-[#173156] bg-[#16233b] px-5 font-medium text-white">
+          <button className="flex h-12 items-center justify-center gap-2 rounded-2xl border-2 border-[#173156] bg-[#16233b] px-5 font-medium text-white">
             <Calendar className="h-4 w-4" />
             Últimos 30 días
           </button>
@@ -301,15 +301,15 @@ export default function DashboardFacturaPro() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-2xl border border-[#173156] bg-[#08152b] p-6">
+          <div className="rounded-2xl border-2 border-[#173156] bg-[#08152b] p-6">
             <h3 className="mb-5 text-[20px] font-bold text-white">
               Acciones Rápidas
             </h3>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4" onClick={() => router.push("/pages/invoices/invoice")}>
               <QuickAction
                 icon={<Plus className="h-5 w-5" />}
-                title="Crear Factura"
+                title="Crear Nueva Factura"
               />
               <QuickAction
                 icon={<FileText className="h-5 w-5" />}
@@ -317,7 +317,7 @@ export default function DashboardFacturaPro() {
               />
               <QuickAction
                 icon={<UserPlus className="h-5 w-5" />}
-                title="Añadir Cliente"
+                title="Añadir Clientes"
               />
               <QuickAction
                 icon={<Upload className="h-5 w-5" />}
@@ -326,7 +326,7 @@ export default function DashboardFacturaPro() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#173156] bg-[#08152b] p-6">
+          <div className="rounded-2xl border-2 border-[#173156] bg-[#08152b] p-6">
             <h3 className="mb-5 text-[20px] font-bold text-white">
               Clientes Top
             </h3>
@@ -352,7 +352,7 @@ export default function DashboardFacturaPro() {
               />
             </div>
 
-            <button className="mt-6 h-11 w-full rounded-xl border border-[#29466f] bg-transparent font-semibold text-slate-300 hover:bg-[#0d1d39] hover:text-white">
+            <button className="mt-6 h-11 w-full rounded-xl bg-blue-500 font-semibold text-slate-300 hover:bg-blue-400 shadow-[0_10px_30px_rgba(37,99,235,0.25)] hover:text-white">
               Analizar cartera
             </button>
           </div>

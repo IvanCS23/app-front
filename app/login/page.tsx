@@ -1,18 +1,30 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react"; // ← Importa useState
+
 import {
   Mail,
   Lock,
   Eye,
+  EyeOff, // ← Importa EyeOff también
   ShieldCheck,
   Headphones,
   WalletCards,
 } from "lucide-react";
 
 export default function LoginFacturaPro() {
+  // Estado para controlar la visibilidad de la contraseña
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Función para alternar la visibilidad
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="min-h-screen bg-[#020817] text-white">
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-        {/* Lado izquierdo */}
+        {/* Lado izquierdo - se mantiene igual */}
         <div className="relative hidden lg:flex items-center justify-center overflow-hidden border-r border-white/5 bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.22),_transparent_35%),linear-gradient(180deg,#071427_0%,#03101d_100%)]">
           {/* puntitos de fondo */}
           <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:22px_22px] opacity-20" />
@@ -37,7 +49,7 @@ export default function LoginFacturaPro() {
               de cada transacción con precisión y visión.”
             </p>
 
-            <div className="mt-10 flex items-center gap-4">
+            <div className="mt-10 flex items-center gap-2">
               <div className="h-[2px] w-14 bg-blue-500" />
               <span className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-500">
                 FacturaPro Enterprise
@@ -82,7 +94,7 @@ export default function LoginFacturaPro() {
                   <input
                     type="email"
                     placeholder="nombre@empresa.com"
-                    className="h-12 w-full rounded-xl border border-slate-800 bg-[#081423] pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20"
+                    className="box box-input-icon"
                   />
                 </div>
               </div>
@@ -104,15 +116,20 @@ export default function LoginFacturaPro() {
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"} // ← Cambia el tipo según el estado
                     placeholder="••••••••"
-                    className="h-12 w-full rounded-xl border border-slate-800 bg-[#081423] pl-11 pr-12 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20"
+                    className="box box-input-icon"
                   />
                   <button
                     type="button"
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                    onClick={togglePasswordVisibility} // ← Agrega el manejador de clic
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
                   >
-                    <Eye className="h-4 w-4" />
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" /> // ← Muestra EyeOff cuando está visible
+                    ) : (
+                      <Eye className="h-4 w-4" /> // ← Muestra Eye cuando está oculta
+                    )}
                   </button>
                 </div>
               </div>
@@ -122,7 +139,10 @@ export default function LoginFacturaPro() {
                 <input
                   id="remember"
                   type="checkbox"
-                  className="h-4 w-4 rounded border-slate-700 bg-[#081423] text-blue-500 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-slate-700 bg-[#081423] text-blue-500 focus:ring-blue-500 focus:ring-offset-0 focus:ring-1 checked:bg-blue-500 checked:border-blue-500 transition-colors"
+                  style={{
+                    accentColor: '#3b82f6' 
+                  }}
                 />
                 <label htmlFor="remember" className="text-sm text-slate-400">
                   Mantener sesión iniciada
@@ -148,7 +168,7 @@ export default function LoginFacturaPro() {
             </div>
 
             {/* Footer */}
-            <div className="mt-14 flex items-center justify-center gap-8 border-t border-white/5 pt-6 text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+            <div className="mt-5 flex items-center justify-center gap-8 border-t border-white/5 pt-6 text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
               <div className="flex items-center gap-2">
                 <Headphones className="h-3.5 w-3.5" />
                 Soporte

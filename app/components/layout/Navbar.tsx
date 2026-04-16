@@ -43,7 +43,7 @@ export default function Navbar({
               <input
                 type="text"
                 placeholder="Buscar facturas o clientes..."
-                className="h-12 w-[290px] rounded-2xl border border-[#173156] bg-[#0a1830] pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-blue-500/50"
+                className="h-12 w-full rounded-xl border-2 border-slate-800 bg-[#081423] pl-11 pr-12 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-blue-500/40"
               />
             </div>
           </div>
