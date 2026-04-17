@@ -67,7 +67,7 @@ const configCards = [
 		desc: "Registra CLABES interbancarias para que aparezcan en tus facturas para cobro.", 
 		action: "CUENTAS DE PAGO", 
 		actionColor: "text-blue-400",
-		route: "/bank-accounts"
+		route: "/pages/settings/bankAccount"
 	},
 	{
 		icon: <Settings className="h-7 w-7 text-blue-500" />, 
@@ -75,7 +75,7 @@ const configCards = [
 		desc: "Notificaciones por correo, idioma del sistema y temas visuales.", 
 		action: "PREFERENCIAS", 
 		actionColor: "text-blue-400",
-		route: "/general-settings"
+		route: "/pages/settings/generalSettings"
 	},
 ];
 
@@ -120,9 +120,9 @@ export default function SettingsPage() {
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div className="bg-[#1a222c] border-2 border-[#16304f] rounded-2xl p-6 flex flex-col justify-between min-h-[170px] transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-500/50">
-						<div className="font-bold text-lg mb-1 flex items-center gap-2"><MessageCircle className="h-7 w-7 text-blue-500" /> Observaciones</div>
+						<div className="font-bold text-lg mb-1 flex items-center gap-2"><MessageCircle className="h-7 w-7 text-blue-500"/> Observaciones</div>
 						<div className="text-gray-400 text-sm flex-1">Define textos predeterminados para términos y condiciones en tus PDF.</div>
-						<button className="mt-2 text-xs font-bold tracking-wide text-blue-400 hover:underline text-left transition-all duration-200 hover:translate-x-1">EDITAR TEXTOS &gt;</button>
+						<button onClick={() => handleNavigation("/pages/settings/observations")} className="mt-2 text-xs font-bold tracking-wide text-blue-400 hover:underline text-left transition-all duration-200 hover:translate-x-1">EDITAR TEXTOS &gt;</button>
 					</div>
 					<div className="bg-[#1a222c] border-2 border-[#16304f] rounded-2xl p-6 flex flex-col justify-between min-h-[170px] relative overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-500/50">
 						<div className="flex items-center gap-2 mb-2"><CreditCard className="h-7 w-7 text-blue-500" /><span className="font-bold text-lg">Integración con PayPal</span></div>
