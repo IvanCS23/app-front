@@ -188,6 +188,30 @@ const AlertModal = ({ isOpen, onClose, title, message, type }: { isOpen: boolean
   );
 };
 
+// Componente Modal de Confirmación
+const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }: { isOpen: boolean; onClose: () => void; onConfirm: () => void; title: string; message: string }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-500/20">
+            <AlertCircle className="h-10 w-10 text-yellow-500" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
+          <p className="text-slate-400 mb-6">{message}</p>
+          <div className="flex gap-4">
+            <button onClick={onClose} className="flex-1 rounded-xl bg-gray-600 px-4 py-2 font-medium text-white hover:bg-gray-500">Cancelar</button>
+            <button onClick={onConfirm} className="flex-1 rounded-xl bg-red-500 px-4 py-2 font-medium text-white hover:bg-red-400">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Modal para agregar/editar usuario
 const UserModal = ({ isOpen, onClose, onSave, editingUser }: { isOpen: boolean; onClose: () => void; onSave: (user: any) => void; editingUser?: Usuario | null }) => {
   const [nombre, setNombre] = useState(editingUser?.nombre || "");
@@ -387,9 +411,14 @@ export default function Users() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: "", message: "", type: "success" as "success" | "error" | "warning" });
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: "", message: "", onConfirm: () => {}, userId: "", userName: "" });
 
   const showAlert = (title: string, message: string, type: "success" | "error" | "warning") => {
     setAlertModal({ isOpen: true, title, message, type });
+  };
+
+  const showConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmModal({ isOpen: true, title, message, onConfirm, userId: "", userName: "" });
   };
 
   const handleSaveUser = (user: Usuario) => {
@@ -413,10 +442,11 @@ export default function Users() {
   };
 
   const handleDeleteUser = (id: string, nombre: string) => {
-    if (confirm(`¿Estás seguro de eliminar al usuario "${nombre}"?`)) {
+    showConfirm("Confirmar eliminación", `¿Estás seguro de eliminar al usuario "${nombre}"?`, () => {
       setUsuarios(usuarios.filter(u => u.id !== id));
       showAlert("Eliminado", `El usuario "${nombre}" ha sido eliminado`, "success");
-    }
+      setConfirmModal({ ...confirmModal, isOpen: false });
+    });
   };
 
   const getRolColor = (rol: string) => {
@@ -432,7 +462,7 @@ export default function Users() {
     <AppLayout>
       <div className="min-h-screen bg-[#071321] text-white">
         <main className="mx-auto max-w-[1400px]">
-          <div className="mb-8 flex justify-between items-center">
+          <div className="mb-4 flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-extrabold text-white">Usuarios</h1>
               <p className="mt-2 text-slate-400">Gestiona los usuarios y sus permisos dentro del sistema.</p>
@@ -444,7 +474,7 @@ export default function Users() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {usuarios.map((usuario) => (
-              <div key={usuario.id} className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.01)] hover:border-blue-500/40 transition-all duration-200">
+              <div key={usuario.id} className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.01)] hover:border-blue-500/40 ransition-all duration-300 hover:-translate-y-2 cursor-pointer">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/20">
@@ -481,6 +511,13 @@ export default function Users() {
 
       <UserModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingUser(null); }} onSave={handleSaveUser} editingUser={editingUser} />
       <AlertModal isOpen={alertModal.isOpen} onClose={() => setAlertModal({ ...alertModal, isOpen: false })} title={alertModal.title} message={alertModal.message} type={alertModal.type} />
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+      />
     </AppLayout>
   );
 }

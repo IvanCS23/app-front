@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Search, Bell, Settings, BadgeDollarSign } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Menu, Search, Bell, Settings, BadgeDollarSign, User, LogOut, Building2, Fingerprint } from "lucide-react";
 
 type NavbarProps = {
   onOpenSidebar: () => void;
@@ -12,6 +13,33 @@ export default function Navbar({
   onOpenSidebar,
   isCollapsed,
 }: NavbarProps) {
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Datos del usuario (simulados)
+  const userData = {
+    nombre: "Administrador",
+    rfc: "ADMIN800101XYZ",
+    plan: "Plan Empresarial",
+  };
+
+  // Cerrar menú al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    console.log("Cerrando sesión...");
+    // Aquí agregar lógica de cierre de sesión
+    window.location.href = "/login";
+  };
+
   return (
     <header
       className={`
@@ -61,7 +89,58 @@ export default function Navbar({
             <Settings className="h-5 w-5" />
           </Link>
 
-          <div className="h-11 w-11 rounded-full border-2 border-blue-500 bg-[#efc4ab]" />
+          {/* Botón de perfil con el mismo estilo */}
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#16233b] text-slate-300 hover:text-white transition-colors"
+            >
+              <User className="h-5 w-5" />
+            </button>
+
+            {/* Submenú desplegable */}
+            {isProfileMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl z-50 overflow-hidden">
+                {/* Header del menú */}
+                <div className="p-4 border-b border-[#173156] bg-[#0a1424]">
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-full bg-[#16233b] flex items-center justify-center">
+                      <User className="h-6 w-6 text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold">{userData.nombre}</p>
+                      <p className="text-xs text-slate-400">{userData.plan}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Información del usuario */}
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center gap-3 text-sm">
+                    <Fingerprint className="h-4 w-4 text-slate-500" />
+                    <span className="text-slate-400">RFC:</span>
+                    <span className="text-white font-mono text-xs">{userData.rfc}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Building2 className="h-4 w-4 text-slate-500" />
+                    <span className="text-slate-400">Plan:</span>
+                    <span className="text-white">{userData.plan}</span>
+                  </div>
+                </div>
+
+                {/* Botón de cerrar sesión */}
+                <div className="p-4 border-t border-[#173156] bg-[#0a1424]">
+                  <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-500/10 px-4 py-2 text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span className="text-sm font-medium">Cerrar sesión</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
