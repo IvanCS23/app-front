@@ -907,14 +907,14 @@ const ProductModal = ({
                 <button
                   onClick={() => removePedimento(index)}
                   className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-red-500 hover:border-red-500"
-                >
+                  title="Quitar">
                   <Minus className="h-5 w-5" />
                 </button>
                 {index === pedimentos.length - 1 && (
                   <button
                     onClick={addPedimento}
                     className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-[#1d9bf0] hover:border-[#3c83f666]"
-                  >
+                    title="Agregar">
                     <Plus className="h-5 w-5" />
                   </button>
                 )}
@@ -1005,7 +1005,7 @@ const ProductModal = ({
                 <button
                   onClick={() => removeImpuestoLocal(impuesto.id)}
                   className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-red-500 hover:border-red-500"
-                >
+                  title="Quitar">
                   <Minus className="h-5 w-5" />
                 </button>
               </div>

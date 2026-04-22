@@ -99,10 +99,10 @@ body {
 
 /* Estados */
 .box:focus {
-  border-color: rgba(59, 130, 246, 0.6);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-color: #3b82f699;
+  box-shadow: 0 0 0 2px #3b82f633;
 }
 
 .box:hover {
-  border-color: rgba(5, 82, 207, 0.4);
+  border-color: #0552cf66;
 }

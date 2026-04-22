@@ -28,8 +28,15 @@ export default function Sidebar({
     if (isCollapsed && hasSubMenu) {
       onToggleCollapse();
     }
-    // Cambiar la sección activa
-    onChangeSection(itemId);
+    
+    // Si el item ya está activo y tiene submenú, cerrar el submenú (no cambiar la sección)
+    if (activeItem === itemId && hasSubMenu) {
+      // Esto "desactiva" el item para que el submenú se cierre
+      onChangeSection("");
+    } else {
+      // Cambiar la sección activa
+      onChangeSection(itemId);
+    }
   };
 
   return (
@@ -49,10 +56,11 @@ export default function Sidebar({
           ${isCollapsed ? "w-[92px]" : "w-[260px]"}
           ${isOpenMobile ? "translate-x-0" : "-translate-x-full"}
           xl:translate-x-0
+          flex flex-col
         `}
       >
-        {/* Header del sidebar */}
-        <div className="flex h-20 items-center justify-between border-b border-[#173156] px-4">
+        {/* Header del sidebar - fijo */}
+        <div className="flex h-20 shrink-0 items-center justify-between border-b border-[#173156] px-4">
           <div
             className={`flex items-center gap-3 overflow-hidden ${
               isCollapsed ? "w-full justify-center" : ""
@@ -79,96 +87,98 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* Contenido del sidebar */}
-        <div className="flex h-[calc(100vh-80px)] flex-col justify-between p-4">
-          {/* Menú de navegación */}
-          <div className="space-y-2">
-            {menuItems.map((item) => {
-              const isActive = activeItem === item.id;
-              const hasSubMenu = !!item.subMenu && item.subMenu.length > 0;
-              
-              const content = (
-                <span
-                  className={`group flex w-full items-center rounded-2xl px-4 py-3 transition-all duration-200 ${
-                    isCollapsed ? "justify-center" : "gap-3"
-                  } ${
-                    isActive
-                      ? "bg-blue-500 text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)]"
-                      : "text-slate-300 hover:bg-[#0d1b35] hover:text-white"
-                  }`}
-                  title={isCollapsed ? item.label : ""}
-                >
-                  <span className="shrink-0">{item.icon}</span>
-                  {!isCollapsed && (
-                    <span className="text-[15px] font-medium">{item.label}</span>
-                  )}
-                </span>
-              );
+        {/* Contenido del sidebar - scrolable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-4">
+            {/* Menú de navegación */}
+            <div className="space-y-2">
+              {menuItems.map((item) => {
+                const isActive = activeItem === item.id;
+                const hasSubMenu = !!item.subMenu && item.subMenu.length > 0;
+                
+                const content = (
+                  <span
+                    className={`group flex w-full items-center rounded-2xl px-4 py-3 transition-all duration-200 ${
+                      isCollapsed ? "justify-center" : "gap-3"
+                    } ${
+                      isActive
+                        ? "bg-blue-500 text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)]"
+                        : "text-slate-300 hover:bg-[#0d1b35] hover:text-white"
+                    }`}
+                    title={isCollapsed ? item.label : ""}
+                  >
+                    <span className="shrink-0">{item.icon}</span>
+                    {!isCollapsed && (
+                      <span className="text-[15px] font-medium">{item.label}</span>
+                    )}
+                  </span>
+                );
 
-              return (
-                <div key={item.id}>
-                  {item.href ? (
-                    <Link
-                      href={item.href}
-                      onClick={() => {
-                        handleItemClick(item.id, hasSubMenu);
-                        onCloseMobile();
-                      }}
-                      className="w-full"
-                    >
-                      {content}
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        handleItemClick(item.id, hasSubMenu);
-                        onCloseMobile();
-                      }}
-                      className="w-full text-left"
-                    >
-                      {content}
-                    </button>
-                  )}
+                return (
+                  <div key={item.id}>
+                    {item.href ? (
+                      <Link
+                        href={item.href}
+                        onClick={() => {
+                          handleItemClick(item.id, hasSubMenu);
+                          onCloseMobile();
+                        }}
+                        className="w-full"
+                      >
+                        {content}
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          handleItemClick(item.id, hasSubMenu);
+                          onCloseMobile();
+                        }}
+                        className="w-full text-left"
+                      >
+                        {content}
+                      </button>
+                    )}
 
-                  {/* Submenú */}
-                  {!isCollapsed && isActive && item.subMenu && (
-                    <div className="ml-8 mt-2 flex flex-col gap-1">
-                      {item.subMenu.map((sub) => (
-                        <Link
-                          key={sub.href}
-                          href={sub.href}
-                          onClick={() => {
-                            onChangeSection(item.id);
-                            onCloseMobile();
-                          }}
-                          className="rounded-xl px-4 py-2 text-sm text-slate-300 transition hover:bg-[#173156] hover:text-white"
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                    {/* Submenú */}
+                    {!isCollapsed && isActive && item.subMenu && (
+                      <div className="ml-8 mt-2 flex flex-col gap-1">
+                        {item.subMenu.map((sub) => (
+                          <Link
+                            key={sub.href}
+                            href={sub.href}
+                            onClick={() => {
+                              onChangeSection(item.id);
+                              onCloseMobile();
+                            }}
+                            className="rounded-xl px-4 py-2 text-sm text-slate-300 transition hover:bg-[#173156] hover:text-white"
+                          >
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
+        </div>
 
-          {/* Botón para colapsar/expandir */}
-          <div className="space-y-3">
-            <button
-              onClick={onToggleCollapse}
-              className={`flex h-11 w-full items-center rounded-xl border border-[#173156] bg-[#0d1830] text-slate-300 transition hover:bg-[#132241] hover:text-white ${
-                isCollapsed ? "justify-center" : "justify-between px-4"
-              }`}
-            >
-              {!isCollapsed && <span className="text-sm font-medium">Colapsar</span>}
-              {isCollapsed ? (
-                <ChevronRight className="h-5 w-5" />
-              ) : (
-                <ChevronLeft className="h-5 w-5" />
-              )}
-            </button>
-          </div>
+        {/* Botón para colapsar/expandir - fijo */}
+        <div className="shrink-0 p-4 border-t border-[#173156]">
+          <button
+            onClick={onToggleCollapse}
+            className={`flex h-11 w-full items-center rounded-xl border border-[#173156] bg-[#0d1830] text-slate-300 transition hover:bg-[#132241] hover:text-white ${
+              isCollapsed ? "justify-center" : "justify-between px-4"
+            }`}
+          >
+            {!isCollapsed && <span className="text-sm font-medium">Colapsar</span>}
+            {isCollapsed ? (
+              <ChevronRight className="h-5 w-5" />
+            ) : (
+              <ChevronLeft className="h-5 w-5" />
+            )}
+          </button>
         </div>
       </aside>
     </>
