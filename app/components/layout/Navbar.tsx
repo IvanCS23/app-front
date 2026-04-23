@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { clearSession, getToken, logoutRequest } from "@/lib/api";
 import { Menu, Search, Bell, Settings, BadgeDollarSign, User, LogOut, Building2, Fingerprint } from "lucide-react";
 
 type NavbarProps = {
@@ -13,6 +15,7 @@ export default function Navbar({
   onOpenSidebar,
   isCollapsed,
 }: NavbarProps) {
+  const router = useRouter();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -34,10 +37,20 @@ export default function Navbar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    console.log("Cerrando sesión...");
-    // Aquí agregar lógica de cierre de sesión
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    setIsProfileMenuOpen(false);
+
+    const token = getToken();
+    if (token) {
+      try {
+        await logoutRequest(token);
+      } catch (error) {
+        console.error("No se pudo cerrar sesión en el backend:", error);
+      }
+    }
+
+    clearSession();
+    router.push("/login");
   };
 
   return (
