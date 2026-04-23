@@ -44,11 +44,16 @@ const StatCard = ({ title, value, badge, badgeColor, icon }: StatCardProps) => (
 const QuickAction = ({
   icon,
   title,
+  onClick,
 }: {
   icon: React.ReactNode;
   title: string;
+  onClick?: () => void;
 }) => (
-  <button className="flex h-32 flex-col items-center justify-center rounded-2xl border-2 border-[#173156] bg-[#0c1933] text-center transition hover:border-blue-500/40 hover:bg-[#102246]">
+  <button
+    onClick={onClick}
+    className="flex h-32 flex-col items-center justify-center rounded-2xl border-2 border-[#173156] bg-[#0c1933] text-center transition hover:border-blue-500/40 hover:bg-[#102246]"
+  >
     <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#0f2347] text-blue-400">
       {icon}
     </div>
@@ -237,6 +242,7 @@ const RecentTable = () => {
 
 export default function DashboardFacturaPro() {
   const router = useRouter();
+  
   return (
     <AppLayout>
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -306,22 +312,26 @@ export default function DashboardFacturaPro() {
               Acciones Rápidas
             </h3>
 
-            <div className="grid grid-cols-2 gap-4" onClick={() => router.push("/pages/invoices/invoice")}>
+            <div className="grid grid-cols-2 gap-4">
               <QuickAction
                 icon={<Plus className="h-5 w-5" />}
                 title="Crear Nueva Factura"
+                onClick={() => router.push("/pages/invoices/invoice")}
               />
               <QuickAction
                 icon={<FileText className="h-5 w-5" />}
                 title="Nueva Cotización"
+                onClick={() => router.push("/pages/quotes/new")}
               />
               <QuickAction
                 icon={<UserPlus className="h-5 w-5" />}
                 title="Añadir Clientes"
+                onClick={() => router.push("/pages/catalogs/clients")}
               />
               <QuickAction
                 icon={<Upload className="h-5 w-5" />}
                 title="Importar Datos"
+                onClick={() => router.push("/pages/import")}
               />
             </div>
           </div>

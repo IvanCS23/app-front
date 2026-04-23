@@ -4,6 +4,8 @@ import {
   Receipt,
   FileText,
   BookImage,
+  Wallet,
+  BarChart3,
 } from "lucide-react";
 
 export type SubMenuItem = {
@@ -31,12 +33,12 @@ export const menuItems: MenuItem[] = [
     label: "Facturas",
     icon: <Receipt className="h-5 w-5" />,
     subMenu: [
-      { label: "Recuperación", href: "/facturas/recuperacion" },
-      { label: "Facturación masiva", href: "/facturas/masiva" },
-      { label: "Descarga masiva", href: "/facturas/descarga-masiva" },
-      { label: "Descarga de Facturas", href: "/facturas/descarga-facturas" },
-      { label: "Carga XML", href: "/facturas/xml" },
-      { label: "Agregar Addenda", href: "/facturas/addenda" },
+      { label: "Recuperación", href: "/pages/invoices/recovery" },
+      { label: "Facturación masiva", href: "/pages/invoices/masiva" },
+      { label: "Descarga masiva", href: "/pages/invoices/descarga-masiva" },
+      { label: "Descarga de Facturas", href: "/pages/invoices/descarga-facturas" },
+      { label: "Carga XML", href: "/pages/invoices/xml" },
+      { label: "Agregar Addenda", href: "/pages/invoices/addenda" },
     ],
   },
   {
@@ -56,7 +58,27 @@ export const menuItems: MenuItem[] = [
     subMenu: [
       { label: "Clientes", href: "/pages/catalogs/clients" },
       { label: "Productos", href: "/pages/catalogs/products" },
-      { label: "Empleados", href: "/pages/catalogs/employees" },
+      { label: "Empleados", href: "/pages/catalogs/employee" },
+    ],
+  },
+  {
+    id: "cuentas",
+    label: "Cuentas",
+    icon: <Wallet className="h-5 w-5" />,
+    subMenu: [
+      { label: "Cuentas por Pagar", href: "/pages/accounts/payable" },
+      { label: "Cuentas por cobrar", href: "/pages/accounts/receivable" },
+      { label: "Libro diario", href: "/pages/accounts/journal" },
+    ],
+  },
+  {
+    id: "estadisticas",
+    label: "Estadísticas",
+    icon: <BarChart3 className="h-5 w-5" />,
+    subMenu: [
+      { label: "Mis estadísticas", href: "/pages/statistics/my-statistics" },
+      { label: "Informe mensual", href: "/pages/statistics/monthly-report" },
+      { label: "Informe PayPal", href: "/pages/statistics/paypal-report" },
     ],
   },
 ];
