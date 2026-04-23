@@ -78,14 +78,15 @@ export default function Navbar({
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#16233b] text-slate-300 hover:text-white">
+          <button className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#16233b] text-slate-300 hover:text-white"
+            title="Notificaciones">
             <Bell className="h-5 w-5" />
           </button>
 
           <Link
             href="/pages/settings"
             className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#16233b] text-slate-300 hover:text-white"
-          >
+            title="Configuración">
             <Settings className="h-5 w-5" />
           </Link>
 
@@ -94,7 +95,7 @@ export default function Navbar({
             <button
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
               className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#16233b] text-slate-300 hover:text-white transition-colors"
-            >
+              title="Perfil">
               <User className="h-5 w-5" />
             </button>
 
@@ -133,7 +134,7 @@ export default function Navbar({
                   <button
                     onClick={handleLogout}
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-500/10 px-4 py-2 text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300"
-                  >
+                    >
                     <LogOut className="h-4 w-4" />
                     <span className="text-sm font-medium">Cerrar sesión</span>
                   </button>
