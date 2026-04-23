@@ -1,24 +1,44 @@
 "use client";
 
-import React, { useState } from "react"; // ← Importa useState
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { loginRequest, saveSession } from "@/lib/api";
 
 import {
   Mail,
   Lock,
   Eye,
-  EyeOff, // ← Importa EyeOff también
+  EyeOff,
   ShieldCheck,
   Headphones,
   WalletCards,
 } from "lucide-react";
 
 export default function LoginFacturaPro() {
-  // Estado para controlar la visibilidad de la contraseña
-  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
-  // Función para alternar la visibilidad
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const togglePasswordVisibility = () => setShowPassword((v) => !v);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const { token, user } = await loginRequest({ email, password });
+      saveSession(token, user);
+      router.push("/pages/dashboard");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error al iniciar sesión.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -83,7 +103,14 @@ export default function LoginFacturaPro() {
             </div>
 
             {/* Formulario */}
-            <form className="space-y-5">
+            <form className="space-y-5" onSubmit={handleSubmit}>
+              {/* Mensaje de error */}
+              {error && (
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                  {error}
+                </div>
+              )}
+
               {/* Email */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-slate-300">
@@ -95,6 +122,10 @@ export default function LoginFacturaPro() {
                     type="email"
                     placeholder="nombre@empresa.com"
                     className="box box-input-icon"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -116,19 +147,23 @@ export default function LoginFacturaPro() {
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                   <input
-                    type={showPassword ? "text" : "password"} // ← Cambia el tipo según el estado
+                    type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     className="box box-input-icon"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
                   />
                   <button
                     type="button"
-                    onClick={togglePasswordVisibility} // ← Agrega el manejador de clic
+                    onClick={togglePasswordVisibility}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" /> // ← Muestra EyeOff cuando está visible
+                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="h-4 w-4" /> // ← Muestra Eye cuando está oculta
+                      <Eye className="h-4 w-4" />
                     )}
                   </button>
                 </div>
@@ -140,9 +175,7 @@ export default function LoginFacturaPro() {
                   id="remember"
                   type="checkbox"
                   className="h-4 w-4 rounded border-slate-700 bg-[#081423] text-blue-500 focus:ring-blue-500 focus:ring-offset-0 focus:ring-1 checked:bg-blue-500 checked:border-blue-500 transition-colors"
-                  style={{
-                    accentColor: '#3b82f6' 
-                  }}
+                  style={{ accentColor: "#3b82f6" }}
                 />
                 <label htmlFor="remember" className="text-sm text-slate-400">
                   Mantener sesión iniciada
@@ -152,10 +185,11 @@ export default function LoginFacturaPro() {
               {/* Botón */}
               <button
                 type="submit"
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-500 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition hover:bg-blue-400"
+                disabled={loading}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-500 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition hover:bg-blue-400 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Iniciar Sesión
-                <span className="text-base">→</span>
+                {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+                {!loading && <span className="text-base">→</span>}
               </button>
             </form>
 
