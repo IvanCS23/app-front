@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { clearSession, getToken, logoutRequest } from "@/lib/api";
+import { clearSession, getToken, logoutRequest } from "@/src/services/auth.services";
 import { Menu, Search, Bell, Settings, BadgeDollarSign, User, LogOut, Building2, Fingerprint } from "lucide-react";
 
 type NavbarProps = {

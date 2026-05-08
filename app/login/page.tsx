@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginRequest, saveSession } from "@/lib/api";
+import { loginRequest, saveSession } from "@/src/services/auth.services";
 
 import {
   Mail,

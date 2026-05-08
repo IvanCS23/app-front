@@ -5,12 +5,16 @@ import {
   Download, Upload, Activity, FileText as FileTextIcon 
 } from "lucide-react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import { 
+  getProducts, 
+  createProduct, 
+  updateProduct, 
+  deleteProduct,
+  Product 
+} from "@/src/services/product.services";
 
-const selectStyle =
-  "box box-input";
-
-const inputStyle =
-  "box box-input";
+const selectStyle = "box box-input";
+const inputStyle = "box box-input";
 
 // Componente Toast
 const Toast = ({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) => {
@@ -461,50 +465,12 @@ type ImpuestoLocal = {
   tipo: string;
 };
 
-const productosMock = [
-  {
-    codigo: "43231501",
-    nombre: "Licencia Software Pro",
-    descripcion: "Suscripción anual para entorno corporativo...",
-    clave: "E48",
-    unidad: "Unidad de servicio",
-    precio: "$12,450.00",
-    precioNumerico: 12450,
-  },
-  {
-    codigo: "81111504",
-    nombre: "Consultoría IT Nivel 2",
-    descripcion: "Servicios profesionales de arquitectura ...",
-    clave: "HUR",
-    unidad: "Hora",
-    precio: "$2,800.00",
-    precioNumerico: 2800,
-  },
-  {
-    codigo: "43201484",
-    nombre: "Servidor Rack G10",
-    descripcion: "Hardware de alto rendimiento para pro...",
-    clave: "H87",
-    unidad: "Pieza",
-    precio: "$85,200.00",
-    precioNumerico: 85200,
-  },
-  {
-    codigo: "43232107",
-    nombre: "Firewall Appliance X",
-    descripcion: "Seguridad perimetral con filtrado avanz...",
-    clave: "H87",
-    unidad: "Pieza",
-    precio: "$15,300.00",
-    precioNumerico: 15300,
-  },
-];
-
 // Props para el modal de producto
 type ProductModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
+  isEditing: boolean;
   productInternalName: string;
   setProductInternalName: (value: string) => void;
   productNoIdentificacion: string;
@@ -546,13 +512,15 @@ type ProductModalProps = {
   removeImpuestoLocal: (id: string) => void;
   updateImpuestoLocal: (id: string, field: keyof ImpuestoLocal, value: string) => void;
   showImpuestosLocales: boolean;
+  isLoading?: boolean;
 };
 
-// Componente ProductModal (fuera del componente principal)
+// Componente ProductModal
 const ProductModal = ({
   isOpen,
   onClose,
   onSave,
+  isEditing,
   productInternalName,
   setProductInternalName,
   productNoIdentificacion,
@@ -594,6 +562,7 @@ const ProductModal = ({
   removeImpuestoLocal,
   updateImpuestoLocal,
   showImpuestosLocales,
+  isLoading = false,
 }: ProductModalProps) => {
   if (!isOpen) return null;
 
@@ -606,7 +575,9 @@ const ProductModal = ({
       
       <div className="relative max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-          <h2 className="text-xl font-bold text-white">Nuevo Producto</h2>
+          <h2 className="text-xl font-bold text-white">
+            {isEditing ? "Editar Producto" : "Nuevo Producto"}
+          </h2>
           <button
             onClick={onClose}
             className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-[#0d1b35] hover:text-white"
@@ -1017,14 +988,23 @@ const ProductModal = ({
           <button
             onClick={onClose} 
             className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] transition-colors duration-200 hover:bg-red-400"
+            disabled={isLoading}
           >
             Cerrar
           </button>
           <button
             onClick={onSave}
-            className="rounded-xl bg-blue-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-colors duration-200 hover:bg-blue-400"
+            className="rounded-xl bg-blue-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-colors duration-200 hover:bg-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading}
           >
-            Guardar
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {isEditing ? "Actualizando..." : "Guardando..."}
+              </span>
+            ) : (
+              isEditing ? "Actualizar" : "Guardar"
+            )}
           </button>
         </div>
       </div>
@@ -1038,7 +1018,7 @@ type BulkUploadModalProps = {
   onClose: () => void;
 };
 
-// Componente BulkUploadModal (fuera del componente principal)
+// Componente BulkUploadModal
 const BulkUploadModal = ({ isOpen, onClose }: BulkUploadModalProps) => {
   if (!isOpen) return null;
 
@@ -1114,8 +1094,12 @@ export default function CatalogoProductos() {
   const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   
-  // Estado para los productos filtrados
-  const [filteredProductos, setFilteredProductos] = useState(productosMock);
+  // Estados para productos desde API
+  const [productos, setProductos] = useState<Product[]>([]);
+  const [filteredProductos, setFilteredProductos] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<number | null>(null);
 
   // Estados para el modal de producto
   const [productInternalName, setProductInternalName] = useState("");
@@ -1138,21 +1122,117 @@ export default function CatalogoProductos() {
   const [impuestosLocales, setImpuestosLocales] = useState<ImpuestoLocal[]>([]);
   const [showImpuestosLocales, setShowImpuestosLocales] = useState(false);
 
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
+
+  // Cargar productos al iniciar
+  const loadProducts = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getProducts();
+      setProductos(data);
+      setFilteredProductos(data);
+    } catch (error: any) {
+      setToast({ 
+        message: error.message || "Error al cargar productos", 
+        type: "error" 
+      });
+      setProductos([]);
+      setFilteredProductos([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
   // Filtrar productos cuando cambia el término de búsqueda
   useEffect(() => {
     const searchLower = search.toLowerCase();
-    const filtered = productosMock.filter(producto => 
-      producto.nombre.toLowerCase().includes(searchLower) ||
-      producto.codigo.includes(search) ||
-      producto.descripcion.toLowerCase().includes(searchLower) ||
-      producto.clave.toLowerCase().includes(searchLower) ||
-      producto.unidad.toLowerCase().includes(searchLower)
+    const filtered = productos.filter(producto => 
+      producto.name?.toLowerCase().includes(searchLower) ||
+      producto.clave_producto?.includes(search) ||
+      producto.descripcion?.toLowerCase().includes(searchLower) ||
+      producto.clave_unidad?.toLowerCase().includes(searchLower)
     );
     setFilteredProductos(filtered);
-  }, [search]);
+    setCurrentPage(1); // Resetear a primera página al buscar
+  }, [search, productos]);
+
+  // Calcular productos paginados
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProducts = filteredProductos.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredProductos.length / itemsPerPage);
 
   // Funciones para el modal de producto
   const openProductModal = () => {
+    setEditingProductId(null);
+    resetProductForm();
+    setIsProductModalOpen(true);
+  };
+
+  const openEditModal = (producto: Product) => {
+    setEditingProductId(producto.id || null);
+    setProductInternalName(producto.name || "");
+    setProductNoIdentificacion(producto.no_identificacion || "");
+    setProductDescription(producto.descripcion || "");
+    setProductUnitPrice(producto.precio_unitario?.toString() || "");
+    setProductClaveSat(producto.clave_producto || "");
+    setProductUnidadSat(producto.clave_unidad || "");
+    setProductObjetoImpuesto(producto.objeto_imp || "01");
+    setProductIVA(producto.iva?.toString() || "16");
+    setProductIVARet(producto.iva_retenido?.toString() || "");
+    setProductISR(producto.isr?.toString() || "");
+    
+    // Manejar IEPS
+    if (producto.ieps) {
+      setIepsType("tasa");
+      setIepsTasaValue(producto.ieps.toString());
+    } else {
+      setIepsType("tasa");
+      setIepsTasaValue("");
+      setIepsCuotaValue("");
+    }
+    
+    // Manejar cuenta predial
+    if (producto.cuenta_predial) {
+      setCuentasPrediales([producto.cuenta_predial]);
+      setShowCuentasPrediales(true);
+    } else {
+      setCuentasPrediales([]);
+      setShowCuentasPrediales(false);
+    }
+    
+    // Manejar pedimento
+    if (producto.no_pedimento) {
+      setPedimentos([producto.no_pedimento]);
+      setShowPedimentos(true);
+    } else {
+      setPedimentos([]);
+      setShowPedimentos(false);
+    }
+    
+    // Manejar impuestos locales
+    if (producto.impuesto_local) {
+      try {
+        const parsedImpuestos = JSON.parse(producto.impuesto_local);
+        if (Array.isArray(parsedImpuestos)) {
+          setImpuestosLocales(parsedImpuestos);
+          setShowImpuestosLocales(true);
+        }
+      } catch {
+        setImpuestosLocales([]);
+        setShowImpuestosLocales(false);
+      }
+    } else {
+      setImpuestosLocales([]);
+      setShowImpuestosLocales(false);
+    }
+    
     setIsProductModalOpen(true);
   };
 
@@ -1183,7 +1263,8 @@ export default function CatalogoProductos() {
     setShowImpuestosLocales(false);
   };
 
-  const handleSaveProduct = () => {
+  const handleSaveProduct = async () => {
+    // Validaciones
     if (!productInternalName) {
       setToast({ message: "El campo Nombre Interno es obligatorio", type: "error" });
       return;
@@ -1200,31 +1281,54 @@ export default function CatalogoProductos() {
       setToast({ message: "El campo Clave de Producto o Servicio es obligatorio", type: "error" });
       return;
     }
-    if (!productUnidadSat) {
-      setToast({ message: "El campo Unidad es obligatorio", type: "error" });
+
+    const productData: Product = {
+  name: productInternalName,
+  no_identificacion: productNoIdentificacion || undefined,
+  descripcion: productDescription,
+  precio_unitario: parseFloat(productUnitPrice) || 0,
+      cuenta_predial: cuentasPrediales.length > 0 ? cuentasPrediales[0] : undefined,
+      clave_producto: productClaveSat,
+      clave_unidad: productUnidadSat || undefined,
+      objeto_imp: productObjetoImpuesto,
+      no_pedimento: pedimentos.length > 0 ? pedimentos[0] : undefined,
+      impuesto_local: impuestosLocales.length > 0 ? JSON.stringify(impuestosLocales) : "",
+      iva: productIVA ? parseFloat(productIVA) : undefined,
+      iva_retenido: productIVARet ? parseFloat(productIVARet) : undefined,
+      ieps: iepsType === "tasa" ? (iepsTasaValue ? parseFloat(iepsTasaValue) : undefined) : (iepsCuotaValue ? parseFloat(iepsCuotaValue) : undefined),
+      isr: productISR ? parseFloat(productISR) : undefined,
+    };
+
+    setIsSaving(true);
+    try {
+      if (editingProductId) {
+        await updateProduct(editingProductId, productData);
+        setToast({ message: "Producto actualizado correctamente", type: "success" });
+      } else {
+        await createProduct(productData);
+        setToast({ message: "Producto agregado correctamente", type: "success" });
+      }
+      closeProductModal();
+      await loadProducts(); // Recargar productos
+    } catch (error: any) {
+      setToast({ message: error.message || "Error al guardar producto", type: "error" });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteProduct = async (productId: number) => {
+    if (!confirm("¿Estás seguro de que deseas eliminar este producto?")) {
       return;
     }
-
-    console.log("Producto guardado:", {
-      internalName: productInternalName,
-      noIdentificacion: productNoIdentificacion,
-      description: productDescription,
-      unitPrice: productUnitPrice,
-      claveSat: productClaveSat,
-      unidadSat: productUnidadSat,
-      objetoImpuesto: productObjetoImpuesto,
-      cuentasPrediales,
-      iva: productIVA,
-      ivaRet: productIVARet,
-      iepsType,
-      iepsValue: iepsType === "tasa" ? iepsTasaValue : iepsCuotaValue,
-      isr: productISR,
-      pedimentos,
-      impuestosLocales,
-    });
     
-    setToast({ message: "Producto agregado correctamente", type: "success" });
-    closeProductModal();
+    try {
+      await deleteProduct(productId);
+      setToast({ message: "Producto eliminado correctamente", type: "success" });
+      await loadProducts(); // Recargar productos
+    } catch (error: any) {
+      setToast({ message: error.message || "Error al eliminar producto", type: "error" });
+    }
   };
 
   // Funciones para Cuenta Predial
@@ -1304,6 +1408,32 @@ export default function CatalogoProductos() {
     setIsBulkUploadModalOpen(false);
   };
 
+  // Funciones para paginación
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const paginationNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
+
   return (
     <AppLayout>
       <div className="min-h-screen bg-[#151c24] rounded-lg text-white p-3">
@@ -1339,85 +1469,125 @@ export default function CatalogoProductos() {
           />
           <div className="flex items-center gap-2">
             <span className="text-gray-400">MOSTRAR</span>
-            <select className="box box-input">
-              <option>25 registros</option>
-              <option>50 registros</option>
-              <option>100 registros</option>
+            <select 
+              className="box box-input"
+              value={itemsPerPage}
+              onChange={handleItemsPerPageChange}
+            >
+              <option value="25">25 registros</option>
+              <option value="50">50 registros</option>
+              <option value="100">100 registros</option>
             </select>
           </div>
         </div>
 
-        <div className="bg-[#232b36] rounded-xl overflow-hidden mb-8">
-          <table className="w-full text-sm">
-            <thead className="bg-[#1a222c] text-gray-400">
-              <tr>
-                <th className="p-3 text-left">ACCIONES</th>
-                <th className="p-3 text-left">CÓDIGO SAT</th>
-                <th className="p-3 text-left">NOMBRE</th>
-                <th className="p-3 text-left">DESCRIPCIÓN</th>
-                <th className="p-3 text-left">CLAVE UNIDAD</th>
-                <th className="p-3 text-left">UNIDAD</th>
-                <th className="p-3 text-right">PRECIO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProductos.map((p, i) => (
-                <tr key={i} className="border-t border-[#232b36] hover:bg-[#1a222c]">
-                  <td className="p-3 flex gap-2">
-                    <button className="text-gray-400 hover:text-blue-400">
-                      <SquarePen className="h-4 w-4" />
-                    </button>
-                    <button className="text-gray-400 hover:text-red-400">
-                      <Trash className="h-4 w-4" />
-                    </button>
-                  </td>
-                  <td className="p-3">
-                    <span className="bg-[#1e293b] text-blue-300 px-2 py-1 rounded text-xs font-mono cursor-pointer hover:underline">
-                      {p.codigo}
-                    </span>
-                  </td>
-                  <td className="p-3 font-bold">{p.nombre}</td>
-                  <td className="p-3 text-gray-400">{p.descripcion}</td>
-                  <td className="p-3">{p.clave}</td>
-                  <td className="p-3">{p.unidad}</td>
-                  <td className="p-3 text-right font-bold text-yellow-400">{p.precio}</td>
-                </tr>
-              ))}
-              {filteredProductos.length === 0 && (
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+          </div>
+        ) : (
+          <div className="bg-[#232b36] rounded-xl overflow-hidden mb-8">
+            <table className="w-full text-sm">
+              <thead className="bg-[#1a222c] text-gray-400">
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-gray-400">
-                    No se encontraron productos que coincidan con tu búsqueda
-                  </td>
+                  <th className="p-3 text-left">ACCIONES</th>
+                  <th className="p-3 text-left">CÓDIGO SAT</th>
+                  <th className="p-3 text-left">NOMBRE</th>
+                  <th className="p-3 text-left">DESCRIPCIÓN</th>
+                  <th className="p-3 text-left">CLAVE UNIDAD</th>
+                  <th className="p-3 text-left">UNIDAD</th>
+                  <th className="p-3 text-right">PRECIO</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-          <div className="flex justify-between items-center p-4 border-t border-[#232b36] text-gray-400 text-sm">
-            <span>Mostrando {filteredProductos.length} de {productosMock.length} resultados</span>
-            <div className="flex gap-2">
-              <button className="px-3 py-1 bg-[#1a222c] rounded">Anterior</button>
-              <button className="px-3 py-1 bg-blue-600 rounded text-white">1</button>
-              <button className="px-3 py-1 bg-[#1a222c] rounded">2</button>
-              <button className="px-3 py-1 bg-[#1a222c] rounded">3</button>
-              <button className="px-3 py-1 bg-[#1a222c] rounded">Siguiente</button>
+              </thead>
+              <tbody>
+                {currentProducts.map((producto) => (
+                  <tr key={producto.id} className="border-t border-[#232b36] hover:bg-[#1a222c]">
+                    <td className="p-3 flex gap-2">
+                      <button 
+                        className="text-gray-400 hover:text-blue-400"
+                        onClick={() => openEditModal(producto)}
+                        title="Editar producto"
+                      >
+                        <SquarePen className="h-4 w-4" />
+                      </button>
+                      <button 
+                        className="text-gray-400 hover:text-red-400"
+                        onClick={() => producto.id && handleDeleteProduct(producto.id)}
+                        title="Eliminar producto"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </button>
+                    </td>
+                    <td className="p-3">
+                      <span className="bg-[#1e293b] text-blue-300 px-2 py-1 rounded text-xs font-mono cursor-pointer hover:underline">
+                        {producto.clave_producto}
+                      </span>
+                    </td>
+                    <td className="p-3 font-bold">{producto.name}</td>
+                    <td className="p-3 text-gray-400">{producto.descripcion}</td>
+                    <td className="p-3">{producto.clave_unidad || "-"}</td>
+                    <td className="p-3">{producto.clave_unidad || "-"}</td>
+                    <td className="p-3 text-right font-bold text-yellow-400">
+                      ${producto.precio_unitario?.toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+                {currentProducts.length === 0 && !isLoading && (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center text-gray-400">
+                      No se encontraron productos que coincidan con tu búsqueda
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <div className="flex justify-between items-center p-4 border-t border-[#232b36] text-gray-400 text-sm">
+              <span>Mostrando {currentProducts.length} de {filteredProductos.length} resultados</span>
+              <div className="flex gap-2">
+                <button 
+                  className="px-3 py-1 bg-[#1a222c] rounded disabled:opacity-50"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Anterior
+                </button>
+                {paginationNumbers().map((page) => (
+                  <button
+                    key={page}
+                    className={`px-3 py-1 rounded ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-[#1a222c]'}`}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button 
+                  className="px-3 py-1 bg-[#1a222c] rounded disabled:opacity-50"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Siguiente
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           <div className="bg-[#1a222c] rounded-xl p-6 flex flex-col items-start border-2 border-[#16304f]">
             <span className="text-xs text-gray-400 font-bold mb-2">TOTAL PRODUCTOS</span>
-            <span className="text-3xl font-extrabold mb-2">1,250</span>
+            <span className="text-3xl font-extrabold mb-2">{productos.length}</span>
             <div className="w-full h-1 bg-blue-700 rounded" />
           </div>
           <div className="bg-[#1a222c] rounded-xl p-6 flex flex-col items-start border-2 border-[#16304f]">
             <span className="text-xs text-yellow-400 font-bold mb-2">SERVICIOS SAT</span>
-            <span className="text-3xl font-extrabold mb-2">84</span>
+            <span className="text-3xl font-extrabold mb-2">
+              {productos.filter(p => p.clave_producto).length}
+            </span>
             <div className="w-full h-1 bg-yellow-400 rounded" />
           </div>
           <div className="bg-[#1a222c] rounded-xl p-6 flex flex-col items-start border-2 border-[#16304f]">
             <span className="text-xs text-gray-400 font-bold mb-2">OPTIMIZACIÓN</span>
-            <span className="text-base mb-2">Claves actualizadas al catálogo 2024.</span>
+            <span className="text-base mb-2">Catálogo actualizado en tiempo real.</span>
           </div>
         </div>
       </div>
@@ -1427,6 +1597,7 @@ export default function CatalogoProductos() {
         isOpen={isProductModalOpen}
         onClose={closeProductModal}
         onSave={handleSaveProduct}
+        isEditing={editingProductId !== null}
         productInternalName={productInternalName}
         setProductInternalName={setProductInternalName}
         productNoIdentificacion={productNoIdentificacion}
@@ -1468,6 +1639,7 @@ export default function CatalogoProductos() {
         removeImpuestoLocal={removeImpuestoLocal}
         updateImpuestoLocal={updateImpuestoLocal}
         showImpuestosLocales={showImpuestosLocales}
+        isLoading={isSaving}
       />
 
       {/* Modal de carga masiva */}
