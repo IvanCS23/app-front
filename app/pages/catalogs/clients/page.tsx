@@ -1,16 +1,22 @@
+// app-front/app/pages/catalogs/clients/page.tsx
+
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   SquarePen, Trash, Eye, Plus, X, ChevronDown, ChevronUp, Info, CheckCircle2, Loader2,
   Download, Upload, Activity, FileText as FileTextIcon 
 } from "lucide-react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import { 
+  getClients, 
+  createClient, 
+  updateClient, 
+  deleteClient, 
+  Client as ClientType 
+} from "@/src/services/client.services";
 
-const selectStyle =
-  "box box-input";
-
-const inputStyle =
-  "box box-input";
+const selectStyle = "box box-input";
+const inputStyle = "box box-input";
 
 // Componente Toast
 const Toast = ({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) => {
@@ -120,268 +126,46 @@ const taxRegimeOptions = [
 
 // Estados de la República Mexicana
 const mexicanStates = [
-  "Aguascalientes",
-  "Baja California",
-  "Baja California Sur",
-  "Campeche",
-  "Chiapas",
-  "Chihuahua",
-  "Ciudad de México",
-  "Coahuila",
-  "Colima",
-  "Durango",
-  "Guanajuato",
-  "Guerrero",
-  "Hidalgo",
-  "Jalisco",
-  "México",
-  "Michoacán",
-  "Morelos",
-  "Nayarit",
-  "Nuevo León",
-  "Oaxaca",
-  "Puebla",
-  "Querétaro",
-  "Quintana Roo",
-  "San Luis Potosí",
-  "Sinaloa",
-  "Sonora",
-  "Tabasco",
-  "Tamaulipas",
-  "Tlaxcala",
-  "Veracruz",
-  "Yucatán",
-  "Zacatecas",
+  "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas",
+  "Chihuahua", "Ciudad de México", "Coahuila", "Colima", "Durango", "Guanajuato",
+  "Guerrero", "Hidalgo", "Jalisco", "México", "Michoacán", "Morelos", "Nayarit",
+  "Nuevo León", "Oaxaca", "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí",
+  "Sinaloa", "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas",
 ];
 
 // Países en orden alfabético
 const countries = [
-  "Afganistán",
-  "Albania",
-  "Alemania",
-  "Andorra",
-  "Angola",
-  "Antigua y Barbuda",
-  "Arabia Saudita",
-  "Argelia",
-  "Argentina",
-  "Armenia",
-  "Australia",
-  "Austria",
-  "Azerbaiyán",
-  "Bahamas",
-  "Bangladés",
-  "Barbados",
-  "Baréin",
-  "Bélgica",
-  "Belice",
-  "Benín",
-  "Bielorrusia",
-  "Birmania",
-  "Bolivia",
-  "Bosnia y Herzegovina",
-  "Botsuana",
-  "Brasil",
-  "Brunéi",
-  "Bulgaria",
-  "Burkina Faso",
-  "Burundi",
-  "Bután",
-  "Cabo Verde",
-  "Camboya",
-  "Camerún",
-  "Canadá",
-  "Catar",
-  "Chad",
-  "Chile",
-  "China",
-  "Chipre",
-  "Ciudad del Vaticano",
-  "Colombia",
-  "Comoras",
-  "Corea del Norte",
-  "Corea del Sur",
-  "Costa de Marfil",
-  "Costa Rica",
-  "Croacia",
-  "Cuba",
-  "Dinamarca",
-  "Dominica",
-  "Ecuador",
-  "Egipto",
-  "El Salvador",
-  "Emiratos Árabes Unidos",
-  "Eritrea",
-  "Eslovaquia",
-  "Eslovenia",
-  "España",
-  "Estados Unidos",
-  "Estonia",
-  "Esuatini",
-  "Etiopía",
-  "Filipinas",
-  "Finlandia",
-  "Fiyi",
-  "Francia",
-  "Gabón",
-  "Gambia",
-  "Georgia",
-  "Ghana",
-  "Granada",
-  "Grecia",
-  "Guatemala",
-  "Guinea",
-  "Guinea-Bisáu",
-  "Guinea Ecuatorial",
-  "Guyana",
-  "Haití",
-  "Honduras",
-  "Hungría",
-  "India",
-  "Indonesia",
-  "Irak",
-  "Irán",
-  "Irlanda",
-  "Islandia",
-  "Islas Marshall",
-  "Islas Salomón",
-  "Israel",
-  "Italia",
-  "Jamaica",
-  "Japón",
-  "Jordania",
-  "Kazajistán",
-  "Kenia",
-  "Kirguistán",
-  "Kiribati",
-  "Kuwait",
-  "Laos",
-  "Lesoto",
-  "Letonia",
-  "Líbano",
-  "Liberia",
-  "Libia",
-  "Liechtenstein",
-  "Lituania",
-  "Luxemburgo",
-  "Macedonia del Norte",
-  "Madagascar",
-  "Malasia",
-  "Malaui",
-  "Maldivas",
-  "Malí",
-  "Malta",
-  "Marruecos",
-  "Mauricio",
-  "Mauritania",
-  "México",
-  "Micronesia",
-  "Moldavia",
-  "Mónaco",
-  "Mongolia",
-  "Montenegro",
-  "Mozambique",
-  "Namibia",
-  "Nauru",
-  "Nepal",
-  "Nicaragua",
-  "Níger",
-  "Nigeria",
-  "Noruega",
-  "Nueva Zelanda",
-  "Omán",
-  "Países Bajos",
-  "Pakistán",
-  "Palaos",
-  "Palestina",
-  "Panamá",
-  "Papúa Nueva Guinea",
-  "Paraguay",
-  "Perú",
-  "Polonia",
-  "Portugal",
-  "Reino Unido",
-  "República Centroafricana",
-  "República Checa",
-  "República del Congo",
-  "República Democrática del Congo",
-  "República Dominicana",
-  "Ruanda",
-  "Rumania",
-  "Rusia",
-  "Samoa",
-  "San Cristóbal y Nieves",
-  "San Marino",
-  "San Vicente y las Granadinas",
-  "Santa Lucía",
-  "Santo Tomé y Príncipe",
-  "Senegal",
-  "Serbia",
-  "Seychelles",
-  "Sierra Leona",
-  "Singapur",
-  "Siria",
-  "Somalia",
-  "Sri Lanka",
-  "Sudáfrica",
-  "Sudán",
-  "Sudán del Sur",
-  "Suecia",
-  "Suiza",
-  "Surinam",
-  "Tailandia",
-  "Tanzania",
-  "Tayikistán",
-  "Timor Oriental",
-  "Togo",
-  "Tonga",
-  "Trinidad y Tobago",
-  "Túnez",
-  "Turkmenistán",
-  "Turquía",
-  "Tuvalu",
-  "Ucrania",
-  "Uganda",
-  "Uruguay",
-  "Uzbekistán",
-  "Vanuatu",
-  "Venezuela",
-  "Vietnam",
-  "Yemen",
-  "Yibuti",
-  "Zambia",
-  "Zimbabue",
-];
-
-const clientesMock = [
-  {
-    iniciales: "AD",
-    nombre: "AARON DIAZ FLORES",
-    rfc: "DIFA806512XYZ",
-    email: "aaron.diaz@example.com",
-    cp: "06700",
-  },
-  {
-    iniciales: "AP",
-    nombre: "AUTOS PREMIER GK",
-    rfc: "APG120304HJK",
-    email: "contacto@autospremier.mx",
-    cp: "64000",
-  },
-  {
-    iniciales: "BC",
-    nombre: "BERNARDO CARRILLO",
-    rfc: "CABB50101789",
-    email: "b.carrillo@provider.net",
-    cp: "45010",
-  },
-  {
-    iniciales: "CI",
-    nombre: "CONSTRUCTORA INTEGRAL",
-    rfc: "CIN506812S34",
-    email: "pagos@constructora-int.com",
-    cp: "72000",
-  },
+  "Afganistán", "Albania", "Alemania", "Andorra", "Angola", "Antigua y Barbuda",
+  "Arabia Saudita", "Argelia", "Argentina", "Armenia", "Australia", "Austria",
+  "Azerbaiyán", "Bahamas", "Bangladés", "Barbados", "Baréin", "Bélgica", "Belice",
+  "Benín", "Bielorrusia", "Birmania", "Bolivia", "Bosnia y Herzegovina", "Botsuana",
+  "Brasil", "Brunéi", "Bulgaria", "Burkina Faso", "Burundi", "Bután", "Cabo Verde",
+  "Camboya", "Camerún", "Canadá", "Catar", "Chad", "Chile", "China", "Chipre",
+  "Ciudad del Vaticano", "Colombia", "Comoras", "Corea del Norte", "Corea del Sur",
+  "Costa de Marfil", "Costa Rica", "Croacia", "Cuba", "Dinamarca", "Dominica",
+  "Ecuador", "Egipto", "El Salvador", "Emiratos Árabes Unidos", "Eritrea", "Eslovaquia",
+  "Eslovenia", "España", "Estados Unidos", "Estonia", "Esuatini", "Etiopía", "Filipinas",
+  "Finlandia", "Fiyi", "Francia", "Gabón", "Gambia", "Georgia", "Ghana", "Granada",
+  "Grecia", "Guatemala", "Guinea", "Guinea-Bisáu", "Guinea Ecuatorial", "Guyana",
+  "Haití", "Honduras", "Hungría", "India", "Indonesia", "Irak", "Irán", "Irlanda",
+  "Islandia", "Islas Marshall", "Islas Salomón", "Israel", "Italia", "Jamaica",
+  "Japón", "Jordania", "Kazajistán", "Kenia", "Kirguistán", "Kiribati", "Kuwait",
+  "Laos", "Lesoto", "Letonia", "Líbano", "Liberia", "Libia", "Liechtenstein",
+  "Lituania", "Luxemburgo", "Macedonia del Norte", "Madagascar", "Malasia", "Malaui",
+  "Maldivas", "Malí", "Malta", "Marruecos", "Mauricio", "Mauritania", "México",
+  "Micronesia", "Moldavia", "Mónaco", "Mongolia", "Montenegro", "Mozambique",
+  "Namibia", "Nauru", "Nepal", "Nicaragua", "Níger", "Nigeria", "Noruega",
+  "Nueva Zelanda", "Omán", "Países Bajos", "Pakistán", "Palaos", "Palestina",
+  "Panamá", "Papúa Nueva Guinea", "Paraguay", "Perú", "Polonia", "Portugal",
+  "Reino Unido", "República Centroafricana", "República Checa", "República del Congo",
+  "República Democrática del Congo", "República Dominicana", "Ruanda", "Rumania",
+  "Rusia", "Samoa", "San Cristóbal y Nieves", "San Marino", "San Vicente y las Granadinas",
+  "Santa Lucía", "Santo Tomé y Príncipe", "Senegal", "Serbia", "Seychelles",
+  "Sierra Leona", "Singapur", "Siria", "Somalia", "Sri Lanka", "Sudáfrica",
+  "Sudán", "Sudán del Sur", "Suecia", "Suiza", "Surinam", "Tailandia", "Tanzania",
+  "Tayikistán", "Timor Oriental", "Togo", "Tonga", "Trinidad y Tobago", "Túnez",
+  "Turkmenistán", "Turquía", "Tuvalu", "Ucrania", "Uganda", "Uruguay", "Uzbekistán",
+  "Vanuatu", "Venezuela", "Vietnam", "Yemen", "Yibuti", "Zambia", "Zimbabue",
 ];
 
 export default function CatalogoClientes() {
@@ -390,9 +174,18 @@ export default function CatalogoClientes() {
   const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
   const [showOptionalFields, setShowOptionalFields] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editingClientId, setEditingClientId] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   
-  // Estado para los clientes filtrados
-  const [filteredClientes, setFilteredClientes] = useState(clientesMock);
+  // Estado para los clientes
+  const [clients, setClients] = useState<ClientType[]>([]);
+  const [filteredClients, setFilteredClients] = useState<ClientType[]>([]);
+
+  // Estado para paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [recordsPerPage, setRecordsPerPage] = useState(25);
 
   // Estados para los campos del cliente
   const [clientName, setClientName] = useState("");
@@ -412,20 +205,106 @@ export default function CatalogoClientes() {
   const [clientState, setClientState] = useState("");
   const [clientCountry, setClientCountry] = useState("México");
 
-  // Filtrar clientes cuando cambia el término de búsqueda
+  // Cargar clientes desde la API
+  const fetchClients = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await getClients();
+      setClients(data);
+      setFilteredClients(data);
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      setToast({ 
+        message: error instanceof Error ? error.message : "Error al cargar clientes", 
+        type: "error" 
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Cargar clientes al montar el componente
+  useEffect(() => {
+    fetchClients();
+  }, [fetchClients]);
+
+  // Filtrar clientes cuando cambia el término de búsqueda o la lista de clientes
   useEffect(() => {
     const searchLower = search.toLowerCase();
-    const filtered = clientesMock.filter(cliente => 
-      cliente.nombre.toLowerCase().includes(searchLower) ||
-      cliente.rfc.toLowerCase().includes(searchLower) ||
-      cliente.email.toLowerCase().includes(searchLower) ||
-      cliente.cp.includes(search)
+    const filtered = clients.filter(cliente => 
+      (cliente.name || '').toLowerCase().includes(searchLower) ||
+      (cliente.rfc || '').toLowerCase().includes(searchLower) ||
+      (cliente.email || '').toLowerCase().includes(searchLower) ||
+      (cliente.codigo_postal || '').includes(search)
     );
-    setFilteredClientes(filtered);
-  }, [search]);
+    setFilteredClients(filtered);
+    setCurrentPage(1);
+  }, [search, clients]);
+
+  // Calcular clientes paginados
+  const paginatedClients = filteredClients.slice(
+    (currentPage - 1) * recordsPerPage,
+    currentPage * recordsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredClients.length / recordsPerPage);
+
+  // Mapear campos del formulario al objeto Client
+  const mapFormToClient = (): ClientType => {
+    return {
+      name: clientName,
+      rfc: clientRfc,
+      uso_cfdi: clientInvoiceUsage,
+      regimen_fiscal: clientTaxRegime,
+      email: clientEmail,
+      codigo_postal: clientCp,
+      calle: clientStreet || undefined,
+      no_exterior: clientExteriorNumber || undefined,
+      no_interior: clientInteriorNumber || undefined,
+      colonia: clientNeighborhood || undefined,
+      localidad: clientLocality || undefined,
+      municipio: clientMunicipality || undefined,
+      estado: clientState || undefined,
+      pais: clientCountry || undefined,
+    };
+  };
+
+  // Mapear cliente a campos del formulario
+  const mapClientToForm = (client: ClientType) => {
+    setClientName(client.name || '');
+    setClientRfc(client.rfc || '');
+    setClientInvoiceUsage(client.uso_cfdi || '');
+    setClientTaxRegime(client.regimen_fiscal || '');
+    setClientEmail(client.email || '');
+    setClientEmailOptional1('');
+    setClientEmailOptional2('');
+    setClientCp(client.codigo_postal || '');
+    setClientStreet(client.calle || '');
+    setClientExteriorNumber(client.no_exterior || '');
+    setClientInteriorNumber(client.no_interior || '');
+    setClientNeighborhood(client.colonia || '');
+    setClientLocality(client.localidad || '');
+    setClientMunicipality(client.municipio || '');
+    setClientState(client.estado || '');
+    setClientCountry(client.pais || 'México');
+    
+    // Si hay campos opcionales con datos, mostrar la sección opcional
+    if (client.calle || client.no_exterior || client.colonia || client.municipio || client.estado) {
+      setShowOptionalFields(true);
+    } else {
+      setShowOptionalFields(false);
+    }
+  };
 
   // Funciones para el modal de cliente
-  const openClientModal = () => {
+  const openClientModal = (client?: ClientType) => {
+    if (client) {
+      setEditingClientId(client.id || null);
+      mapClientToForm(client);
+    } else {
+      setEditingClientId(null);
+      resetClientForm();
+    }
     setIsClientModalOpen(true);
   };
 
@@ -452,142 +331,180 @@ export default function CatalogoClientes() {
     setClientState("");
     setClientCountry("México");
     setShowOptionalFields(false);
+    setEditingClientId(null);
   };
 
-  const handleSaveClient = () => {
-    // Validar campos obligatorios
-    if (!clientName) {
+  const validateForm = (): boolean => {
+    if (!clientName.trim()) {
       setToast({ message: "El campo Nombre / Razón Social es obligatorio", type: "error" });
-      return;
+      return false;
     }
-    if (!clientRfc) {
+    if (!clientRfc.trim()) {
       setToast({ message: "El campo RFC es obligatorio", type: "error" });
-      return;
+      return false;
     }
     if (!clientInvoiceUsage) {
       setToast({ message: "El campo Uso de la factura es obligatorio", type: "error" });
-      return;
+      return false;
     }
     if (!clientTaxRegime) {
       setToast({ message: "El campo Régimen fiscal es obligatorio", type: "error" });
-      return;
+      return false;
     }
-    if (!clientEmail) {
+    if (!clientEmail.trim()) {
       setToast({ message: "El campo E-Mail es obligatorio", type: "error" });
-      return;
+      return false;
     }
-    if (!clientCp) {
+    if (!clientCp.trim()) {
       setToast({ message: "El campo C.P. es obligatorio", type: "error" });
-      return;
+      return false;
     }
+    return true;
+  };
 
-    console.log("Cliente guardado:", {
-      name: clientName,
-      rfc: clientRfc,
-      invoiceUsage: clientInvoiceUsage,
-      taxRegime: clientTaxRegime,
-      email: clientEmail,
-      emailOptional1: clientEmailOptional1,
-      emailOptional2: clientEmailOptional2,
-      cp: clientCp,
-      street: clientStreet,
-      exteriorNumber: clientExteriorNumber,
-      interiorNumber: clientInteriorNumber,
-      neighborhood: clientNeighborhood,
-      locality: clientLocality,
-      municipality: clientMunicipality,
-      state: clientState,
-      country: clientCountry,
-    });
+  const handleSaveClient = async () => {
+    if (!validateForm()) return;
+
+    setIsSaving(true);
+    try {
+      const clientData = mapFormToClient();
+
+      if (editingClientId) {
+        await updateClient(editingClientId, clientData);
+        setToast({ message: "Cliente actualizado correctamente", type: "success" });
+      } else {
+        await createClient(clientData);
+        setToast({ message: "Cliente agregado correctamente", type: "success" });
+      }
+
+      await fetchClients();
+      closeClientModal();
+    } catch (error) {
+      console.error("Error saving client:", error);
+      setToast({ 
+        message: error instanceof Error ? error.message : "Error al guardar cliente", 
+        type: "error" 
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteClient = async (clientId: number) => {
+    setConfirmDeleteId(clientId);
+  };
+
+  const confirmDelete = async () => {
+    if (!confirmDeleteId) return;
     
-    setToast({ message: "Cliente agregado correctamente", type: "success" });
-    closeClientModal();
+    setIsLoading(true);
+    try {
+      await deleteClient(confirmDeleteId);
+      setToast({ message: "Cliente eliminado correctamente", type: "success" });
+      await fetchClients();
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      setToast({ 
+        message: error instanceof Error ? error.message : "Error al eliminar cliente", 
+        type: "error" 
+      });
+    } finally {
+      setIsLoading(false);
+      setConfirmDeleteId(null);
+    }
   };
 
-  // Funciones para el modal de carga masiva
-  const openBulkUploadModal = () => {
-    setIsBulkUploadModalOpen(true);
+  const cancelDelete = () => {
+    setConfirmDeleteId(null);
   };
 
-  const closeBulkUploadModal = () => {
-    setIsBulkUploadModalOpen(false);
+  const handleViewClient = (client: ClientType) => {
+    // Implementar lógica para ver detalles del cliente
+    console.log("Ver cliente:", client);
+    setToast({ message: "Vista de detalles en desarrollo", type: "success" });
   };
 
   // Modal de carga masiva
   const BulkUploadModal = () => {
-  if (!isBulkUploadModalOpen) return null;
+    if (!isBulkUploadModalOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={closeBulkUploadModal}
-      />
-      
-      {/* Añade overflow-y-auto y max-height al contenedor principal */}
-      <div className="relative max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-          <h2 className="text-xl font-bold text-white">Carga Masiva de Clientes</h2>
-          <button
-            onClick={closeBulkUploadModal}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-[#0d1b35] hover:text-white"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="p-6">
-          {/* Resto del contenido del modal - igual que antes */}
-          <div className="mb-6 p-4 rounded-xl bg-[#0a1424] border border-[#173156]">
-            <p className="text-slate-300 text-sm leading-relaxed">
-              Aquí podrás subir tu catálogo de clientes de forma masiva, a través de un archivo .csv. 
-              En <span className="text-blue-400 font-medium">Ejemplo de carga masiva</span> se descargará la plantilla base 
-              y un documento con los detalles para el llenado del archivo.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
-              <FileTextIcon className="h-5 w-5 text-[#1d9bf0]" />
-              <span className="text-sm font-medium">Ejemplo de carga masiva</span>
-            </button>
-            
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
-              <Download className="h-5 w-5 text-[#1d9bf0]" />
-              <span className="text-sm font-medium">Descarga .csv</span>
-            </button>
-            
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
-              <Upload className="h-5 w-5 text-[#1d9bf0]" />
-              <span className="text-sm font-medium">Subir archivo .csv</span>
-            </button>
-            
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
-              <Activity className="h-5 w-5 text-[#1d9bf0]" />
-              <span className="text-sm font-medium">Ver estado de los procesos</span>
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div
+          className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          onClick={closeBulkUploadModal}
+        />
+        
+        <div className="relative max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
+            <h2 className="text-xl font-bold text-white">Carga Masiva de Clientes</h2>
+            <button
+              onClick={closeBulkUploadModal}
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-[#0d1b35] hover:text-white"
+            >
+              <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="border-t border-[#173156] my-6"></div>
+          <div className="p-6">
+            <div className="mb-6 p-4 rounded-xl bg-[#0a1424] border border-[#173156]">
+              <p className="text-slate-300 text-sm leading-relaxed">
+                Aquí podrás subir tu catálogo de clientes de forma masiva, a través de un archivo .csv. 
+                En <span className="text-blue-400 font-medium">Ejemplo de carga masiva</span> se descargará la plantilla base 
+                y un documento con los detalles para el llenado del archivo.
+              </p>
+            </div>
 
-          <div className="flex gap-4">
-            <button className="flex-1 rounded-xl bg-blue-500 px-4 py-2.5 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-colors duration-200 hover:bg-blue-400">
-              Procesar archivos
-            </button>
-            <button className="flex-1 rounded-xl bg-red-500 px-4 py-2.5 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] transition-colors duration-200 hover:bg-red-400">
-              Eliminar todos
-            </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+              <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
+                <FileTextIcon className="h-5 w-5 text-[#1d9bf0]" />
+                <span className="text-sm font-medium">Ejemplo de carga masiva</span>
+              </button>
+              
+              <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
+                <Download className="h-5 w-5 text-[#1d9bf0]" />
+                <span className="text-sm font-medium">Descarga .csv</span>
+              </button>
+              
+              <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
+                <Upload className="h-5 w-5 text-[#1d9bf0]" />
+                <span className="text-sm font-medium">Subir archivo .csv</span>
+              </button>
+              
+              <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
+                <Activity className="h-5 w-5 text-[#1d9bf0]" />
+                <span className="text-sm font-medium">Ver estado de los procesos</span>
+              </button>
+            </div>
+
+            <div className="border-t border-[#173156] my-6"></div>
+
+            <div className="flex gap-4">
+              <button className="flex-1 rounded-xl bg-blue-500 px-4 py-2.5 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-colors duration-200 hover:bg-blue-400">
+                Procesar archivos
+              </button>
+              <button className="flex-1 rounded-xl bg-red-500 px-4 py-2.5 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] transition-colors duration-200 hover:bg-red-400">
+                Eliminar todos
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
-
+    );
+  };
 
   return (
     <AppLayout>
       <div className="min-h-screen bg-[#151c24] text-white p-3 rounded-lg">
+        {/* Barra de carga */}
+        {isLoading && (
+          <div className="fixed top-0 left-0 right-0 z-50">
+            <div className="h-1 bg-blue-500">
+              <div className="h-full bg-blue-400 animate-pulse"></div>
+            </div>
+          </div>
+        )}
+        
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-extrabold">Catálogo de Clientes</h1>
@@ -597,15 +514,17 @@ export default function CatalogoClientes() {
           </div>
           <div className="flex gap-3">
             <button 
-              onClick={openBulkUploadModal}
-              className="w-36 bg-emerald-500 hover:bg-emerald-400 rounded-lg font-semibold shadow text-white shadow-lg shadow-emerald-500/30"
+              onClick={() => setIsBulkUploadModalOpen(true)}
+              className="w-36 bg-emerald-500 hover:bg-emerald-400 rounded-lg font-semibold shadow text-white shadow-lg shadow-emerald-500/30 transition-colors"
             >
-              Carga masiva de clientes
+              Carga masiva
             </button>
             <button 
-              onClick={openClientModal}
-              className="w-36 bg-blue-500 hover:bg-blue-400 rounded-lg font-semibold shadow text-white shadow-lg shadow-blue-500/30"
+              onClick={() => openClientModal()}
+              className="w-36 bg-blue-500 hover:bg-blue-400 rounded-lg font-semibold shadow text-white shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-colors"
+              disabled={isLoading}
             >
+              <Plus className="h-4 w-4" />
               Agregar cliente
             </button>
           </div>
@@ -613,17 +532,24 @@ export default function CatalogoClientes() {
 
         <div className="flex items-center gap-4 mb-4">
           <input
-            className="box box-input flex-1"
+            className={inputStyle + " flex-1"}
             placeholder="Filtrar por nombre, RFC o correo..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
           <div className="flex items-center gap-2">
-            <span className="text-gray-400">MOSTRAR</span>
-            <select className="box box-input">
-              <option>25 registros</option>
-              <option>50 registros</option>
-              <option>100 registros</option>
+            <span className="text-gray-400 text-sm">MOSTRAR</span>
+            <select 
+              className={selectStyle}
+              value={recordsPerPage}
+              onChange={(e) => {
+                setRecordsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value={25}>25 registros</option>
+              <option value={50}>50 registros</option>
+              <option value={100}>100 registros</option>
             </select>
           </div>
         </div>
@@ -640,68 +566,154 @@ export default function CatalogoClientes() {
               </tr>
             </thead>
             <tbody>
-              {filteredClientes.map((c, i) => (
-                <tr key={i} className="border-t border-[#232b36] hover:bg-[#1a222c]">
-                  <td className="p-3 flex gap-2">
-                    <button className="text-gray-400 hover:text-blue-400"><SquarePen className="h-4 w-4" /></button>
-                    <button className="text-gray-400 hover:text-red-400"><Trash className="h-4 w-4" /></button>
-                    <button className="text-gray-400 hover:text-green-400"><Eye className="h-4 w-4" /></button>
+              {isLoading && clients.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center">
+                    <div className="flex items-center justify-center gap-3">
+                      <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+                      <span className="text-gray-400">Cargando clientes...</span>
+                    </div>
                   </td>
-                  <td className="p-3 flex items-center gap-3 font-bold">
-                    <span className={`rounded-lg px-2 py-1 text-xs font-bold ${i === 1 ? 'bg-yellow-600 text-yellow-200' : 'bg-blue-900 text-blue-200'}`}>{c.iniciales}</span>
-                    {c.nombre}
-                  </td>
-                  <td className="p-3">
-                    <span className="bg-[#1e293b] text-blue-300 px-2 py-1 rounded text-xs font-mono cursor-pointer hover:underline">
-                      {c.rfc}
-                    </span>
-                  </td>
-                  <td className="p-3 text-gray-300">{c.email}</td>
-                  <td className="p-3">{c.cp}</td>
                 </tr>
-              ))}
-              {filteredClientes.length === 0 && (
+              ) : paginatedClients.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-gray-400">
-                    No se encontraron clientes que coincidan con tu búsqueda
+                    {search ? "No se encontraron clientes que coincidan con tu búsqueda" : "No hay clientes registrados"}
                   </td>
                 </tr>
+              ) : (
+                paginatedClients.map((client) => (
+                  <tr key={client.id} className="border-t border-[#232b36] hover:bg-[#1a222c] transition-colors">
+                    <td className="p-3">
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => openClientModal(client)}
+                          className="text-gray-400 hover:text-blue-400 transition-colors"
+                          title="Editar cliente"
+                        >
+                          <SquarePen className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => client.id && handleDeleteClient(client.id)}
+                          className="text-gray-400 hover:text-red-400 transition-colors"
+                          title="Eliminar cliente"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleViewClient(client)}
+                          className="text-gray-400 hover:text-green-400 transition-colors"
+                          title="Ver detalles"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                    <td className="p-3 font-bold">
+                      <div className="flex items-center gap-3">
+                        <span className="bg-blue-900 text-blue-200 rounded-lg px-2 py-1 text-xs font-bold">
+                          {(client.name || '').substring(0, 2).toUpperCase()}
+                        </span>
+                        {client.name}
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <span className="bg-[#1e293b] text-blue-300 px-2 py-1 rounded text-xs font-mono cursor-pointer hover:underline">
+                        {client.rfc}
+                      </span>
+                    </td>
+                    <td className="p-3 text-gray-300">{client.email}</td>
+                    <td className="p-3">{client.codigo_postal}</td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
-          <div className="flex justify-between items-center p-4 border-t border-[#232b36] text-gray-400 text-sm">
-            <span>Mostrando {filteredClientes.length} de {clientesMock.length} registros</span>
-            <div className="flex gap-2">
-              <button className="px-3 py-1 bg-[#1a222c] rounded">Anterior</button>
-              <button className="px-3 py-1 bg-blue-600 rounded text-white">1</button>
-              <button className="px-3 py-1 bg-[#1a222c] rounded">2</button>
-              <button className="px-3 py-1 bg-[#1a222c] rounded">3</button>
-              <button className="px-3 py-1 bg-[#1a222c] rounded">Siguiente</button>
+          
+          {/* Paginación */}
+          {filteredClients.length > 0 && (
+            <div className="flex justify-between items-center p-4 border-t border-[#232b36] text-gray-400 text-sm">
+              <span>
+                Mostrando {paginatedClients.length} de {filteredClients.length} registros
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1 rounded transition-colors ${
+                    currentPage === 1 
+                      ? 'bg-[#1a222c] text-gray-600 cursor-not-allowed' 
+                      : 'bg-[#1a222c] hover:bg-blue-600 hover:text-white'
+                  }`}
+                >
+                  Anterior
+                </button>
+                
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`px-3 py-1 rounded transition-colors ${
+                        currentPage === pageNum
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-[#1a222c] hover:bg-blue-600 hover:text-white'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className={`px-3 py-1 rounded transition-colors ${
+                    currentPage === totalPages || totalPages === 0
+                      ? 'bg-[#1a222c] text-gray-600 cursor-not-allowed'
+                      : 'bg-[#1a222c] hover:bg-blue-600 hover:text-white'
+                  }`}
+                >
+                  Siguiente
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
           <div className="bg-[#1a222c] rounded-xl p-6 flex flex-col items-start border-2 border-[#16304f]">
             <span className="text-base font-bold mb-2">Resumen de Actividad</span>
-            <span className="text-gray-300 mb-2">Has agregado 12 clientes nuevos este mes. Tu base de datos ha crecido un 8% respecto al periodo anterior.</span>
+            <span className="text-gray-300 mb-2">
+              Has agregado {clients.length} clientes en total. Gestiona tu catálogo de forma eficiente.
+            </span>
             <a href="#" className="text-blue-400 hover:underline text-sm">Ver reporte detallado</a>
           </div>
           <div className="bg-[#1a222c] rounded-xl p-6 flex flex-col items-start border-2 border-[#16304f]">
-            <span className="text-base font-bold mb-2">PRÓXIMO VENCIMIENTO</span>
-            <span className="text-3xl font-extrabold mb-2">15 Clientes</span>
-            <span className="text-gray-300 mb-2">Requieren actualización de constancia fiscal.</span>
+            <span className="text-base font-bold mb-2">ESTADÍSTICAS</span>
+            <span className="text-3xl font-extrabold mb-2">{clients.length} Clientes</span>
+            <span className="text-gray-300 mb-2">Registrados en el sistema.</span>
             <div className="flex gap-1 mt-2">
-              <span className="bg-blue-800 text-white rounded-full px-2 py-1 text-xs font-bold">JD</span>
-              <span className="bg-blue-800 text-white rounded-full px-2 py-1 text-xs font-bold">ML</span>
-              <span className="bg-yellow-700 text-white rounded-full px-2 py-1 text-xs font-bold">RC</span>
-              <span className="bg-gray-700 text-white rounded-full px-2 py-1 text-xs font-bold">+12</span>
+              <span className="bg-blue-800 text-white rounded-full px-2 py-1 text-xs font-bold">
+                {clients.length > 0 ? "+" + clients.length : "0"}
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Modal para agregar cliente */}
+      {/* Modal para agregar/editar cliente */}
       {isClientModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -711,7 +723,9 @@ export default function CatalogoClientes() {
           
           <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-              <h2 className="text-xl font-bold text-white">Agregar Nuevo Cliente</h2>
+              <h2 className="text-xl font-bold text-white">
+                {editingClientId ? 'Editar Cliente' : 'Agregar Nuevo Cliente'}
+              </h2>
               <button
                 onClick={closeClientModal}
                 className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-[#0d1b35] hover:text-white"
@@ -730,6 +744,7 @@ export default function CatalogoClientes() {
                     onChange={(e) => setClientName(e.target.value)}
                     placeholder="Nombre o razón social del cliente"
                     className={inputStyle}
+                    disabled={isSaving}
                   />
                 </div>
 
@@ -742,6 +757,7 @@ export default function CatalogoClientes() {
                     placeholder="RFC del cliente"
                     maxLength={13}
                     className={inputStyle}
+                    disabled={isSaving}
                   />
                 </div>
 
@@ -752,6 +768,7 @@ export default function CatalogoClientes() {
                       value={clientInvoiceUsage}
                       onChange={(e) => setClientInvoiceUsage(e.target.value)}
                       className={`${selectStyle} appearance-none`}
+                      disabled={isSaving}
                     >
                       {invoiceUsageOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -772,6 +789,7 @@ export default function CatalogoClientes() {
                       value={clientTaxRegime}
                       onChange={(e) => setClientTaxRegime(e.target.value)}
                       className={`${selectStyle} appearance-none`}
+                      disabled={isSaving}
                     >
                       {taxRegimeOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -791,6 +809,7 @@ export default function CatalogoClientes() {
                     onChange={(e) => setClientEmail(e.target.value)}
                     placeholder="correo@ejemplo.com"
                     className={inputStyle}
+                    disabled={isSaving}
                   />
                 </div>
 
@@ -802,6 +821,7 @@ export default function CatalogoClientes() {
                     onChange={(e) => setClientEmailOptional1(e.target.value)}
                     placeholder="correo@ejemplo.com"
                     className={inputStyle}
+                    disabled={isSaving}
                   />
                 </div>
 
@@ -813,6 +833,7 @@ export default function CatalogoClientes() {
                     onChange={(e) => setClientEmailOptional2(e.target.value)}
                     placeholder="correo@ejemplo.com"
                     className={inputStyle}
+                    disabled={isSaving}
                   />
                 </div>
 
@@ -827,6 +848,7 @@ export default function CatalogoClientes() {
                     placeholder="Código postal"
                     maxLength={5}
                     className={inputStyle}
+                    disabled={isSaving}
                   />
                 </div>
 
@@ -834,6 +856,7 @@ export default function CatalogoClientes() {
                   <button
                     onClick={() => setShowOptionalFields(!showOptionalFields)}
                     className="flex items-center gap-2 text-[15px] font-semibold text-[#1d9bf0] hover:opacity-90 transition-opacity"
+                    type="button"
                   >
                     {showOptionalFields ? (
                       <ChevronUp className="h-4 w-4" />
@@ -855,6 +878,7 @@ export default function CatalogoClientes() {
                           onChange={(e) => setClientStreet(e.target.value)}
                           placeholder="Calle"
                           className={inputStyle}
+                          disabled={isSaving}
                         />
                       </div>
                       
@@ -866,6 +890,7 @@ export default function CatalogoClientes() {
                           onChange={(e) => setClientExteriorNumber(e.target.value)}
                           placeholder="Número exterior"
                           className={inputStyle}
+                          disabled={isSaving}
                         />
                       </div>
 
@@ -877,6 +902,7 @@ export default function CatalogoClientes() {
                           onChange={(e) => setClientInteriorNumber(e.target.value)}
                           placeholder="Número interior (opcional)"
                           className={inputStyle}
+                          disabled={isSaving}
                         />
                       </div>
 
@@ -888,6 +914,7 @@ export default function CatalogoClientes() {
                           onChange={(e) => setClientNeighborhood(e.target.value)}
                           placeholder="Colonia"
                           className={inputStyle}
+                          disabled={isSaving}
                         />
                       </div>
 
@@ -899,6 +926,7 @@ export default function CatalogoClientes() {
                           onChange={(e) => setClientLocality(e.target.value)}
                           placeholder="Localidad (opcional)"
                           className={inputStyle}
+                          disabled={isSaving}
                         />
                       </div>
 
@@ -910,6 +938,7 @@ export default function CatalogoClientes() {
                           onChange={(e) => setClientMunicipality(e.target.value)}
                           placeholder="Municipio"
                           className={inputStyle}
+                          disabled={isSaving}
                         />
                       </div>
 
@@ -920,6 +949,7 @@ export default function CatalogoClientes() {
                             value={clientState}
                             onChange={(e) => setClientState(e.target.value)}
                             className={`${selectStyle} appearance-none`}
+                            disabled={isSaving}
                           >
                             <option value="">Seleccione un estado</option>
                             {mexicanStates.map((state) => (
@@ -939,6 +969,7 @@ export default function CatalogoClientes() {
                             value={clientCountry}
                             onChange={(e) => setClientCountry(e.target.value)}
                             className={`${selectStyle} appearance-none`}
+                            disabled={isSaving}
                           >
                             {countries.map((country) => (
                               <option key={country} value={country}>
@@ -958,15 +989,84 @@ export default function CatalogoClientes() {
             <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#173156] bg-[#071321] px-6 py-4">
               <button
                 onClick={closeClientModal}
-                className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] transition-colors duration-200 hover:bg-red-400"
+                className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] transition-colors duration-200 hover:bg-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSaving}
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSaveClient}
-                className="rounded-xl bg-blue-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-colors duration-200 hover:bg-blue-400"
+                disabled={isSaving}
+                className="rounded-xl bg-blue-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-colors duration-200 hover:bg-blue-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                Guardar Cliente
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  editingClientId ? 'Actualizar Cliente' : 'Guardar Cliente'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación para eliminar */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={cancelDelete}
+          />
+          
+          <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#173156] px-6 py-4">
+              <h2 className="text-xl font-bold text-white">Confirmar Eliminación</h2>
+              <button
+                onClick={cancelDelete}
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-[#0d1b35] hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                  <Trash className="h-6 w-6 text-red-400" />
+                </div>
+                <div>
+                  <p className="text-white font-medium">¿Estás seguro de eliminar este cliente?</p>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Esta acción no se puede deshacer. Se eliminará permanentemente el cliente y todos sus datos asociados.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-4 border-t border-[#173156] px-6 py-4">
+              <button
+                onClick={cancelDelete}
+                className="rounded-xl bg-[#0d1b35] px-6 py-2 font-medium text-white transition-colors duration-200 hover:bg-[#16233b]"
+                disabled={isLoading}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={isLoading}
+                className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] transition-colors duration-200 hover:bg-red-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Eliminando...
+                  </>
+                ) : (
+                  'Eliminar Cliente'
+                )}
               </button>
             </div>
           </div>
