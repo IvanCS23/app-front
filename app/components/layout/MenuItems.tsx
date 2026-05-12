@@ -33,12 +33,12 @@ export const menuItems: MenuItem[] = [
     label: "Facturas",
     icon: <Receipt className="h-5 w-5" />,
     subMenu: [
-      { label: "Recuperación", href: "/pages/invoices/recovery" },
-      { label: "Facturación masiva", href: "/pages/invoices/masiva" },
-      { label: "Descarga masiva", href: "/pages/invoices/descarga-masiva" },
-      { label: "Descarga de Facturas", href: "/pages/invoices/descarga-facturas" },
-      { label: "Carga XML", href: "/pages/invoices/xml" },
       { label: "Agregar Addenda", href: "/pages/invoices/addenda" },
+      { label: "Carga XML", href: "/pages/invoices/xml" },
+      { label: "Consultar", href: "/pages/invoices/consult" },
+      { label: "Descarga de Facturas", href: "/pages/invoices/DownloadInvoices" },
+      { label: "Facturación masiva", href: "/pages/invoices/massive" },
+      { label: "Recuperación", href: "/pages/invoices/recovery" },             
     ],
   },
   {
@@ -47,8 +47,8 @@ export const menuItems: MenuItem[] = [
     icon: <FileText className="h-5 w-5" />,
     subMenu: [
       { label: "Crear Cotización", href: "/cotizaciones/crear" },
-      { label: "Mis Cotizaciones", href: "/cotizaciones/mis-cotizaciones" },
       { label: "Cotizaciones Aprobadas", href: "/cotizaciones/aprobadas" },
+      { label: "Mis Cotizaciones", href: "/cotizaciones/mis-cotizaciones" },
     ],
   },
   {
@@ -57,8 +57,8 @@ export const menuItems: MenuItem[] = [
     icon: <BookImage className="h-5 w-5" />,
     subMenu: [
       { label: "Clientes", href: "/pages/catalogs/clients" },
-      { label: "Productos", href: "/pages/catalogs/products" },
       { label: "Empleados", href: "/pages/catalogs/employee" },
+      { label: "Productos", href: "/pages/catalogs/products" },
     ],
   },
   {
@@ -66,8 +66,8 @@ export const menuItems: MenuItem[] = [
     label: "Cuentas",
     icon: <Wallet className="h-5 w-5" />,
     subMenu: [
-      { label: "Cuentas por Pagar", href: "/pages/accounts/payable" },
       { label: "Cuentas por cobrar", href: "/pages/accounts/receivable" },
+      { label: "Cuentas por pagar", href: "/pages/accounts/payable" },
       { label: "Libro diario", href: "/pages/accounts/journal" },
     ],
   },
@@ -76,9 +76,8 @@ export const menuItems: MenuItem[] = [
     label: "Estadísticas",
     icon: <BarChart3 className="h-5 w-5" />,
     subMenu: [
-      { label: "Mis estadísticas", href: "/pages/statistics/my-statistics" },
-      { label: "Informe mensual", href: "/pages/statistics/monthly-report" },
-      { label: "Informe PayPal", href: "/pages/statistics/paypal-report" },
+      { label: "Informe mensual", href: "/pages/statistics/reports" },
+      { label: "Mis estadísticas", href: "/pages/statistics/charts" },
     ],
   },
 ];

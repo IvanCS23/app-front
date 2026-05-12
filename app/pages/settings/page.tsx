@@ -118,19 +118,13 @@ export default function SettingsPage() {
 					))}
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<div className="bg-[#1a222c] border-2 border-[#16304f] rounded-2xl p-6 flex flex-col justify-between min-h-[170px] transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-500/50">
-						<div className="font-bold text-lg mb-1 flex items-center gap-2"><MessageCircle className="h-7 w-7 text-blue-500"/> Observaciones</div>
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 justify-center">
+					<div></div>
+					<div className="bg-[#1a222c] border-2 border-[#16304f] rounded-2xl p-6 flex flex-col gap-3 min-h-[170px] transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-500/50 cursor-pointer">
+						<div><MessageCircle className="h-7 w-7 text-blue-500"/></div>
+						<div className="font-bold text-lg mb-1">Observaciones</div>
 						<div className="text-gray-400 text-sm flex-1">Define textos predeterminados para términos y condiciones en tus PDF.</div>
 						<button onClick={() => handleNavigation("/pages/settings/observations")} className="mt-2 text-xs font-bold tracking-wide text-blue-400 hover:underline text-left transition-all duration-200 hover:translate-x-1">EDITAR TEXTOS &gt;</button>
-					</div>
-					<div className="bg-[#1a222c] border-2 border-[#16304f] rounded-2xl p-6 flex flex-col justify-between min-h-[170px] relative overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-500/50">
-						<div className="flex items-center gap-2 mb-2"><CreditCard className="h-7 w-7 text-blue-500" /><span className="font-bold text-lg">Integración con PayPal</span></div>
-						<div className="text-gray-300 text-sm mb-4">Activa pagos directos desde tus facturas electrónicas. Recibe pagos con tarjeta de crédito o saldo PayPal de forma automática.</div>
-						<button className="bg-blue-500 hover:bg-blue-400 px-5 py-2 rounded-lg font-semibold text-white text-sm w-fit shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-all duration-300 hover:scale-105 hover:shadow-[0_15px_35px_rgba(37,99,235,0.35)]">Conectar Ahora</button>
-						<span className="text-xs text-gray-400 mt-2">Requiere cuenta Business</span>
-						<div className="absolute right-0 bottom-0 w-1/2 h-1/2 bg-[radial-gradient(circle,rgba(37,99,235,0.10)_0%,transparent_70%)] pointer-events-none" />
-						<div className="absolute right-0 top-0 w-1/2 h-1/2 border border-dashed border-gray-700 opacity-30" style={{borderRadius:'1rem'}} />
 					</div>
 				</div>
 			</div>
