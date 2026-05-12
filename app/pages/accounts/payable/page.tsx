@@ -67,52 +67,103 @@ type Articulo = {
   total: number;
 };
 
-type Factura = {
+type FacturaPorPagar = {
   id: string;
   fecha: string;
   folio: string;
-  cliente: string;
-  tipoCliente: "fisica" | "moral";
+  proveedor: string;
+  tipoProveedor: "fisica" | "moral";
   moneda: string;
   subtotal: number;
   impuestos: number;
   total: number;
   estadoPago: "sin_pagar" | "desconocida" | "pagada";
-  articulos: Articulo[];
-};
-
-type Cotizacion = {
-  id: string;
-  fecha: string;
-  folio: string;
-  cliente: string;
-  tipoCliente: "fisica" | "moral";
-  moneda: string;
-  subtotal: number;
-  impuestos: number;
-  total: number;
-  estadoPago: "sin_pagar" | "desconocida" | "pagada";
+  fechaVencimiento: string;
   articulos: Articulo[];
 };
 
 // Datos simulados
-const facturasMock: Factura[] = [
+const facturasPorPagarMock: FacturaPorPagar[] = [
   {
     id: "1",
-    fecha: "2024-01-15",
-    folio: "FAC-001",
-    cliente: "Juan Pérez García",
-    tipoCliente: "fisica",
+    fecha: "2024-02-01",
+    folio: "PRO-001",
+    proveedor: "Tecnología del Bajío SA de CV",
+    tipoProveedor: "moral",
+    moneda: "MXN",
+    subtotal: 32500.00,
+    impuestos: 5200.00,
+    total: 37700.00,
+    estadoPago: "sin_pagar",
+    fechaVencimiento: "2024-03-01",
+    articulos: [
+      {
+        id: "a1",
+        nombre: "Servidores Dell",
+        descripcion: "Servidor PowerEdge R740",
+        cantidad: 2,
+        precio: 16250.00,
+        descuento: 0,
+        subtotal: 32500.00,
+        impuestos: 5200.00,
+        total: 37700.00,
+      },
+    ],
+  },
+  {
+    id: "2",
+    fecha: "2024-02-10",
+    folio: "PRO-002",
+    proveedor: "Papelería y Oficina del Norte",
+    tipoProveedor: "moral",
+    moneda: "MXN",
+    subtotal: 8450.00,
+    impuestos: 1352.00,
+    total: 9802.00,
+    estadoPago: "sin_pagar",
+    fechaVencimiento: "2024-03-10",
+    articulos: [
+      {
+        id: "a2",
+        nombre: "Papel bond",
+        descripcion: "Resma de papel bond 500 hojas",
+        cantidad: 50,
+        precio: 89.00,
+        descuento: 0,
+        subtotal: 4450.00,
+        impuestos: 712.00,
+        total: 5162.00,
+      },
+      {
+        id: "a3",
+        nombre: "Toner HP",
+        descripcion: "Cartucho de tinta negra",
+        cantidad: 8,
+        precio: 500.00,
+        descuento: 0,
+        subtotal: 4000.00,
+        impuestos: 640.00,
+        total: 4640.00,
+      },
+    ],
+  },
+  {
+    id: "3",
+    fecha: "2024-02-15",
+    folio: "PRO-003",
+    proveedor: "Mantenimiento Industrial Gutiérrez",
+    tipoProveedor: "fisica",
     moneda: "MXN",
     subtotal: 12500.00,
     impuestos: 2000.00,
     total: 14500.00,
-    estadoPago: "sin_pagar",
+    estadoPago: "desconocida",
+    fechaVencimiento: "2024-03-15",
     articulos: [
       {
-        id: "a1",
-        nombre: "Laptop Gamer",
-        descripcion: "Laptop 15.6 pulgadas, 16GB RAM, 512GB SSD",
+        id: "a4",
+        nombre: "Mantenimiento preventivo",
+        descripcion: "Servicio de mantenimiento a maquinaria",
         cantidad: 1,
         precio: 12500.00,
         descuento: 0,
@@ -123,141 +174,28 @@ const facturasMock: Factura[] = [
     ],
   },
   {
-    id: "2",
+    id: "4",
     fecha: "2024-01-20",
-    folio: "FAC-002",
-    cliente: "Constructora Integral SA de CV",
-    tipoCliente: "moral",
+    folio: "PRO-004",
+    proveedor: "Software Solutions MX",
+    tipoProveedor: "moral",
     moneda: "USD",
     subtotal: 3500.00,
     impuestos: 560.00,
     total: 4060.00,
-    estadoPago: "sin_pagar",
+    estadoPago: "pagada",
+    fechaVencimiento: "2024-02-20",
     articulos: [
       {
-        id: "a2",
-        nombre: "Monitor 24 pulgadas",
-        descripcion: "Monitor LED Full HD",
-        cantidad: 2,
-        precio: 1750.00,
+        id: "a5",
+        nombre: "Licencia Office 365",
+        descripcion: "Licencia anual para 5 usuarios",
+        cantidad: 1,
+        precio: 3500.00,
         descuento: 0,
         subtotal: 3500.00,
         impuestos: 560.00,
         total: 4060.00,
-      },
-    ],
-  },
-  {
-    id: "3",
-    fecha: "2024-01-25",
-    folio: "FAC-003",
-    cliente: "María López Hernández",
-    tipoCliente: "fisica",
-    moneda: "MXN",
-    subtotal: 8900.00,
-    impuestos: 1424.00,
-    total: 10324.00,
-    estadoPago: "desconocida",
-    articulos: [
-      {
-        id: "a3",
-        nombre: "Silla Ergonomica",
-        descripcion: "Silla de oficina con soporte lumbar",
-        cantidad: 2,
-        precio: 2450.00,
-        descuento: 0,
-        subtotal: 4900.00,
-        impuestos: 784.00,
-        total: 5684.00,
-      },
-      {
-        id: "a4",
-        nombre: "Escritorio Ejecutivo",
-        descripcion: "Escritorio de 1.50m con acabado moderno",
-        cantidad: 1,
-        precio: 4000.00,
-        descuento: 0,
-        subtotal: 4000.00,
-        impuestos: 640.00,
-        total: 4640.00,
-      },
-    ],
-  },
-  {
-    id: "4",
-    fecha: "2024-02-01",
-    folio: "FAC-004",
-    cliente: "Tech Solutions SA",
-    tipoCliente: "moral",
-    moneda: "MXN",
-    subtotal: 22500.00,
-    impuestos: 3600.00,
-    total: 26100.00,
-    estadoPago: "pagada",
-    articulos: [
-      {
-        id: "a5",
-        nombre: "Servidor Dell",
-        descripcion: "Servidor PowerEdge con 64GB RAM",
-        cantidad: 1,
-        precio: 22500.00,
-        descuento: 0,
-        subtotal: 22500.00,
-        impuestos: 3600.00,
-        total: 26100.00,
-      },
-    ],
-  },
-];
-
-const cotizacionesMock: Cotizacion[] = [
-  {
-    id: "1",
-    fecha: "2024-02-10",
-    folio: "COT-001",
-    cliente: "Automotriz del Norte",
-    tipoCliente: "moral",
-    moneda: "MXN",
-    subtotal: 18500.00,
-    impuestos: 2960.00,
-    total: 21460.00,
-    estadoPago: "sin_pagar",
-    articulos: [
-      {
-        id: "a6",
-        nombre: "Software ERP",
-        descripcion: "Licencia anual para 10 usuarios",
-        cantidad: 1,
-        precio: 18500.00,
-        descuento: 0,
-        subtotal: 18500.00,
-        impuestos: 2960.00,
-        total: 21460.00,
-      },
-    ],
-  },
-  {
-    id: "2",
-    fecha: "2024-02-15",
-    folio: "COT-002",
-    cliente: "Consultoría Fiscal SC",
-    tipoCliente: "moral",
-    moneda: "USD",
-    subtotal: 5200.00,
-    impuestos: 832.00,
-    total: 6032.00,
-    estadoPago: "sin_pagar",
-    articulos: [
-      {
-        id: "a7",
-        nombre: "Capacitación Fiscal",
-        descripcion: "Curso especializado para el equipo",
-        cantidad: 1,
-        precio: 5200.00,
-        descuento: 0,
-        subtotal: 5200.00,
-        impuestos: 832.00,
-        total: 6032.00,
       },
     ],
   },
@@ -297,7 +235,7 @@ const AlertModal = ({ isOpen, onClose, title, message, type }: { isOpen: boolean
 };
 
 // Modal de confirmación para cambiar estado a pagado
-const ConfirmPagoModal = ({ isOpen, onClose, onConfirm, folio, cliente }: { isOpen: boolean; onClose: () => void; onConfirm: () => void; folio: string; cliente: string }) => {
+const ConfirmPagoModal = ({ isOpen, onClose, onConfirm, folio, proveedor, monto }: { isOpen: boolean; onClose: () => void; onConfirm: () => void; folio: string; proveedor: string; monto: number }) => {
   if (!isOpen) return null;
 
   return (
@@ -308,13 +246,14 @@ const ConfirmPagoModal = ({ isOpen, onClose, onConfirm, folio, cliente }: { isOp
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20">
             <CheckCircle2 className="h-10 w-10 text-emerald-500" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">Confirmar pago</h2>
+          <h2 className="text-xl font-bold text-white mb-2">Confirmar pago a proveedor</h2>
           <p className="text-slate-400 mb-2">
             ¿Desea marcar como <span className="text-emerald-400 font-bold">PAGADA</span> la siguiente factura?
           </p>
           <div className="bg-[#0a1424] rounded-lg p-3 mb-4 text-left">
             <p className="text-sm"><span className="text-slate-400">Folio:</span> <span className="text-white font-mono">{folio}</span></p>
-            <p className="text-sm"><span className="text-slate-400">Cliente:</span> <span className="text-white">{cliente}</span></p>
+            <p className="text-sm"><span className="text-slate-400">Proveedor:</span> <span className="text-white">{proveedor}</span></p>
+            <p className="text-sm"><span className="text-slate-400">Monto:</span> <span className="text-white font-bold">${monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></p>
           </div>
           <p className="text-slate-400 text-sm mb-6">Esta acción eliminará el registro de la tabla actual.</p>
           <div className="flex gap-4">
@@ -327,28 +266,28 @@ const ConfirmPagoModal = ({ isOpen, onClose, onConfirm, folio, cliente }: { isOp
   );
 };
 
-// Modal para visualizar detalle de factura/cotización
-const DetalleModal = ({ isOpen, onClose, item, tipo }: { isOpen: boolean; onClose: () => void; item: Factura | Cotizacion | null; tipo: string }) => {
-  if (!isOpen || !item) return null;
+// Modal para visualizar detalle de factura
+const DetalleModal = ({ isOpen, onClose, factura }: { isOpen: boolean; onClose: () => void; factura: FacturaPorPagar | null }) => {
+  if (!isOpen || !factura) return null;
 
-  const totalGeneral = item.articulos.reduce((sum, art) => sum + art.total, 0);
+  const totalGeneral = factura.articulos.reduce((sum, art) => sum + art.total, 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-          <h2 className="text-xl font-bold text-white">Detalle de {tipo} - Folio: {item.folio}</h2>
+          <h2 className="text-xl font-bold text-white">Detalle de Factura - Folio: {factura.folio}</h2>
           <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-[#0d1b35] hover:text-white"><X className="h-5 w-5" /></button>
         </div>
 
         <div className="p-6">
           {/* Información general */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 rounded-xl bg-[#0a1424] border border-[#173156]">
-            <div><p className="text-xs text-slate-400">Fecha</p><p className="text-white font-medium">{item.fecha}</p></div>
-            <div><p className="text-xs text-slate-400">Cliente</p><p className="text-white font-medium">{item.cliente}</p></div>
-            <div><p className="text-xs text-slate-400">Moneda</p><p className="text-white font-medium">{item.moneda}</p></div>
-            <div><p className="text-xs text-slate-400">Estado</p><span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${item.estadoPago === "pagada" ? "bg-emerald-500/20 text-emerald-400" : item.estadoPago === "desconocida" ? "bg-yellow-500/20 text-yellow-400" : "bg-red-500/20 text-red-400"}`}>{item.estadoPago === "sin_pagar" ? "Sin pagar" : item.estadoPago === "desconocida" ? "Desconocida" : "Pagada"}</span></div>
+            <div><p className="text-xs text-slate-400">Fecha</p><p className="text-white font-medium">{factura.fecha}</p></div>
+            <div><p className="text-xs text-slate-400">Proveedor</p><p className="text-white font-medium">{factura.proveedor}</p></div>
+            <div><p className="text-xs text-slate-400">Moneda</p><p className="text-white font-medium">{factura.moneda}</p></div>
+            <div><p className="text-xs text-slate-400">Vencimiento</p><p className="text-white font-medium">{factura.fechaVencimiento}</p></div>
           </div>
 
           {/* Tabla de artículos */}
@@ -367,7 +306,7 @@ const DetalleModal = ({ isOpen, onClose, item, tipo }: { isOpen: boolean; onClos
                 </tr>
               </thead>
               <tbody>
-                {item.articulos.map((art, idx) => (
+                {factura.articulos.map((art, idx) => (
                   <tr key={art.id} className="border-t border-[#16304f] hover:bg-[#0d1b35]">
                     <td className="px-4 py-3 font-medium">{art.nombre}</td>
                     <td className="px-4 py-3 text-slate-400">{art.descripcion}</td>
@@ -376,14 +315,14 @@ const DetalleModal = ({ isOpen, onClose, item, tipo }: { isOpen: boolean; onClos
                     <td className="px-4 py-3 text-right">${art.descuento.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td className="px-4 py-3 text-right">${art.subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td className="px-4 py-3 text-right">${art.impuestos.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td className="px-4 py-3 text-right font-bold text-emerald-400">${art.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td className="px-4 py-3 text-right font-bold text-red-400">${art.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot className="bg-[#0a1424]">
                 <tr className="border-t border-[#173156]">
                   <td colSpan={7} className="px-4 py-3 text-right font-bold text-white">Total Final:</td>
-                  <td className="px-4 py-3 text-right font-bold text-emerald-400 text-lg">${totalGeneral.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                  <td className="px-4 py-3 text-right font-bold text-red-400 text-lg">${totalGeneral.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 </tr>
               </tfoot>
             </table>
@@ -395,14 +334,12 @@ const DetalleModal = ({ isOpen, onClose, item, tipo }: { isOpen: boolean; onClos
 };
 
 export default function CuentasPorPagar() {
-  const [tipo, setTipo] = useState("facturas");
-  const [deTipo, setDeTipo] = useState("por_pagar");
   const [searchText, setSearchText] = useState("");
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
-  const [facturas, setFacturas] = useState<Factura[]>(facturasMock);
-  const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>(cotizacionesMock);
-  const [selectedItem, setSelectedItem] = useState<Factura | Cotizacion | null>(null);
+  const [estadoFiltro, setEstadoFiltro] = useState("todas");
+  const [facturas, setFacturas] = useState<FacturaPorPagar[]>(facturasPorPagarMock);
+  const [selectedFactura, setSelectedFactura] = useState<FacturaPorPagar | null>(null);
   const [isDetalleModalOpen, setIsDetalleModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [pendingPagoId, setPendingPagoId] = useState<string | null>(null);
@@ -412,21 +349,22 @@ export default function CuentasPorPagar() {
     setAlertModal({ isOpen: true, title, message, type });
   };
 
-  // Obtener datos según el tipo seleccionado
-  const getData = () => {
-    const data = tipo === "facturas" ? facturas : cotizaciones;
-    let filtered = [...data];
+  // Filtrar facturas
+  const getFilteredFacturas = () => {
+    let filtered = [...facturas];
 
-    // Filtrar por estado de pago
-    if (deTipo === "por_pagar") {
+    // Filtrar por estado
+    if (estadoFiltro === "por_pagar") {
       filtered = filtered.filter(item => item.estadoPago !== "pagada");
+    } else if (estadoFiltro === "pagadas") {
+      filtered = filtered.filter(item => item.estadoPago === "pagada");
     }
 
     // Filtrar por texto de búsqueda
     if (searchText) {
       const searchLower = searchText.toLowerCase();
       filtered = filtered.filter(item =>
-        item.cliente.toLowerCase().includes(searchLower) ||
+        item.proveedor.toLowerCase().includes(searchLower) ||
         item.folio.toLowerCase().includes(searchLower)
       );
     }
@@ -442,26 +380,24 @@ export default function CuentasPorPagar() {
     return filtered;
   };
 
-  const handleCambiarEstadoPago = (id: string, folio: string, cliente: string) => {
+  const handleCambiarEstadoPago = (id: string, folio: string, proveedor: string, monto: number) => {
     setPendingPagoId(id);
     setIsConfirmModalOpen(true);
   };
 
   const confirmarPago = () => {
     if (pendingPagoId) {
-      if (tipo === "facturas") {
-        setFacturas(facturas.filter(f => f.id !== pendingPagoId));
-      } else {
-        setCotizaciones(cotizaciones.filter(c => c.id !== pendingPagoId));
-      }
-      showAlert("Pago registrado", "El documento ha sido marcado como pagado y eliminado de la lista", "success");
+      setFacturas(facturas.map(f => 
+        f.id === pendingPagoId ? { ...f, estadoPago: "pagada" as const } : f
+      ));
+      showAlert("Pago registrado", "La factura ha sido marcada como pagada", "success");
       setIsConfirmModalOpen(false);
       setPendingPagoId(null);
     }
   };
 
-  const handleVerDetalle = (item: Factura | Cotizacion) => {
-    setSelectedItem(item);
+  const handleVerDetalle = (factura: FacturaPorPagar) => {
+    setSelectedFactura(factura);
     setIsDetalleModalOpen(true);
   };
 
@@ -473,7 +409,10 @@ export default function CuentasPorPagar() {
     showAlert("Descarga iniciada", "El archivo PDF se está generando", "success");
   };
 
-  const data = getData();
+  const filteredFacturas = getFilteredFacturas();
+  const totalPorPagar = filteredFacturas
+    .filter(f => f.estadoPago !== "pagada")
+    .reduce((sum, f) => sum + f.total, 0);
 
   return (
     <AppLayout>
@@ -481,56 +420,16 @@ export default function CuentasPorPagar() {
         <main className="mx-auto max-w-[1400px]">
           <div className="mb-8">
             <h1 className="text-3xl font-extrabold text-white">Cuentas por Pagar</h1>
-            <p className="mt-2 text-slate-400">Administra y gestiona tus facturas y cotizaciones pendientes de pago.</p>
+            <p className="mt-2 text-slate-400">Administra y gestiona las facturas pendientes de pago a tus proveedores.</p>
           </div>
 
-          {/* Filtros */}
-          <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.01)] mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div>
-                <Label>Tipo:</Label>
-                <div className="relative">
-                  <select value={tipo} onChange={(e) => setTipo(e.target.value)} className={`${selectStyle} appearance-none`}>
-                    <option value="cotizaciones">Cotizaciones</option>
-                    <option value="facturas">Facturas</option>
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                </div>
-              </div>
-              <div>
-                <Label>De tipo:</Label>
-                <div className="relative">
-                  <select value={deTipo} onChange={(e) => setDeTipo(e.target.value)} className={`${selectStyle} appearance-none`}>
-                    <option value="por_pagar">Por Pagar</option>
-                    <option value="todas">Todas</option>
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                </div>
-              </div>
-              <div>
-                <Label>Nombre, RFC, Folio:</Label>
-                <input type="text" value={searchText} onChange={(e) => setSearchText(e.target.value)} placeholder="Buscar..." className={inputStyle} />
-              </div>
-              <div>
-                <Label>Desde:</Label>
-                <input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} className={inputStyle} />
-              </div>
-              <div>
-                <Label>Hasta:</Label>
-                <input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} className={inputStyle} />
-              </div>
-            </div>
-            <div className="flex justify-end mt-4">
-              <button className="flex items-center gap-2 rounded-xl bg-blue-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] hover:bg-blue-400 transition-colors">
-                <Search className="h-4 w-4" /> Buscar
-              </button>
-            </div>
-          </div>
-
-          {/* Botones de descarga */}
-          <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.01)] mb-6">
+          {/* Tarjeta de resumen */}
+          <div className="rounded-2xl border-2 border-[#16304f] bg-gradient-to-r from-red-500/10 to-orange-500/10 p-6 mb-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-white">Descargar</h3>
+              <div>
+                <p className="text-sm text-slate-400">Total por pagar</p>
+                <p className="text-3xl font-bold text-white">${totalPorPagar.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              </div>
               <div className="flex gap-3">
                 <button onClick={handleDescargarExcel} className="flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-2 font-medium text-white hover:bg-emerald-500 transition-colors" title="Descargar en formato Excel">
                   <FileSpreadsheet className="h-4 w-4" /> Excel
@@ -542,60 +441,95 @@ export default function CuentasPorPagar() {
             </div>
           </div>
 
+          {/* Filtros */}
+          <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.01)] mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div>
+                <Label>Estado:</Label>
+                <div className="relative">
+                  <select value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value)} className={`${selectStyle} appearance-none`}>
+                    <option value="todas">Todas</option>
+                    <option value="por_pagar">Por pagar</option>
+                    <option value="pagadas">Pagadas</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                </div>
+              </div>
+              <div>
+                <Label>Proveedor, Folio:</Label>
+                <input type="text" value={searchText} onChange={(e) => setSearchText(e.target.value)} placeholder="Buscar..." className={inputStyle} />
+              </div>
+              <div>
+                <Label>Desde:</Label>
+                <input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} className={inputStyle} />
+              </div>
+              <div>
+                <Label>Hasta:</Label>
+                <input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} className={inputStyle} />
+              </div>
+              <div className="flex items-end">
+                <button className="flex items-center gap-2 rounded-xl bg-blue-500 px-10 py-3 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] hover:bg-blue-400 transition-colors">
+                  <Search className="h-4 w-4" /> Buscar
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Tabla */}
           <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-[#16253e]">
                   <tr className="text-left text-sm uppercase tracking-wide text-slate-400">
-                    <th className="px-10 py-4 text-center">Fecha</th>
-                    <th className="px-10 py-4 text-center">Folio</th>
-                    <th className="px-20 py-4 text-center">Cliente</th>
-                    <th className="px-2 py-4 text-center">Moneda</th>
+                    <th className="px-10 py-4">Fecha</th>
+                    <th className="px-10 py-4">Folio</th>
+                    <th className="px-20 py-4">Proveedor</th>
+                    <th className="px-2 py-4">Moneda</th>
                     <th className="px-6 py-4 text-center">Subtotal</th>
                     <th className="px-6 py-4 text-center">Impuestos</th>
                     <th className="px-6 py-4 text-center">Total</th>
-                    <th className="px-6 py-4 text-center">Estado de pago</th>
+                    <th className="px-6 py-4 text-center">Vencimiento</th>
+                    <th className="px-6 py-4 text-center">Estado</th>
                     <th className="px-6 py-4 text-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.map((item) => (
-                    <tr key={item.id} className="border-t border-[#16304f] hover:bg-[#0d1b35]">
-                      <td className="px-6 py-4 text-left">{item.fecha}</td>
-                      <td className="px-6 py-4 font-mono font-bold text-center">{item.folio}</td>
-                      <td className="px-6 py-4 text-left">
+                  {filteredFacturas.map((factura) => (
+                    <tr key={factura.id} className="border-t border-[#16304f] hover:bg-[#0d1b35]">
+                      <td className="px-6 py-4 text-left">{factura.fecha}</td>
+                      <td className="px-6 py-4 font-mono font-bold text-center">{factura.folio}</td>
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          {item.tipoCliente === "fisica" ? <User className="h-4 w-4 text-slate-500" /> : <Building2 className="h-4 w-4 text-slate-500" />}
-                          <span>{item.cliente}</span>
+                          {factura.tipoProveedor === "fisica" ? <User className="h-4 w-4 text-slate-500" /> : <Building2 className="h-4 w-4 text-slate-500" />}
+                          <span>{factura.proveedor}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-center">{item.moneda}</td>
-                      <td className="px-6 py-4 text-center">${item.subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                      <td className="px-6 py-4 text-center">${item.impuestos.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                      <td className="px-6 py-4 text-center font-bold text-emerald-400">${item.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                      <td className="px-6 py-4 text-center">
-                        {item.estadoPago !== "pagada" ? (
-                          <select
-                            value={item.estadoPago}
-                            onChange={(e) => {
-                              if (e.target.value === "pagada") {
-                                handleCambiarEstadoPago(item.id, item.folio, item.cliente);
-                              }
-                            }}
-                            className="bg-[#081423] border-2 border-[#1e293b] rounded-lg px-2 py-1 text-sm text-white focus:outline-none focus:border-[#3b82f699] hover:border-[#0552cf66] transition-colors focus:shadow-[0_0_0_2px_rgba(59,130,246,0.2)]"
-                          >
-                            <option value="desconocida">Desconocida</option>
-                            <option value="pagada">Pagada</option>
-                            <option value="sin_pagar">Sin pagar</option>
-                          </select>
+                      <td className="px-6 py-4">{factura.moneda}</td>
+                      <td className="px-6 py-4 text-center">${factura.subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td className="px-6 py-4 text-center">${factura.impuestos.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td className="px-6 py-4 text-center font-bold text-red-400">${factura.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td className="px-6 py-4 text-center">{factura.fechaVencimiento}</td>
+                      <td className="px-6 py-4">
+                        {factura.estadoPago !== "pagada" ? (
+                          <div className="flex items-center gap-2">
+                            <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400">
+                              {factura.estadoPago === "sin_pagar" ? "Sin pagar" : "Desconocida"}
+                            </span>
+                            <button
+                              onClick={() => handleCambiarEstadoPago(factura.id, factura.folio, factura.proveedor, factura.total)}
+                              className="text-emerald-400 hover:text-emerald-300 transition-colors"
+                              title="Marcar como pagada"
+                            >
+                              <CheckCircle2 className="h-5 w-5" />
+                            </button>
+                          </div>
                         ) : (
                           <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">Pagada</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-6 py-4">
                         <div className="flex gap-2">
-                          <button onClick={() => handleVerDetalle(item)} className="text-emerald-400 hover:text-emerald-300 transition-colors ml-3" title="Visualizar detalle">
+                          <button onClick={() => handleVerDetalle(factura)} className="text-emerald-400 hover:text-emerald-300 transition-colors ml-3" title="Visualizar detalle">
                             <Eye className="h-5 w-5" />
                           </button>
                           <button className="text-blue-400 hover:text-blue-300 transition-colors" title="Descargar">
@@ -605,9 +539,9 @@ export default function CuentasPorPagar() {
                       </td>
                     </tr>
                   ))}
-                  {data.length === 0 && (
+                  {filteredFacturas.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="px-6 py-16 text-center text-slate-400">
+                      <td colSpan={10} className="px-6 py-16 text-center text-slate-400">
                         No hay registros que coincidan con los filtros aplicados
                       </td>
                     </tr>
@@ -619,8 +553,15 @@ export default function CuentasPorPagar() {
         </main>
       </div>
 
-      <DetalleModal isOpen={isDetalleModalOpen} onClose={() => setIsDetalleModalOpen(false)} item={selectedItem} tipo={tipo === "facturas" ? "Factura" : "Cotización"} />
-      <ConfirmPagoModal isOpen={isConfirmModalOpen} onClose={() => setIsConfirmModalOpen(false)} onConfirm={confirmarPago} folio={data.find(d => d.id === pendingPagoId)?.folio || ""} cliente={data.find(d => d.id === pendingPagoId)?.cliente || ""} />
+      <DetalleModal isOpen={isDetalleModalOpen} onClose={() => setIsDetalleModalOpen(false)} factura={selectedFactura} />
+      <ConfirmPagoModal 
+        isOpen={isConfirmModalOpen} 
+        onClose={() => setIsConfirmModalOpen(false)} 
+        onConfirm={confirmarPago} 
+        folio={facturas.find(f => f.id === pendingPagoId)?.folio || ""} 
+        proveedor={facturas.find(f => f.id === pendingPagoId)?.proveedor || ""}
+        monto={facturas.find(f => f.id === pendingPagoId)?.total || 0}
+      />
       <AlertModal isOpen={alertModal.isOpen} onClose={() => setAlertModal({ ...alertModal, isOpen: false })} title={alertModal.title} message={alertModal.message} type={alertModal.type} />
     </AppLayout>
   );
