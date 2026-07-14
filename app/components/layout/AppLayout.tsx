@@ -76,10 +76,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
   // Mostrar layout estático mientras carga
   if (!isClient) {
     return (
-      <div className="min-h-screen bg-[#06111f] text-white">
-        <div className="fixed left-0 top-0 z-50 h-screen w-[260px] border-r border-[#173156] bg-[#05101d]" />
-        <div className="xl:ml-[260px]">
-          <div className="sticky top-0 z-30 h-20 border-b border-[#173156] bg-[#06111f]/95" />
+      <div className="min-h-screen bg-[#F8FAFC]">
+        <div className="fixed left-0 top-0 z-50 h-screen w-72 border-r border-gray-200 bg-white" />
+        <div className="xl:ml-72">
+          <div className="sticky top-0 z-30 h-[70px] border-b border-[#E2E8F0] bg-white" />
           <main className="p-6">{children}</main>
         </div>
       </div>
@@ -87,7 +87,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#06111f] text-white">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <Sidebar
         isOpenMobile={isSidebarOpenMobile}
         isCollapsed={isSidebarCollapsed}
@@ -103,8 +103,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
       />
 
       <main
-        className={`p-6 transition-all duration-300 ${
-          isSidebarCollapsed ? "xl:ml-[92px]" : "xl:ml-[260px]"
+        className={`p-6 pt-4 transition-all duration-300 ${
+          isSidebarCollapsed ? "xl:ml-18" : "xl:ml-72"
         }`}
       >
         {children}

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { 
-  SquarePen, Trash, Eye, Plus, Minus, X, ChevronDown, ChevronUp, Info, CheckCircle2, Loader2,
+  SquarePen, Trash, Plus, Minus, X, ChevronDown, Info, CheckCircle2, Loader2, Search,
   Download, Upload, Activity, FileText as FileTextIcon 
 } from "lucide-react";
 import AppLayout from "@/app/components/layout/AppLayout";
@@ -13,8 +13,10 @@ import {
   Product 
 } from "@/src/services/product.services";
 
-const selectStyle = "box box-input";
-const inputStyle = "box box-input";
+const fieldStyle =
+  "w-full rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-sm text-[#0F172A] placeholder:text-[#64748B] shadow-sm transition-colors duration-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+const selectStyle = `${fieldStyle} pr-10`;
+const inputStyle = fieldStyle;
 
 // Componente Toast
 const Toast = ({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) => {
@@ -26,7 +28,7 @@ const Toast = ({ message, type, onClose }: { message: string; type: "success" | 
   }, [onClose]);
 
   return (
-    <div className={`fixed bottom-4 right-4 z-[100] flex items-center gap-3 rounded-xl px-4 py-3 shadow-lg animate-in slide-in-from-right-5 duration-300 ${
+    <div className={`fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-xl border border-[#E2E8F0] px-4 py-3 shadow-sm animate-in slide-in-from-right-5 duration-300 ${
       type === "success" ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
     }`}>
       {type === "success" ? (
@@ -50,18 +52,18 @@ function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
   
   return (
     <div className="mb-2 flex items-center gap-1">
-      <label className="text-sm font-bold uppercase tracking-wide text-slate-400">
+      <label className="text-sm font-semibold uppercase tracking-wide text-[#0F172A]">
         {children}
       </label>
       {withInfo && (
         <div className="relative">
           <Info 
-            className="h-4 w-4 cursor-help text-[#1d9bf0]" 
+            className="h-4 w-4 cursor-help text-blue-600" 
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           />
           {showTooltip && (
-            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+            <div className="absolute bottom-full left-0 z-50 mb-2 w-64 rounded-xl border border-[#E2E8F0] bg-white p-3 text-xs text-[#64748B] shadow-sm">
               {infoText}
             </div>
           )}
@@ -569,27 +571,27 @@ const ProductModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
         onClick={onClose}
       />
       
-      <div className="relative max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-          <h2 className="text-xl font-bold text-white">
+      <div className="relative max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-white px-6 py-4">
+          <h2 className="text-xl font-bold text-[#0F172A]">
             {isEditing ? "Editar Producto" : "Nuevo Producto"}
           </h2>
           <button
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-[#0d1b35] hover:text-white"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-transparent text-slate-500 transition hover:border-[#E2E8F0] hover:bg-blue-50 hover:text-blue-600"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="bg-slate-50 p-6">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
             <div>
-              <h3 className="mb-4 text-lg font-bold text-white border-b border-[#173156] pb-2">Datos del producto</h3>
+              <h3 className="mb-4 border-b border-[#E2E8F0] pb-2 text-lg font-bold text-[#0F172A]">Datos del producto</h3>
               <div className="space-y-4">
                 <div>
                   <Label>Nombre Interno:</Label>
@@ -638,10 +640,10 @@ const ProductModal = ({
             </div>
 
             <div>
-              <h3 className="mb-4 text-lg font-bold text-white border-b border-[#173156] pb-2">Cambios obligatorios CFDI 4.0 SAT</h3>
+              <h3 className="mb-4 border-b border-[#E2E8F0] pb-2 text-lg font-bold text-[#0F172A]">Cambios obligatorios CFDI 4.0 SAT</h3>
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-slate-300 mb-2">
+                  <p className="mb-2 text-sm text-[#64748B]">
                     Asocia tu producto al CATALOGO del SAT<br />
                     Busca tu CLAVE, escríbela en el campo de abajo, espera opciones y selecciona una (8 caracteres):
                   </p>
@@ -654,14 +656,14 @@ const ProductModal = ({
                       className={`${inputStyle} flex-1`}
                       maxLength={8}
                     />
-                    <button className="flex h-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] px-4 text-[#1d9bf0] hover:border-[#3c83f666] whitespace-nowrap">
+                    <button className="flex h-12 items-center justify-center whitespace-nowrap rounded-xl border border-[#E2E8F0] bg-white px-4 text-sm font-semibold text-blue-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:shadow-md">
                       Buscar Clave
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-sm text-slate-300 mb-2">
+                  <p className="mb-2 text-sm text-[#64748B]">
                     Define la UNIDAD de tu producto<br />
                     Busca tu UNIDAD, escríbela en el campo, espera opciones y selecciona una (De 2 o 3 caracteres):
                   </p>
@@ -674,14 +676,14 @@ const ProductModal = ({
                       className={`${inputStyle} flex-1`}
                       maxLength={3}
                     />
-                    <button className="flex h-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] px-4 text-[#1d9bf0] hover:border-[#3c83f666] whitespace-nowrap">
+                    <button className="flex h-12 items-center justify-center whitespace-nowrap rounded-xl border border-[#E2E8F0] bg-white px-4 text-sm font-semibold text-blue-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:shadow-md">
                       Buscar Unidad
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-sm text-slate-300 mb-2">Objeto Impuesto</p>
+                  <p className="mb-2 text-sm text-[#64748B]">Objeto Impuesto</p>
                   <div className="relative">
                     <select
                       value={productObjetoImpuesto}
@@ -702,12 +704,12 @@ const ProductModal = ({
           </div>
 
           <div className="mt-8">
-            <h3 className="mb-4 text-lg font-bold text-white border-b border-[#173156] pb-2">Opcionales</h3>
+            <h3 className="mb-4 border-b border-[#E2E8F0] pb-2 text-lg font-bold text-[#0F172A]">Opcionales</h3>
             
             <div className="mb-6">
               <button
                 onClick={addCuentaPredial}
-                className="flex items-center gap-2 text-[15px] font-semibold text-[#1d9bf0] hover:opacity-90 transition-opacity"
+                className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 transition hover:text-blue-700"
               >
                 <Plus className="h-4 w-4" />
                 Agregar Cuenta Predial
@@ -724,14 +726,14 @@ const ProductModal = ({
                   />
                   <button
                     onClick={() => removeCuentaPredial(index)}
-                    className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-red-500 hover:border-red-500"
+                    className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-red-600 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:shadow-md"
                   >
                     <Minus className="h-5 w-5" />
                   </button>
                   {index === cuentasPrediales.length - 1 && (
                     <button
                       onClick={addCuentaPredial}
-                      className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-[#1d9bf0] hover:border-[#3c83f666]"
+                      className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-blue-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:shadow-md"
                     >
                       <Plus className="h-5 w-5" />
                     </button>
@@ -742,8 +744,8 @@ const ProductModal = ({
           </div>
 
           <div className="mt-6">
-            <h3 className="text-md font-bold text-white">Impuestos Federales</h3>
-            <p className="text-sm text-slate-400 mb-4">Selecciona únicamente los impuestos que necesite tu producto</p>
+            <h3 className="text-md font-bold text-[#0F172A]">Impuestos Federales</h3>
+            <p className="mb-4 text-sm text-[#64748B]">Selecciona únicamente los impuestos que necesite tu producto</p>
             
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
               <div>
@@ -792,7 +794,7 @@ const ProductModal = ({
                         name="iepsType"
                         checked={iepsType === "tasa"}
                         onChange={() => setIepsType("tasa")}
-                        className="w-4 h-4 rounded-full border-slate-700 bg-[#081423] text-blue-500 focus:ring-blue-500 focus:ring-offset-0 checked:bg-blue-500 checked:border-blue-500 mb-2"
+                        className="mb-2 h-4 w-4 rounded-full border-slate-300 bg-white text-blue-600 focus:ring-blue-500 focus:ring-offset-0 checked:border-blue-600 checked:bg-blue-600"
                       />
                       <span className="text-sm text-slate-300 mb-2">TASA</span>
                     </label>
@@ -802,7 +804,7 @@ const ProductModal = ({
                         name="iepsType"
                         checked={iepsType === "cuota"}
                         onChange={() => setIepsType("cuota")}
-                        className="w-4 h-4 rounded-full border-slate-700 bg-[#081423] text-blue-500 focus:ring-blue-500 focus:ring-offset-0 checked:bg-blue-500 checked:border-blue-500 mb-2"
+                        className="mb-2 h-4 w-4 rounded-full border-slate-300 bg-white text-blue-600 focus:ring-blue-500 focus:ring-offset-0 checked:border-blue-600 checked:bg-blue-600"
                       />
                       <span className="text-sm text-slate-300 mb-2">CUOTA</span>
                     </label>
@@ -855,12 +857,12 @@ const ProductModal = ({
           </div>
 
           <div className="mt-8">
-            <h3 className="mb-2 text-md font-bold text-white">Información Aduanera</h3>
-            <p className="text-sm text-slate-400 mb-3">Numero de Pedimento</p>
+            <h3 className="mb-2 text-md font-bold text-[#0F172A]">Información Aduanera</h3>
+            <p className="mb-3 text-sm text-[#64748B]">Numero de Pedimento</p>
             
             <button
               onClick={addPedimento}
-              className="flex items-center gap-2 text-[15px] font-semibold text-[#1d9bf0] hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 transition hover:text-blue-700"
             >
               <Plus className="h-4 w-4" />
               Agregar Numero de Pedimento
@@ -877,14 +879,14 @@ const ProductModal = ({
                 />
                 <button
                   onClick={() => removePedimento(index)}
-                  className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-red-500 hover:border-red-500"
+                  className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-red-600 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:shadow-md"
                   title="Quitar">
                   <Minus className="h-5 w-5" />
                 </button>
                 {index === pedimentos.length - 1 && (
                   <button
                     onClick={addPedimento}
-                    className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-[#1d9bf0] hover:border-[#3c83f666]"
+                    className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-blue-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:shadow-md"
                     title="Agregar">
                     <Plus className="h-5 w-5" />
                   </button>
@@ -895,10 +897,10 @@ const ProductModal = ({
 
           <div className="mt-8">
             <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-md font-bold text-white">Impuestos Locales</h3>
+              <h3 className="text-md font-bold text-[#0F172A]">Impuestos Locales</h3>
               <div className="relative">
                 <Info 
-                  className="h-4 w-4 cursor-help text-yellow-500" 
+                  className="h-4 w-4 cursor-help text-amber-500" 
                   onMouseEnter={(e) => {
                     const tooltip = e.currentTarget.nextElementSibling;
                     if (tooltip) tooltip.classList.remove('hidden');
@@ -908,7 +910,7 @@ const ProductModal = ({
                     if (tooltip) tooltip.classList.add('hidden');
                   }}
                 />
-                <div className="hidden absolute bottom-full left-0 mb-2 z-50 w-80 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+                <div className="hidden absolute bottom-full left-0 z-50 mb-2 w-80 rounded-xl border border-[#E2E8F0] bg-white p-3 text-xs text-[#64748B] shadow-sm">
                   En el nombre no se permiten caracteres especiales salvo el signo %.
                   <br /><br />
                   Si escribes la <b>Tasa</b>, el monto será calculado con base al subtotal.
@@ -922,7 +924,7 @@ const ProductModal = ({
                           
             <button
               onClick={addImpuestoLocal}
-              className="flex items-center gap-2 text-[15px] font-semibold text-[#1d9bf0] hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 transition hover:text-blue-700"
             >
               <Plus className="h-4 w-4" />
               Agregar Impuestos Locales
@@ -930,7 +932,7 @@ const ProductModal = ({
             
             {showImpuestosLocales && impuestosLocales.map((impuesto) => (
               <div key={impuesto.id} className="flex flex-wrap gap-2 mt-3 items-end">
-                <div className="flex-1 min-w-[150px]">
+                <div className="flex-1 min-w-40">
                   <input
                     type="text"
                     value={impuesto.nombre}
@@ -939,7 +941,7 @@ const ProductModal = ({
                     className={inputStyle}
                   />
                 </div>
-                <div className="flex-1 min-w-[120px]">
+                <div className="flex-1 min-w-32">
                   <input
                     type="text"
                     value={impuesto.tasa}
@@ -948,7 +950,7 @@ const ProductModal = ({
                     className={inputStyle}
                   />
                 </div>
-                <div className="flex-1 min-w-[120px]">
+                <div className="flex-1 min-w-32">
                   <input
                     type="text"
                     value={impuesto.monto}
@@ -957,7 +959,7 @@ const ProductModal = ({
                     className={inputStyle}
                   />
                 </div>
-                <div className="w-[130px]">
+                <div className="w-32">
                   <div className="relative">
                     <select
                       value={impuesto.tipo}
@@ -975,7 +977,7 @@ const ProductModal = ({
                 </div>
                 <button
                   onClick={() => removeImpuestoLocal(impuesto.id)}
-                  className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-red-500 hover:border-red-500"
+                  className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-red-600 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:shadow-md"
                   title="Quitar">
                   <Minus className="h-5 w-5" />
                 </button>
@@ -984,17 +986,17 @@ const ProductModal = ({
           </div>
         </div>
 
-        <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#173156] bg-[#071321] px-6 py-4">
+        <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#E2E8F0] bg-white px-6 py-4">
           <button
             onClick={onClose} 
-            className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] transition-colors duration-200 hover:bg-red-400"
+            className="rounded-xl border border-red-100 bg-red-50 px-6 py-2 font-semibold text-red-600 shadow-sm transition hover:bg-red-100 hover:shadow-md"
             disabled={isLoading}
           >
             Cerrar
           </button>
           <button
             onClick={onSave}
-            className="rounded-xl bg-blue-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-colors duration-200 hover:bg-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-xl bg-blue-600 px-6 py-2 font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -1025,59 +1027,59 @@ const BulkUploadModal = ({ isOpen, onClose }: BulkUploadModalProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
         onClick={onClose}
       />
       
-      <div className="relative max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-          <h2 className="text-xl font-bold text-white">Carga Masiva de Productos</h2>
+      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-white px-6 py-4">
+          <h2 className="text-xl font-bold text-[#0F172A]">Carga Masiva de Productos</h2>
           <button
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-[#0d1b35] hover:text-white"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-transparent text-slate-500 transition hover:border-[#E2E8F0] hover:bg-blue-50 hover:text-blue-600"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="p-6">
-          <div className="mb-6 p-4 rounded-xl bg-[#0a1424] border border-[#173156]">
-            <p className="text-slate-300 text-sm leading-relaxed">
+        <div className="bg-slate-50 p-6">
+          <div className="mb-6 rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+            <p className="text-sm leading-relaxed text-[#64748B]">
               Aquí podrás subir tu catálogo de productos de forma masiva, a través de un archivo .csv. 
-              En <span className="text-blue-400 font-medium">Ejemplo de carga masiva</span> se descargará la plantilla base 
+              En <span className="font-medium text-blue-600">Ejemplo de carga masiva</span> se descargará la plantilla base 
               y un documento con los detalles para el llenado del archivo.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
-              <FileTextIcon className="h-5 w-5 text-[#1d9bf0]" />
-              <span className="text-sm font-medium">Ejemplo de carga masiva</span>
+          <div className="grid grid-cols-1 gap-3 mb-6 sm:grid-cols-2">
+            <button className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] shadow-sm transition hover:bg-blue-50 hover:shadow-md">
+              <FileTextIcon className="h-5 w-5 text-blue-600" />
+              <span className="text-sm font-semibold">Ejemplo de carga masiva</span>
             </button>
             
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
-              <Download className="h-5 w-5 text-[#1d9bf0]" />
-              <span className="text-sm font-medium">Descarga .csv</span>
+            <button className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] shadow-sm transition hover:bg-blue-50 hover:shadow-md">
+              <Download className="h-5 w-5 text-blue-600" />
+              <span className="text-sm font-semibold">Descarga .csv</span>
             </button>
             
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
-              <Upload className="h-5 w-5 text-[#1d9bf0]" />
-              <span className="text-sm font-medium">Subir archivo .csv</span>
+            <button className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] shadow-sm transition hover:bg-blue-50 hover:shadow-md">
+              <Upload className="h-5 w-5 text-blue-600" />
+              <span className="text-sm font-semibold">Subir archivo .csv</span>
             </button>
             
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
-              <Activity className="h-5 w-5 text-[#1d9bf0]" />
-              <span className="text-sm font-medium">Ver estado de los procesos</span>
+            <button className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] shadow-sm transition hover:bg-blue-50 hover:shadow-md">
+              <Activity className="h-5 w-5 text-blue-600" />
+              <span className="text-sm font-semibold">Ver estado de los procesos</span>
             </button>
           </div>
 
-          <div className="border-t border-[#173156] my-6"></div>
+          <div className="my-6 border-t border-[#E2E8F0]"></div>
 
           <div className="flex gap-4">
-            <button className="flex-1 rounded-xl bg-blue-500 px-4 py-2.5 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-colors duration-200 hover:bg-blue-400">
+            <button className="flex-1 rounded-xl bg-blue-600 px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md">
               Procesar archivos
             </button>
-            <button className="flex-1 rounded-xl bg-red-500 px-4 py-2.5 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] transition-colors duration-200 hover:bg-red-400">
+            <button className="flex-1 rounded-xl bg-red-500 px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-red-600 hover:shadow-md">
               Eliminar todos
             </button>
           </div>
@@ -1436,158 +1438,190 @@ export default function CatalogoProductos() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#151c24] rounded-lg text-white p-3">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold">Catálogo de Productos</h1>
-            <p className="text-gray-400">
-              Administra tus productos, servicios y claves SAT para facturación.
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <button 
-              onClick={openBulkUploadModal}
-              className="w-36 bg-emerald-500 hover:bg-emerald-400 rounded-lg font-semibold shadow text-white shadow-lg shadow-emerald-500/30"
-            >
-              Carga masiva de productos
-            </button>
-            <button 
-              onClick={openProductModal}
-              className="w-36 bg-blue-500 hover:bg-blue-400 rounded-lg font-semibold shadow text-white shadow-lg shadow-blue-500/30"
-            >
-              Agregar un producto
-            </button>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 mb-4">
-          <input
-            className="box box-input flex-1"
-            placeholder="Buscar por código, nombre, descripción, clave unidad o unidad..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          <div className="flex items-center gap-2">
-            <span className="text-gray-400">MOSTRAR</span>
-            <select 
-              className="box box-input"
-              value={itemsPerPage}
-              onChange={handleItemsPerPageChange}
-            >
-              <option value="25">25 registros</option>
-              <option value="50">50 registros</option>
-              <option value="100">100 registros</option>
-            </select>
-          </div>
-        </div>
-
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
-          </div>
-        ) : (
-          <div className="bg-[#232b36] rounded-xl overflow-hidden mb-8">
-            <table className="w-full text-sm">
-              <thead className="bg-[#1a222c] text-gray-400">
-                <tr>
-                  <th className="p-3 text-left">ACCIONES</th>
-                  <th className="p-3 text-left">CÓDIGO SAT</th>
-                  <th className="p-3 text-left">NOMBRE</th>
-                  <th className="p-3 text-left">DESCRIPCIÓN</th>
-                  <th className="p-3 text-left">CLAVE UNIDAD</th>
-                  <th className="p-3 text-left">UNIDAD</th>
-                  <th className="p-3 text-right">PRECIO</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentProducts.map((producto) => (
-                  <tr key={producto.id} className="border-t border-[#232b36] hover:bg-[#1a222c]">
-                    <td className="p-3 flex gap-2">
-                      <button 
-                        className="text-gray-400 hover:text-blue-400"
-                        onClick={() => openEditModal(producto)}
-                        title="Editar producto"
-                      >
-                        <SquarePen className="h-4 w-4" />
-                      </button>
-                      <button 
-                        className="text-gray-400 hover:text-red-400"
-                        onClick={() => producto.id && handleDeleteProduct(producto.id)}
-                        title="Eliminar producto"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </button>
-                    </td>
-                    <td className="p-3">
-                      <span className="bg-[#1e293b] text-blue-300 px-2 py-1 rounded text-xs font-mono cursor-pointer hover:underline">
-                        {producto.clave_producto}
-                      </span>
-                    </td>
-                    <td className="p-3 font-bold">{producto.name}</td>
-                    <td className="p-3 text-gray-400">{producto.descripcion}</td>
-                    <td className="p-3">{producto.clave_unidad || "-"}</td>
-                    <td className="p-3">{producto.clave_unidad || "-"}</td>
-                    <td className="p-3 text-right font-bold text-yellow-400">
-                      ${producto.precio_unitario?.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-                {currentProducts.length === 0 && !isLoading && (
-                  <tr>
-                    <td colSpan={7} className="p-8 text-center text-gray-400">
-                      No se encontraron productos que coincidan con tu búsqueda
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            <div className="flex justify-between items-center p-4 border-t border-[#232b36] text-gray-400 text-sm">
-              <span>Mostrando {currentProducts.length} de {filteredProductos.length} resultados</span>
-              <div className="flex gap-2">
-                <button 
-                  className="px-3 py-1 bg-[#1a222c] rounded disabled:opacity-50"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
+      <div className="min-h-screen bg-slate-50 p-6 text-[#0F172A]">
+        <div className="space-y-6">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <h1 className="text-3xl font-extrabold tracking-tight text-[#0F172A]">Catálogo de Productos</h1>
+                <p className="mt-1 text-sm text-[#64748B]">
+                  Administra productos, servicios y claves SAT para facturación.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={openBulkUploadModal}
+                  className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 hover:shadow-md"
                 >
-                  Anterior
+                  Carga masiva
                 </button>
-                {paginationNumbers().map((page) => (
-                  <button
-                    key={page}
-                    className={`px-3 py-1 rounded ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-[#1a222c]'}`}
-                    onClick={() => handlePageChange(page)}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button 
-                  className="px-3 py-1 bg-[#1a222c] rounded disabled:opacity-50"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
+                <button
+                  onClick={openProductModal}
+                  className="rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md"
                 >
-                  Siguiente
+                  Agregar producto
                 </button>
               </div>
             </div>
           </div>
-        )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <div className="bg-[#1a222c] rounded-xl p-6 flex flex-col items-start border-2 border-[#16304f]">
-            <span className="text-xs text-gray-400 font-bold mb-2">TOTAL PRODUCTOS</span>
-            <span className="text-3xl font-extrabold mb-2">{productos.length}</span>
-            <div className="w-full h-1 bg-blue-700 rounded" />
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="relative w-full lg:max-w-2xl">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#94A3B8]" />
+                <input
+                  className={`${inputStyle} pl-11`}
+                  placeholder="Buscar por código, nombre, descripción, clave unidad o unidad..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center justify-end gap-3">
+                <span className="text-sm font-semibold uppercase tracking-wide text-[#64748B]">Mostrar</span>
+                <select
+                  className={`${selectStyle} min-w-40`}
+                  value={itemsPerPage}
+                  onChange={handleItemsPerPageChange}
+                >
+                  <option value="25">25 registros</option>
+                  <option value="50">50 registros</option>
+                  <option value="100">100 registros</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <div className="bg-[#1a222c] rounded-xl p-6 flex flex-col items-start border-2 border-[#16304f]">
-            <span className="text-xs text-yellow-400 font-bold mb-2">SERVICIOS SAT</span>
-            <span className="text-3xl font-extrabold mb-2">
-              {productos.filter(p => p.clave_producto).length}
-            </span>
-            <div className="w-full h-1 bg-yellow-400 rounded" />
-          </div>
-          <div className="bg-[#1a222c] rounded-xl p-6 flex flex-col items-start border-2 border-[#16304f]">
-            <span className="text-xs text-gray-400 font-bold mb-2">OPTIMIZACIÓN</span>
-            <span className="text-base mb-2">Catálogo actualizado en tiempo real.</span>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-4xl text-sm">
+                  <thead className="bg-[#F8FAFC] text-left text-xs uppercase tracking-[0.08em] text-[#64748B]">
+                    <tr>
+                      <th className="px-4 py-3.5 font-semibold">Acciones</th>
+                      <th className="px-4 py-3.5 font-semibold">Código SAT</th>
+                      <th className="px-4 py-3.5 font-semibold">Nombre</th>
+                      <th className="px-4 py-3.5 font-semibold">Descripción</th>
+                      <th className="px-4 py-3.5 font-semibold">Clave Unidad</th>
+                      <th className="px-4 py-3.5 font-semibold">Unidad</th>
+                      <th className="px-4 py-3.5 text-right font-semibold">Precio</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#E2E8F0] bg-white">
+                    {currentProducts.map((producto) => (
+                      <tr key={producto.id} className="bg-white transition-colors hover:bg-blue-50">
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-2">
+                            <button
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 transition hover:bg-blue-100 hover:shadow-sm"
+                              onClick={() => openEditModal(producto)}
+                              title="Editar producto"
+                            >
+                              <SquarePen className="h-4 w-4" />
+                            </button>
+                            <button
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-600 transition hover:bg-red-100 hover:shadow-sm"
+                              onClick={() => producto.id && handleDeleteProduct(producto.id)}
+                              title="Eliminar producto"
+                            >
+                              <Trash className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="inline-flex rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600">
+                            {producto.clave_producto}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 font-semibold text-[#0F172A]">{producto.name}</td>
+                        <td className="px-4 py-4 text-[#64748B]">{producto.descripcion}</td>
+                        <td className="px-4 py-4 text-[#64748B]">{producto.clave_unidad || "-"}</td>
+                        <td className="px-4 py-4 text-[#64748B]">{producto.clave_unidad || "-"}</td>
+                        <td className="px-4 py-4 text-right text-sm font-semibold text-blue-600">
+                          ${producto.precio_unitario?.toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                    {currentProducts.length === 0 && !isLoading && (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-10 text-center text-[#64748B]">
+                          No se encontraron productos que coincidan con tu búsqueda
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex flex-col gap-3 border-t border-[#E2E8F0] px-6 py-4 text-sm text-[#64748B] md:flex-row md:items-center md:justify-between">
+                <span>
+                  Mostrando {currentProducts.length} de {filteredProductos.length} resultados
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    className="rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-medium text-[#0F172A] shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Anterior
+                  </button>
+                  {paginationNumbers().map((page) => (
+                    <button
+                      key={page}
+                      className={`rounded-xl border px-3 py-2 font-medium shadow-sm transition hover:shadow-md ${
+                        currentPage === page
+                          ? "border-blue-600 bg-blue-600 text-white hover:bg-blue-700"
+                          : "border-[#E2E8F0] bg-white text-[#0F172A] hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                      }`}
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-medium text-[#0F172A] shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <Activity className="h-5 w-5" />
+              </div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#64748B]">Total productos</p>
+              <h3 className="mt-2 text-3xl font-bold text-[#0F172A]">{productos.length}</h3>
+              <p className="mt-2 text-sm text-[#64748B]">Productos registrados en el catálogo.</p>
+            </div>
+
+            <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                <FileTextIcon className="h-5 w-5" />
+              </div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#64748B]">Servicios SAT</p>
+              <h3 className="mt-2 text-3xl font-bold text-[#0F172A]">
+                {productos.filter((p) => p.clave_producto).length}
+              </h3>
+              <p className="mt-2 text-sm text-[#64748B]">Productos con clave SAT asignada.</p>
+            </div>
+
+            <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#64748B]">Optimización</p>
+              <h3 className="mt-2 text-3xl font-bold text-[#0F172A]">Activo</h3>
+              <p className="mt-2 text-sm text-[#64748B]">Catálogo actualizado en tiempo real.</p>
+            </div>
           </div>
         </div>
       </div>

@@ -20,11 +20,12 @@ import {
   Info,
 } from "lucide-react";
 
-const selectStyle =
-  "box box-input";
+const fieldStyle =
+  "w-full rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-sm text-[#0F172A] placeholder:text-[#64748B] shadow-sm transition-colors duration-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
 
-const inputStyle =
-  "box box-input";
+const selectStyle = `${fieldStyle} pr-10`;
+
+const inputStyle = fieldStyle;
 
 type LabelProps = {
   children: React.ReactNode;
@@ -37,18 +38,18 @@ function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
   
   return (
     <div className="mb-2 flex items-center gap-1">
-      <label className="text-sm font-bold uppercase tracking-wide text-slate-400">
+      <label className="text-sm font-semibold uppercase tracking-wide text-[#0F172A]">
         {children}
       </label>
       {withInfo && (
         <div className="relative">
           <Info 
-            className="h-4 w-4 cursor-help text-[#1d9bf0]" 
+            className="h-4 w-4 cursor-help text-blue-600" 
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           />
           {showTooltip && (
-            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+            <div className="absolute bottom-full left-0 z-50 mb-2 w-64 rounded-xl border border-[#E2E8F0] bg-white p-3 text-xs text-[#64748B] shadow-sm">
               {infoText}
             </div>
           )}
@@ -333,15 +334,15 @@ const AlertModal = ({ isOpen, onClose, title, message, type }: { isOpen: boolean
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative max-w-md w-full rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
         <div className="p-6 text-center">
           <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${getBgColor()}`}>
             {getIcon()}
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
-          <p className="text-slate-400 mb-6">{message}</p>
-          <button onClick={onClose} className="w-full rounded-xl bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-400">Aceptar</button>
+          <h2 className="mb-2 text-xl font-bold text-[#0F172A]">{title}</h2>
+          <p className="mb-6 text-[#64748B]">{message}</p>
+          <button onClick={onClose} className="w-full rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md">Aceptar</button>
         </div>
       </div>
     </div>
@@ -354,17 +355,17 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }: { isOpen: 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative max-w-md w-full rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
         <div className="p-6 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-500/20">
-            <AlertCircle className="h-10 w-10 text-yellow-500" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50">
+            <AlertCircle className="h-10 w-10 text-amber-500" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
-          <p className="text-slate-400 mb-6">{message}</p>
+          <h2 className="mb-2 text-xl font-bold text-[#0F172A]">{title}</h2>
+          <p className="mb-6 text-[#64748B]">{message}</p>
           <div className="flex gap-4">
-            <button onClick={onClose} className="flex-1 rounded-xl bg-gray-600 px-4 py-2 font-medium text-white hover:bg-gray-500">Cancelar</button>
-            <button onClick={onConfirm} className="flex-1 rounded-xl bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-400">Aceptar</button>
+            <button onClick={onClose} className="flex-1 rounded-xl border border-[#E2E8F0] bg-white px-4 py-2 font-semibold text-[#0F172A] shadow-sm transition hover:bg-slate-50 hover:shadow-md">Cancelar</button>
+            <button onClick={onConfirm} className="flex-1 rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md">Aceptar</button>
           </div>
         </div>
       </div>
@@ -406,17 +407,17 @@ const GrupoModal = ({ isOpen, onClose, onSave, editingGrupo, grupos }: { isOpen:
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="relative max-w-md overflow-y-auto w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-          <h2 className="text-xl font-bold text-white">{editingGrupo ? "Editar Grupo" : "Nuevo Grupo"}</h2>
-          <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-[#0d1b35] hover:text-white">
+      <div className="relative max-w-md w-full overflow-y-auto rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-white px-6 py-4">
+          <h2 className="text-xl font-bold text-[#0F172A]">{editingGrupo ? "Editar Grupo" : "Nuevo Grupo"}</h2>
+          <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl border border-transparent text-slate-500 transition hover:border-[#E2E8F0] hover:bg-blue-50 hover:text-blue-600">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="bg-slate-50 p-6">
           <div>
             <Label>Nombre del Grupo:</Label>
             <input
@@ -429,9 +430,9 @@ const GrupoModal = ({ isOpen, onClose, onSave, editingGrupo, grupos }: { isOpen:
           </div>
         </div>
 
-        <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#173156] bg-[#071321] px-6 py-4">
-          <button onClick={onClose} className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] hover:bg-red-400">Cancelar</button>
-          <button onClick={handleSubmit} className="rounded-xl bg-blue-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] hover:bg-blue-400">Guardar</button>
+        <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#E2E8F0] bg-white px-6 py-4">
+          <button onClick={onClose} className="rounded-xl border border-red-100 bg-red-50 px-6 py-2 font-semibold text-red-600 shadow-sm transition hover:bg-red-100 hover:shadow-md">Cancelar</button>
+          <button onClick={handleSubmit} className="rounded-xl bg-blue-600 px-6 py-2 font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md">Guardar</button>
         </div>
       </div>
 
@@ -595,17 +596,17 @@ const EmpleadoModal = ({ isOpen, onClose, onSave, editingEmpleado, grupos, sucur
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-          <h2 className="text-xl font-bold text-white">{editingEmpleado ? "Editar Empleado" : "Nuevo Empleado"}</h2>
-          <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-[#0d1b35] hover:text-white">
+      <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-white px-6 py-4">
+          <h2 className="text-xl font-bold text-[#0F172A]">{editingEmpleado ? "Editar Empleado" : "Nuevo Empleado"}</h2>
+          <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl border border-transparent text-slate-500 transition hover:border-[#E2E8F0] hover:bg-blue-50 hover:text-blue-600">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="bg-slate-50 p-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div><Label>Nombre(s):</Label><input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre(s)" className={inputStyle} /></div>
             <div><Label>Apellido Paterno:</Label><input type="text" value={apellidoPaterno} onChange={(e) => setApellidoPaterno(e.target.value)} placeholder="Apellido Paterno" className={inputStyle} /></div>
@@ -650,17 +651,17 @@ const EmpleadoModal = ({ isOpen, onClose, onSave, editingEmpleado, grupos, sucur
 
           {/* Subcontratación */}
           <div className="mt-6">
-            <h3 className="text-md font-bold text-white mb-2">Opcional</h3>
-            <div className="flex items-center gap-4 mb-3">
-              <span className="text-sm text-slate-400">Subcontratación</span>
-              <button type="button" onClick={addSubcontratacion} className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300"><Plus className="h-3 w-3" />Agregar</button>
-              <button type="button" onClick={() => setSubcontrataciones([])} className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300"><Trash className="h-3 w-3" />Eliminar todos</button>
+            <h3 className="mb-2 text-md font-bold text-[#0F172A]">Opcional</h3>
+            <div className="mb-3 flex items-center gap-4">
+              <span className="text-sm text-[#64748B]">Subcontratación</span>
+              <button type="button" onClick={addSubcontratacion} className="flex items-center gap-1 text-xs font-semibold text-blue-600 transition hover:text-blue-700"><Plus className="h-3 w-3" />Agregar</button>
+              <button type="button" onClick={() => setSubcontrataciones([])} className="flex items-center gap-1 text-xs font-semibold text-red-600 transition hover:text-red-700"><Trash className="h-3 w-3" />Eliminar todos</button>
             </div>
             {subcontrataciones.map((sub, index) => (
               <div key={sub.id} className="flex gap-2 mt-2 items-center">
                 <input type="text" value={sub.rfcEmpresa} onChange={(e) => updateSubcontratacion(sub.id, "rfcEmpresa", e.target.value)} placeholder="RFC Empresa/Persona Terceriza" className={`${inputStyle} flex-8`} />
-                <input type="text" value={sub.porcentajeTiempo} onChange={(e) => updateSubcontratacion(sub.id, "porcentajeTiempo", e.target.value)} placeholder="% Tiempo" className="box box-input flex-1" />
-                <button type="button" onClick={() => removeSubcontratacion(sub.id)} className="text-red-400 hover:text-red-300" title="Eliminar">
+                <input type="text" value={sub.porcentajeTiempo} onChange={(e) => updateSubcontratacion(sub.id, "porcentajeTiempo", e.target.value)} placeholder="% Tiempo" className={`${inputStyle} flex-1`} />
+                <button type="button" onClick={() => removeSubcontratacion(sub.id)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-red-600 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:shadow-md" title="Eliminar">
                   <Trash className="h-5 w-5" />
                 </button>
               </div>
@@ -668,9 +669,9 @@ const EmpleadoModal = ({ isOpen, onClose, onSave, editingEmpleado, grupos, sucur
           </div>
         </div>
 
-        <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#173156] bg-[#071321] px-6 py-4">
-          <button onClick={onClose} className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] hover:bg-red-400">Cancelar</button>
-          <button onClick={handleSubmit} className="rounded-xl bg-blue-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] hover:bg-blue-400">Guardar</button>
+        <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#E2E8F0] bg-white px-6 py-4">
+          <button onClick={onClose} className="rounded-xl border border-red-100 bg-red-50 px-6 py-2 font-semibold text-red-600 shadow-sm transition hover:bg-red-100 hover:shadow-md">Cancelar</button>
+          <button onClick={handleSubmit} className="rounded-xl bg-blue-600 px-6 py-2 font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md">Guardar</button>
         </div>
       </div>
 
@@ -685,28 +686,28 @@ const BulkUploadSection = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative max-w-lg overflow-y-auto w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-          <h2 className="text-xl font-bold text-white">Carga Masiva de Empleados</h2>
-          <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-[#0d1b35] hover:text-white"><X className="h-5 w-5" /></button>
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-lg overflow-y-auto rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-white px-6 py-4">
+          <h2 className="text-xl font-bold text-[#0F172A]">Carga Masiva de Empleados</h2>
+          <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl border border-transparent text-slate-500 transition hover:border-[#E2E8F0] hover:bg-blue-50 hover:text-blue-600"><X className="h-5 w-5" /></button>
         </div>
-        <div className="p-6">
-          <div className="mb-6 p-4 rounded-xl bg-[#0a1424] border border-[#173156]">
-            <p className="text-slate-300 text-sm leading-relaxed">
+        <div className="bg-slate-50 p-6">
+          <div className="mb-6 rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+            <p className="text-sm leading-relaxed text-[#64748B]">
               Importa tu catálogo de empleados de forma masiva mediante un archivo .csv. 
               En el apartado de "Ejemplo de empleados" obtendrás la plantilla base y un 
               instructivo detallado para el correcto llenado de la información.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors"><FileText className="h-5 w-5 text-[#1d9bf0]" /><span className="text-sm">Ejemplo de empleados</span></button>
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors"><Download className="h-5 w-5 text-[#1d9bf0]" /><span className="text-sm">Descargar .csv</span></button>
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors"><Upload className="h-5 w-5 text-[#1d9bf0]" /><span className="text-sm">Subir archivo .csv</span></button>
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors"><Activity className="h-5 w-5 text-[#1d9bf0]" /><span className="text-sm">Ver estado de los procesos</span></button>
+          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <button className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] shadow-sm transition hover:bg-blue-50 hover:shadow-md"><FileText className="h-5 w-5 text-blue-600" /><span className="text-sm font-semibold">Ejemplo de empleados</span></button>
+            <button className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] shadow-sm transition hover:bg-blue-50 hover:shadow-md"><Download className="h-5 w-5 text-blue-600" /><span className="text-sm font-semibold">Descargar .csv</span></button>
+            <button className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] shadow-sm transition hover:bg-blue-50 hover:shadow-md"><Upload className="h-5 w-5 text-blue-600" /><span className="text-sm font-semibold">Subir archivo .csv</span></button>
+            <button className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] shadow-sm transition hover:bg-blue-50 hover:shadow-md"><Activity className="h-5 w-5 text-blue-600" /><span className="text-sm font-semibold">Ver estado de los procesos</span></button>
           </div>
           <div className="flex justify-center">
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-6 py-2.5 font-medium text-white hover:bg-blue-400 transition-colors"><FileSpreadsheet className="h-5 w-5" />Procesar archivo</button>
+            <button className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md"><FileSpreadsheet className="h-5 w-5" />Procesar archivo</button>
           </div>
         </div>
       </div>
@@ -811,31 +812,49 @@ export default function Empleados() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#151c24] text-white p-3 rounded-lg">
-        <main className="mx-auto max-w-[1400px]">
-          <div className="mb-8 flex justify-between items-center">
-            <div><h1 className="text-3xl font-extrabold text-white">Catálogo de Empleados</h1><p className="mt-2 text-slate-400">Administra la información de tus empleados.</p></div>
-            <div className="flex gap-3">
-              <button onClick={() => setIsBulkUploadOpen(true)} className="w-36 bg-emerald-500 hover:bg-emerald-400 rounded-lg font-semibold shadow text-white shadow-lg shadow-emerald-500/30">Carga Masiva de Empleados</button>
-              <button onClick={() => { setEditingEmpleado(null); setIsModalOpen(true); }} className="w-36 bg-blue-500 hover:bg-blue-400 rounded-lg font-semibold shadow text-white shadow-lg shadow-blue-500/30">Agregar un Empleado</button>
+      <div className="min-h-screen bg-slate-50 p-6 text-[#0F172A]">
+        <main className="mx-auto max-w-7xl space-y-6">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <h1 className="text-3xl font-extrabold tracking-tight text-[#0F172A]">Catálogo de Empleados</h1>
+                <p className="mt-1 text-sm text-[#64748B]">Administra la información de tus empleados.</p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button onClick={() => setIsBulkUploadOpen(true)} className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 hover:shadow-md">Carga masiva de empleados</button>
+                <button onClick={() => { setEditingEmpleado(null); setIsModalOpen(true); }} className="rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md">Agregar empleado</button>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div className="relative flex-1 max-w-md"><Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Buscar por nombre, RFC o número de empleado..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="box box-input-icon" /></div>
-            <div className="flex items-center gap-4"><span className="text-slate-400 text-sm">Seleccionar un grupo</span><div className="relative"><select value={selectedGrupo} onChange={(e) => setSelectedGrupo(e.target.value)} className="box box-input"><option value="">Seleccione un grupo</option>{grupos.map((g) => (<option key={g.id} value={g.nombre}>{g.nombre}</option>))}</select></div>
-            <button onClick={() => { setEditingGrupo(null); setIsGrupoModalOpen(true); }} className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#16233b] text-slate-300 hover:text-blue-500" title="Agregar grupo"><Plus className="h-5 w-5" /></button></div>
-            <button onClick={handleEditGrupo} className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#16233b] text-slate-300 hover:text-yellow-500" title="Editar grupo"><Pencil className="h-5 w-5" /></button>
-            <button onClick={handleDeleteGrupo} className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#16233b] text-slate-300 hover:text-red-400" title="Eliminar grupo"><Trash className="h-5 w-5" /></button>
-            
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="relative w-full lg:max-w-2xl">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#94A3B8]" />
+                <input type="text" placeholder="Buscar por nombre, RFC o número de empleado..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className={`${inputStyle} pl-11`} />
+              </div>
+              <div className="flex flex-wrap items-center gap-3 lg:justify-end">
+                <span className="text-sm font-semibold uppercase tracking-wide text-[#64748B]">Seleccionar un grupo</span>
+                <div className="relative min-w-56">
+                  <select value={selectedGrupo} onChange={(e) => setSelectedGrupo(e.target.value)} className={selectStyle}>
+                    <option value="">Seleccione un grupo</option>
+                    {grupos.map((g) => (<option key={g.id} value={g.nombre}>{g.nombre}</option>))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                </div>
+                <button onClick={() => { setEditingGrupo(null); setIsGrupoModalOpen(true); }} className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#E2E8F0] bg-blue-50 text-blue-600 shadow-sm transition hover:bg-blue-100 hover:shadow-md" title="Agregar grupo"><Plus className="h-5 w-5" /></button>
+                <button onClick={handleEditGrupo} className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#E2E8F0] bg-blue-50 text-blue-600 shadow-sm transition hover:bg-blue-100 hover:shadow-md" title="Editar grupo"><Pencil className="h-5 w-5" /></button>
+                <button onClick={handleDeleteGrupo} className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#E2E8F0] bg-red-50 text-red-600 shadow-sm transition hover:bg-red-100 hover:shadow-md" title="Eliminar grupo"><Trash className="h-5 w-5" /></button>
+              </div>
+            </div>
           </div>
 
-          <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] overflow-hidden">
+          <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[#16253e]"><tr className="text-left text-sm uppercase tracking-wide text-slate-400"><th className="px-6 py-4">Puesto</th><th className="px-6 py-4">Nombre del empleado</th><th className="px-6 py-4">RFC</th><th className="px-6 py-4">No. Seguridad Social</th><th className="px-6 py-4 w-24">Acciones</th></tr></thead>
-                <tbody>{filteredEmpleados.map((emp) => (<tr key={emp.id} className="border-t border-[#16304f] hover:bg-[#0d1b35]"><td className="px-6 py-4">{emp.puesto || "—"}</td><td className="px-6 py-4 font-bold">{`${emp.nombre} ${emp.apellidoPaterno} ${emp.apellidoMaterno}`}</td><td className="px-6 py-4 font-mono">{emp.rfc}</td><td className="px-6 py-4">{emp.noSeguridadSocial || "—"}</td><td className="px-6 py-4"><div className="flex gap-2"><button onClick={() => { setEditingEmpleado(emp); setIsModalOpen(true); }} className="text-blue-400 hover:text-blue-300" title="Editar"><Pencil className="h-5 w-5" /></button><button onClick={() => handleDeleteEmpleado(emp.id, `${emp.nombre} ${emp.apellidoPaterno}`)} className="text-red-400 hover:text-red-300" title="Eliminar"><Trash className="h-5 w-5" /></button></div></td></tr>))}
-                {filteredEmpleados.length === 0 && (<tr><td colSpan={5} className="px-6 py-16 text-center text-slate-400">No hay empleados registrados</td></tr>)}</tbody>
+              <table className="w-full min-w-4xl">
+                <thead className="bg-slate-100 text-left text-xs uppercase tracking-[0.08em] text-slate-700"><tr><th className="px-6 py-4 font-semibold">Puesto</th><th className="px-6 py-4 font-semibold">Nombre del empleado</th><th className="px-6 py-4 font-semibold">RFC</th><th className="px-6 py-4 font-semibold">No. Seguridad Social</th><th className="px-6 py-4 font-semibold w-24">Acciones</th></tr></thead>
+                <tbody className="divide-y divide-[#E2E8F0] bg-white">{filteredEmpleados.map((emp) => (<tr key={emp.id} className="text-[#0F172A] transition-colors hover:bg-blue-50"><td className="px-6 py-4 text-[#64748B]">{emp.puesto || "—"}</td><td className="px-6 py-4 font-semibold text-[#0F172A]">{`${emp.nombre} ${emp.apellidoPaterno} ${emp.apellidoMaterno}`}</td><td className="px-6 py-4 font-mono text-[#0F172A]">{emp.rfc}</td><td className="px-6 py-4 text-[#64748B]">{emp.noSeguridadSocial || "—"}</td><td className="px-6 py-4"><div className="flex gap-2"><button onClick={() => { setEditingEmpleado(emp); setIsModalOpen(true); }} className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 shadow-sm transition hover:bg-blue-100 hover:shadow-md" title="Editar"><Pencil className="h-4 w-4" /></button><button onClick={() => handleDeleteEmpleado(emp.id, `${emp.nombre} ${emp.apellidoPaterno}`)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-600 shadow-sm transition hover:bg-red-100 hover:shadow-md" title="Eliminar"><Trash className="h-4 w-4" /></button></div></td></tr>))}
+                {filteredEmpleados.length === 0 && (<tr><td colSpan={5} className="px-6 py-16 text-center text-[#64748B]">No hay empleados registrados</td></tr>)}</tbody>
               </table>
             </div>
           </div>

@@ -4,10 +4,23 @@ export interface LoginCredentials {
   password: string;
 }
 
+export type CompanyIntegrationStatus = "pending" | "connected" | "disconnected" | "error";
+
+export interface AuthCompany {
+  id: number;
+  nombre: string;
+  rfc: string | null;
+  plan: string | null;
+  integration_status: CompanyIntegrationStatus;
+}
+
 export interface AuthUser {
   id: number;
   name: string;
   email: string;
+  avatar: string | null;
+  role: string;
+  company: AuthCompany | null;
 }
 
 export interface LoginResponse {
@@ -44,6 +57,26 @@ export async function loginRequest(
   return data as LoginResponse;
 }
 
+export async function getMeRequest(token: string): Promise<AuthUser> {
+  const res = await fetch(`${API_URL}/api/user`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    const message =
+      (data as ApiError)?.message ?? "No se pudo obtener el usuario.";
+    throw new Error(message);
+  }
+
+  const data = (await res.json()) as { user: AuthUser };
+  return data.user;
+}
+
 export async function logoutRequest(token: string): Promise<void> {
   const res = await fetch(`${API_URL}/api/logout`, {
     method: "POST",
@@ -63,6 +96,10 @@ export async function logoutRequest(token: string): Promise<void> {
 
 export function saveSession(token: string, user: AuthUser): void {
   localStorage.setItem("api_token", token);
+  localStorage.setItem("auth_user", JSON.stringify(user));
+}
+
+export function saveUser(user: AuthUser): void {
   localStorage.setItem("auth_user", JSON.stringify(user));
 }
 
