@@ -1,133 +1,103 @@
 "use client";
-import React from "react";
-import AppLayout from "@/app/components/layout/AppLayout";
-import { User, Lock, Upload, MapPin, FileText, Puzzle, Users, Banknote, Settings, MessageCircle, CreditCard } from "lucide-react";
-import { useRouter } from "next/navigation";
 
-const configCards = [
-	{
-		icon: <User className="h-7 w-7 text-blue-500" />, 
-		title: "Mi Perfil", 
-		desc: "Gestiona tus datos personales, contraseña y preferencias de seguridad de la cuenta.", 
-		action: "CONFIGURAR", 
-		actionColor: "text-blue-400",
-		route: "/pages/profile"
-	},
-	{
-		icon: <Lock className="h-7 w-7 text-blue-500" />, 
-		title: "Sellos Digitales / FIEL", 
-		desc: "Carga tus certificados .cer y .key vigentes para el timbrado oficial de facturas.", 
-		action: "GESTIONAR CERTIFICADOS", 
-		actionColor: "text-blue-400",
-		route: "/pages/settings/sellos" 
-	},
-	{
-		icon: <Upload className="h-7 w-7 text-blue-500" />, 
-		title: "Sube CIF de tus clientes", 
-		desc: "Importación masiva de datos fiscales mediante la Constancia de Situación Fiscal.", 
-		action: "IMPORTACIÓN", 
-		actionColor: "text-blue-400",
-		route: "/upload-cif"
-	},
-	{
-		icon: <MapPin className="h-7 w-7 text-blue-500" />, 
-		title: "Lugar de Expedición", 
-		desc: "Configura las sucursales, domicilios y códigos postales de emisión.", 
-		action: "SUCURSALES", 
-		actionColor: "text-blue-400",
-		route: "/pages/settings/expedition"
-	},
-	{
-		icon: <FileText className="h-7 w-7 text-blue-500" />, 
-		title: "Tipos de Comprobantes", 
-		desc: "Configura folios y series para facturas, notas de crédito, recibos y pagos.", 
-		action: "SERIES Y FOLIOS", 
-		actionColor: "text-blue-400",
-		route: "/pages/settings/InvoiceType"
-	},
-	{
-		icon: <Puzzle className="h-7 w-7 text-blue-500" />, 
-		title: "Addendas", 
-		desc: "Configuración de campos extra requeridos por clientes comerciales específicos.", 
-		action: "CONFIGURAR ADDENDAS", 
-		actionColor: "text-blue-400",
-		route: "/pages/settings/addenda"
-	},
-	{
-		icon: <Users className="h-7 w-7 text-blue-500" />, 
-		title: "Usuarios", 
-		desc: "Asigna roles y permisos específicos para tu equipo de contabilidad y ventas.", 
-		action: "GESTIONAR ROLES", 
-		actionColor: "text-blue-400",
-		route: "/pages/settings/users"
-	},
-	{
-		icon: <Banknote className="h-7 w-7 text-blue-500" />, 
-		title: "Cuentas de Banco", 
-		desc: "Registra CLABES interbancarias para que aparezcan en tus facturas para cobro.", 
-		action: "CUENTAS DE PAGO", 
-		actionColor: "text-blue-400",
-		route: "/pages/settings/bankAccount"
-	},
-	{
-		icon: <Settings className="h-7 w-7 text-blue-500" />, 
-		title: "Ajustes Generales", 
-		desc: "Notificaciones por correo, idioma del sistema y temas visuales.", 
-		action: "PREFERENCIAS", 
-		actionColor: "text-blue-400",
-		route: "/pages/settings/generalSettings"
-	},
-];
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { SearchX } from "lucide-react";
+import AppLayout from "@/app/components/layout/AppLayout";
+import SettingsHeader from "@/app/components/settings/SettingsHeader";
+import SettingsStats from "@/app/components/settings/SettingsStats";
+import SettingsSearch from "@/app/components/settings/SettingsSearch";
+import SettingsSection from "@/app/components/settings/SettingsSection";
+import FavoriteSettings from "@/app/components/settings/FavoriteSettings";
+import RecentSettings from "@/app/components/settings/RecentSettings";
+import { settingsCatalog } from "@/src/data/settingsCatalog";
+import { useAuth } from "@/src/hooks/useAuth";
+import { useSettingsFavorites } from "@/src/hooks/useSettingsFavorites";
+import { useRecentSettings } from "@/src/hooks/useRecentSettings";
+import type { SettingItem } from "@/src/types/settings";
+
+const allItems: SettingItem[] = settingsCatalog.flatMap((category) => category.items);
+
+function findItem(id: string): SettingItem | undefined {
+  return allItems.find((item) => item.id === id);
+}
 
 export default function SettingsPage() {
-	const router = useRouter();
+  const router = useRouter();
+  const { user } = useAuth();
+  const { favorites, toggleFavorite, isFavorite } = useSettingsFavorites();
+  const { recent, addRecent } = useRecentSettings();
+  const [search, setSearch] = useState("");
 
-	const handleNavigation = (route: string) => {
-		router.push(route);
-	};
+  const normalizedSearch = search.trim().toLowerCase();
 
-	return (
-		<AppLayout>
-			<div className="min-h-screen bg-[#071321] text-white rounded-2xl">
-				<div className="flex justify-between items-center mb-2">
-					<div className="flex items-center gap-2">
-						<div className="bg-blue-700 rounded-full p-2"><Settings className="h-6 w-6 text-white" /></div>
-						<span className="text-xl font-bold text-blue-400 tracking-tight">FACTURAPRO</span>
-					</div>
-					<button className="bg-blue-500 hover:bg-blue-400 px-4 py-2 rounded-lg text-white text-sm font-semibold shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-all duration-300 hover:scale-105">Soporte</button>
-				</div>
-				<h1 className="text-4xl font-extrabold mt-2 mb-2">Panel de Configuración</h1>
-				<p className="text-gray-400 mb-8">Gestiona la identidad fiscal de tu empresa, integra métodos de pago y personaliza la emisión de comprobantes digitales.</p>
+  const filteredCategories = useMemo(() => {
+    if (!normalizedSearch) return settingsCatalog;
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-					{configCards.slice(0, 9).map((card, i) => (
-						<div 
-							key={i} 
-							className="bg-[#1a222c] border-2 border-[#16304f] rounded-2xl p-6 flex flex-col gap-3 min-h-[170px] transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-500/50 cursor-pointer"
-						>
-							<div>{card.icon}</div>
-							<div className="font-bold text-lg mb-1">{card.title}</div>
-							<div className="text-gray-400 text-sm flex-1">{card.desc}</div>
-							<button 
-								onClick={() => handleNavigation(card.route)}
-								className={`mt-2 text-xs font-bold tracking-wide ${card.actionColor} hover:underline text-left transition-all duration-200 hover:translate-x-1`}
-							>
-								{card.action} &gt;
-							</button>
-						</div>
-					))}
-				</div>
+    return settingsCatalog
+      .map((category) => ({
+        ...category,
+        items: category.items.filter(
+          (item) =>
+            item.title.toLowerCase().includes(normalizedSearch) ||
+            item.description.toLowerCase().includes(normalizedSearch)
+        ),
+      }))
+      .filter((category) => category.items.length > 0);
+  }, [normalizedSearch]);
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 justify-center">
-					<div></div>
-					<div className="bg-[#1a222c] border-2 border-[#16304f] rounded-2xl p-6 flex flex-col gap-3 min-h-[170px] transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-500/50 cursor-pointer">
-						<div><MessageCircle className="h-7 w-7 text-blue-500"/></div>
-						<div className="font-bold text-lg mb-1">Observaciones</div>
-						<div className="text-gray-400 text-sm flex-1">Define textos predeterminados para términos y condiciones en tus PDF.</div>
-						<button onClick={() => handleNavigation("/pages/settings/observations")} className="mt-2 text-xs font-bold tracking-wide text-blue-400 hover:underline text-left transition-all duration-200 hover:translate-x-1">EDITAR TEXTOS &gt;</button>
-					</div>
-				</div>
-			</div>
-		</AppLayout>
-	);
+  const favoriteItems = useMemo(
+    () => allItems.filter((item) => favorites.includes(item.id)),
+    [favorites]
+  );
+
+  const hasResults = filteredCategories.some((category) => category.items.length > 0);
+
+  const handleNavigate = (item: SettingItem) => {
+    addRecent(item.id, user?.name ?? "Usuario");
+    router.push(item.href);
+  };
+
+  return (
+    <AppLayout>
+      <div className="min-h-screen rounded-lg bg-slate-50 p-3">
+        <SettingsHeader />
+        <SettingsStats />
+        <SettingsSearch value={search} onChange={setSearch} />
+
+        {!normalizedSearch && (
+          <FavoriteSettings
+            items={favoriteItems}
+            onToggleFavorite={toggleFavorite}
+            onNavigate={handleNavigate}
+          />
+        )}
+
+        {!hasResults ? (
+          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white p-16 text-center shadow-sm">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-50">
+              <SearchX className="h-7 w-7 text-blue-400" />
+            </div>
+            <p className="font-semibold text-slate-900">
+              No se encontraron configuraciones para &ldquo;{search}&rdquo;
+            </p>
+            <p className="text-sm text-slate-500">Intenta con otro término de búsqueda.</p>
+          </div>
+        ) : (
+          filteredCategories.map((category) => (
+            <SettingsSection
+              key={category.id}
+              label={category.label}
+              items={category.items}
+              isFavorite={isFavorite}
+              onToggleFavorite={toggleFavorite}
+              onNavigate={handleNavigate}
+            />
+          ))
+        )}
+
+        <RecentSettings entries={recent} findItem={findItem} onNavigate={handleNavigate} />
+      </div>
+    </AppLayout>
+  );
 }

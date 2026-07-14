@@ -52,7 +52,7 @@ function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
   
   return (
     <div className="mb-2 flex items-center gap-1">
-      <label className="text-sm font-bold uppercase tracking-wide text-slate-400">
+      <label className="text-sm font-bold uppercase tracking-wide text-[#475569]">
         {children}
       </label>
       {withInfo && (
@@ -63,7 +63,7 @@ function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
             onMouseLeave={() => setShowTooltip(false)}
           />
           {showTooltip && (
-            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-white border border-[#E2E8F0] p-2 text-xs text-[#475569] shadow-lg">
               {infoText}
             </div>
           )}
@@ -435,49 +435,49 @@ export default function CatalogoClientes() {
           onClick={closeBulkUploadModal}
         />
         
-        <div className="relative max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-            <h2 className="text-xl font-bold text-white">Carga Masiva de Clientes</h2>
+        <div className="relative max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
+            <h2 className="text-xl font-bold text-[#0F172A]">Carga Masiva de Clientes</h2>
             <button
               onClick={closeBulkUploadModal}
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-[#0d1b35] hover:text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-700"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           <div className="p-6">
-            <div className="mb-6 p-4 rounded-xl bg-[#0a1424] border border-[#173156]">
-              <p className="text-slate-300 text-sm leading-relaxed">
+            <div className="mb-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+              <p className="text-[#475569] text-sm leading-relaxed">
                 Aquí podrás subir tu catálogo de clientes de forma masiva, a través de un archivo .csv. 
-                En <span className="text-blue-400 font-medium">Ejemplo de carga masiva</span> se descargará la plantilla base 
+                En <span className="text-blue-600 font-medium">Ejemplo de carga masiva</span> se descargará la plantilla base 
                 y un documento con los detalles para el llenado del archivo.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-              <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
+              <button className="flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E2E8F0] px-4 py-3 text-[#0F172A] hover:bg-[#F8FAFC] transition-colors hover:border-[#CBD5E1] shadow-sm">
                 <FileTextIcon className="h-5 w-5 text-[#1d9bf0]" />
                 <span className="text-sm font-medium">Ejemplo de carga masiva</span>
               </button>
               
-              <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
+              <button className="flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E2E8F0] px-4 py-3 text-[#0F172A] hover:bg-[#F8FAFC] transition-colors hover:border-[#CBD5E1] shadow-sm">
                 <Download className="h-5 w-5 text-[#1d9bf0]" />
                 <span className="text-sm font-medium">Descarga .csv</span>
               </button>
               
-              <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
+              <button className="flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E2E8F0] px-4 py-3 text-[#0F172A] hover:bg-[#F8FAFC] transition-colors hover:border-[#CBD5E1] shadow-sm">
                 <Upload className="h-5 w-5 text-[#1d9bf0]" />
                 <span className="text-sm font-medium">Subir archivo .csv</span>
               </button>
               
-              <button className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors hover:border-[#3c83f666]">
+              <button className="flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E2E8F0] px-4 py-3 text-[#0F172A] hover:bg-[#F8FAFC] transition-colors hover:border-[#CBD5E1] shadow-sm">
                 <Activity className="h-5 w-5 text-[#1d9bf0]" />
                 <span className="text-sm font-medium">Ver estado de los procesos</span>
               </button>
             </div>
 
-            <div className="border-t border-[#173156] my-6"></div>
+            <div className="border-t border-[#E2E8F0] my-6"></div>
 
             <div className="flex gap-4">
               <button className="flex-1 rounded-xl bg-blue-500 px-4 py-2.5 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-colors duration-200 hover:bg-blue-400">
@@ -495,7 +495,7 @@ export default function CatalogoClientes() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#151c24] text-white p-3 rounded-lg">
+      <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] p-3 rounded-lg">
         {/* Barra de carga */}
         {isLoading && (
           <div className="fixed top-0 left-0 right-0 z-50">
@@ -507,8 +507,8 @@ export default function CatalogoClientes() {
         
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-extrabold">Catálogo de Clientes</h1>
-            <p className="text-gray-400">
+            <h1 className="text-3xl font-extrabold text-[#0F172A]">Catálogo de Clientes</h1>
+            <p className="text-[#64748B]">
               Gestiona la base de datos de tus socios comerciales, consulta sus datos fiscales y realiza cargas masivas de información.
             </p>
           </div>
@@ -538,7 +538,7 @@ export default function CatalogoClientes() {
             onChange={e => setSearch(e.target.value)}
           />
           <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-sm">MOSTRAR</span>
+            <span className="text-[#64748B] text-sm">MOSTRAR</span>
             <select 
               className={selectStyle}
               value={recordsPerPage}
@@ -554,9 +554,9 @@ export default function CatalogoClientes() {
           </div>
         </div>
 
-        <div className="bg-[#232b36] rounded-xl overflow-hidden mb-8">
+        <div className="bg-white rounded-xl overflow-hidden mb-8 border border-[#E2E8F0] shadow-sm">
           <table className="w-full text-sm">
-            <thead className="bg-[#1a222c] text-gray-400">
+            <thead className="bg-[#F1F5F9] text-[#475569]">
               <tr>
                 <th className="p-3 text-left">ACCIONES</th>
                 <th className="p-3 text-left">NOMBRE / RAZÓN SOCIAL</th>
@@ -571,38 +571,38 @@ export default function CatalogoClientes() {
                   <td colSpan={5} className="p-8 text-center">
                     <div className="flex items-center justify-center gap-3">
                       <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-                      <span className="text-gray-400">Cargando clientes...</span>
+                      <span className="text-[#64748B]">Cargando clientes...</span>
                     </div>
                   </td>
                 </tr>
               ) : paginatedClients.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-400">
+                  <td colSpan={5} className="p-8 text-center text-[#64748B]">
                     {search ? "No se encontraron clientes que coincidan con tu búsqueda" : "No hay clientes registrados"}
                   </td>
                 </tr>
               ) : (
                 paginatedClients.map((client) => (
-                  <tr key={client.id} className="border-t border-[#232b36] hover:bg-[#1a222c] transition-colors">
+                  <tr key={client.id} className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC] transition-colors">
                     <td className="p-3">
                       <div className="flex gap-2">
-                        <button 
+                        <button
                           onClick={() => openClientModal(client)}
-                          className="text-gray-400 hover:text-blue-400 transition-colors"
+                          className="text-[#94A3B8] hover:text-blue-600 transition-colors"
                           title="Editar cliente"
                         >
                           <SquarePen className="h-4 w-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => client.id && handleDeleteClient(client.id)}
-                          className="text-gray-400 hover:text-red-400 transition-colors"
+                          className="text-[#94A3B8] hover:text-red-500 transition-colors"
                           title="Eliminar cliente"
                         >
                           <Trash className="h-4 w-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleViewClient(client)}
-                          className="text-gray-400 hover:text-green-400 transition-colors"
+                          className="text-[#94A3B8] hover:text-emerald-600 transition-colors"
                           title="Ver detalles"
                         >
                           <Eye className="h-4 w-4" />
@@ -611,18 +611,18 @@ export default function CatalogoClientes() {
                     </td>
                     <td className="p-3 font-bold">
                       <div className="flex items-center gap-3">
-                        <span className="bg-blue-900 text-blue-200 rounded-lg px-2 py-1 text-xs font-bold">
+                        <span className="bg-blue-50 text-blue-700 rounded-lg px-2 py-1 text-xs font-bold">
                           {(client.name || '').substring(0, 2).toUpperCase()}
                         </span>
                         {client.name}
                       </div>
                     </td>
                     <td className="p-3">
-                      <span className="bg-[#1e293b] text-blue-300 px-2 py-1 rounded text-xs font-mono cursor-pointer hover:underline">
+                      <span className="bg-[#EFF6FF] text-blue-700 px-2 py-1 rounded text-xs font-mono cursor-pointer hover:underline">
                         {client.rfc}
                       </span>
                     </td>
-                    <td className="p-3 text-gray-300">{client.email}</td>
+                    <td className="p-3 text-[#475569]">{client.email}</td>
                     <td className="p-3">{client.codigo_postal}</td>
                   </tr>
                 ))
@@ -632,7 +632,7 @@ export default function CatalogoClientes() {
           
           {/* Paginación */}
           {filteredClients.length > 0 && (
-            <div className="flex justify-between items-center p-4 border-t border-[#232b36] text-gray-400 text-sm">
+            <div className="flex justify-between items-center p-4 border-t border-[#E2E8F0] text-[#64748B] text-sm">
               <span>
                 Mostrando {paginatedClients.length} de {filteredClients.length} registros
               </span>
@@ -640,10 +640,10 @@ export default function CatalogoClientes() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded transition-colors ${
-                    currentPage === 1 
-                      ? 'bg-[#1a222c] text-gray-600 cursor-not-allowed' 
-                      : 'bg-[#1a222c] hover:bg-blue-600 hover:text-white'
+                  className={`px-3 py-1 rounded transition-colors border ${
+                    currentPage === 1
+                      ? 'bg-slate-100 border-[#E2E8F0] text-slate-400 cursor-not-allowed'
+                      : 'bg-white border-[#E2E8F0] text-[#475569] hover:bg-blue-600 hover:text-white hover:border-blue-600'
                   }`}
                 >
                   Anterior
@@ -665,10 +665,10 @@ export default function CatalogoClientes() {
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1 rounded transition-colors ${
+                      className={`px-3 py-1 rounded transition-colors border ${
                         currentPage === pageNum
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-[#1a222c] hover:bg-blue-600 hover:text-white'
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'bg-white border-[#E2E8F0] text-[#475569] hover:bg-blue-600 hover:text-white hover:border-blue-600'
                       }`}
                     >
                       {pageNum}
@@ -679,10 +679,10 @@ export default function CatalogoClientes() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages || totalPages === 0}
-                  className={`px-3 py-1 rounded transition-colors ${
+                  className={`px-3 py-1 rounded transition-colors border ${
                     currentPage === totalPages || totalPages === 0
-                      ? 'bg-[#1a222c] text-gray-600 cursor-not-allowed'
-                      : 'bg-[#1a222c] hover:bg-blue-600 hover:text-white'
+                      ? 'bg-slate-100 border-[#E2E8F0] text-slate-400 cursor-not-allowed'
+                      : 'bg-white border-[#E2E8F0] text-[#475569] hover:bg-blue-600 hover:text-white hover:border-blue-600'
                   }`}
                 >
                   Siguiente
@@ -693,19 +693,19 @@ export default function CatalogoClientes() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-          <div className="bg-[#1a222c] rounded-xl p-6 flex flex-col items-start border-2 border-[#16304f]">
-            <span className="text-base font-bold mb-2">Resumen de Actividad</span>
-            <span className="text-gray-300 mb-2">
+          <div className="bg-white rounded-xl p-6 flex flex-col items-start border border-[#E2E8F0] shadow-sm">
+            <span className="text-base font-bold text-[#0F172A] mb-2">Resumen de Actividad</span>
+            <span className="text-[#64748B] mb-2">
               Has agregado {clients.length} clientes en total. Gestiona tu catálogo de forma eficiente.
             </span>
-            <a href="#" className="text-blue-400 hover:underline text-sm">Ver reporte detallado</a>
+            <a href="#" className="text-blue-600 hover:underline text-sm">Ver reporte detallado</a>
           </div>
-          <div className="bg-[#1a222c] rounded-xl p-6 flex flex-col items-start border-2 border-[#16304f]">
-            <span className="text-base font-bold mb-2">ESTADÍSTICAS</span>
-            <span className="text-3xl font-extrabold mb-2">{clients.length} Clientes</span>
-            <span className="text-gray-300 mb-2">Registrados en el sistema.</span>
+          <div className="bg-white rounded-xl p-6 flex flex-col items-start border border-[#E2E8F0] shadow-sm">
+            <span className="text-base font-bold text-[#64748B] uppercase tracking-wide mb-2">Estadísticas</span>
+            <span className="text-3xl font-extrabold text-[#0F172A] mb-2">{clients.length} Clientes</span>
+            <span className="text-[#64748B] mb-2">Registrados en el sistema.</span>
             <div className="flex gap-1 mt-2">
-              <span className="bg-blue-800 text-white rounded-full px-2 py-1 text-xs font-bold">
+              <span className="bg-blue-50 text-blue-700 rounded-full px-2 py-1 text-xs font-bold">
                 {clients.length > 0 ? "+" + clients.length : "0"}
               </span>
             </div>
@@ -721,14 +721,14 @@ export default function CatalogoClientes() {
             onClick={closeClientModal}
           />
           
-          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-              <h2 className="text-xl font-bold text-white">
+          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
+              <h2 className="text-xl font-bold text-[#0F172A]">
                 {editingClientId ? 'Editar Cliente' : 'Agregar Nuevo Cliente'}
               </h2>
               <button
                 onClick={closeClientModal}
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-[#0d1b35] hover:text-white"
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-700"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -986,7 +986,7 @@ export default function CatalogoClientes() {
               </div>
             </div>
 
-            <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#173156] bg-[#071321] px-6 py-4">
+            <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
               <button
                 onClick={closeClientModal}
                 className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] transition-colors duration-200 hover:bg-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1021,12 +1021,12 @@ export default function CatalogoClientes() {
             onClick={cancelDelete}
           />
           
-          <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[#173156] px-6 py-4">
-              <h2 className="text-xl font-bold text-white">Confirmar Eliminación</h2>
+          <div className="relative max-w-md w-full rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
+              <h2 className="text-xl font-bold text-[#0F172A]">Confirmar Eliminación</h2>
               <button
                 onClick={cancelDelete}
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-[#0d1b35] hover:text-white"
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-700"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1038,18 +1038,18 @@ export default function CatalogoClientes() {
                   <Trash className="h-6 w-6 text-red-400" />
                 </div>
                 <div>
-                  <p className="text-white font-medium">¿Estás seguro de eliminar este cliente?</p>
-                  <p className="text-gray-400 text-sm mt-1">
+                  <p className="text-[#0F172A] font-medium">¿Estás seguro de eliminar este cliente?</p>
+                  <p className="text-[#64748B] text-sm mt-1">
                     Esta acción no se puede deshacer. Se eliminará permanentemente el cliente y todos sus datos asociados.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-4 border-t border-[#173156] px-6 py-4">
+            <div className="flex justify-end gap-4 border-t border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
               <button
                 onClick={cancelDelete}
-                className="rounded-xl bg-[#0d1b35] px-6 py-2 font-medium text-white transition-colors duration-200 hover:bg-[#16233b]"
+                className="rounded-xl border border-[#E2E8F0] bg-white px-6 py-2 font-medium text-[#475569] transition-colors duration-200 hover:bg-slate-50"
                 disabled={isLoading}
               >
                 Cancelar
