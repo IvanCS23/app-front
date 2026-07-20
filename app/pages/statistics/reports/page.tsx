@@ -26,21 +26,21 @@ type LabelProps = {
 
 function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
   const [showTooltip, setShowTooltip] = useState(false);
-  
+
   return (
     <div className="mb-2 flex items-center gap-1">
-      <label className="text-sm font-bold uppercase tracking-wide text-slate-400">
+      <label className="text-sm font-bold uppercase tracking-wide text-[#0F172A]">
         {children}
       </label>
       {withInfo && (
         <div className="relative">
-          <Info 
-            className="h-4 w-4 cursor-help text-[#1d9bf0]" 
+          <Info
+            className="h-4 w-4 cursor-help text-blue-600"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           />
           {showTooltip && (
-            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-white border border-[#E2E8F0] p-2 text-xs text-[#475569] shadow-lg">
               {infoText}
             </div>
           )}
@@ -144,28 +144,28 @@ const MultiSelect = ({ options, selected, onChange, placeholder, disabled = fals
       <button
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
-        className={`box box-input flex items-center justify-between ${disabled ? "opacity-50 cursor-not-allowed bg-[#0a1424]" : ""}`}
+        className={`box box-input flex items-center justify-between ${disabled ? "opacity-50 cursor-not-allowed bg-slate-100" : ""}`}
       >
-        <span className={selected.length === 0 ? "text-slate-500" : "text-white"}>
+        <span className={selected.length === 0 ? "text-slate-500" : "text-[#0F172A]"}>
           {getSelectedLabels()}
         </span>
         <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
       </button>
-      
+
       {isOpen && !disabled && (
-        <div className="absolute z-50 w-full mt-1 rounded-xl border border-[#173156] bg-[#0a1424] shadow-xl overflow-hidden">
+        <div className="absolute z-50 w-full mt-1 rounded-xl border border-[#E2E8F0] bg-white shadow-xl overflow-hidden">
           {options.map((option) => (
             <label
               key={option.value}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-[#0d1b35] cursor-pointer transition-colors border-b border-[#173156] last:border-b-0"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-[#F8FAFC] cursor-pointer transition-colors border-b border-[#E2E8F0] last:border-b-0"
             >
               <input
                 type="checkbox"
                 checked={selected.includes(option.value)}
                 onChange={() => toggleOption(option.value)}
-                className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500"
+                className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500"
               />
-              <span className="text-white text-sm">{option.label}</span>
+              <span className="text-[#0F172A] text-sm">{option.label}</span>
             </label>
           ))}
         </div>
@@ -193,13 +193,13 @@ const AlertModal = ({ isOpen, onClose, title, message, type }: { isOpen: boolean
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
+      <div className="relative max-w-md w-full rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
         <div className="p-6 text-center">
           <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${getBgColor()}`}>
             {getIcon()}
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
-          <p className="text-slate-400 mb-6">{message}</p>
+          <h2 className="text-xl font-bold text-[#0F172A] mb-2">{title}</h2>
+          <p className="text-[#64748B] mb-6">{message}</p>
           <button onClick={onClose} className="w-full rounded-xl bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-400">Aceptar</button>
         </div>
       </div>
@@ -219,7 +219,7 @@ export default function Reportes() {
   const [incluirPrimerConcepto, setIncluirPrimerConcepto] = useState("primer_concepto");
   const [fechaInicial, setFechaInicial] = useState("");
   const [fechaFinal, setFechaFinal] = useState("");
-  
+
   // Estados para loader y alerta
   const [isLoading, setIsLoading] = useState(false);
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: "", message: "", type: "success" as "success" | "error" | "warning" });
@@ -246,11 +246,11 @@ export default function Reportes() {
 
   const handleDescargarReporte = () => {
     setIsLoading(true);
-    
+
     setTimeout(() => {
       setIsLoading(false);
       showAlert("Reporte generado", "El reporte se ha descargado correctamente", "success");
-      
+
       console.log("Generando reporte con filtros:", {
         estatus,
         tipoComprobante,
@@ -272,15 +272,15 @@ export default function Reportes() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#071321] text-white">
+      <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
           <div className="mb-4">
-            <h1 className="text-3xl font-extrabold text-white">Reportes</h1>
-            <p className="mt-2 text-slate-400">Genera reportes personalizados de tus facturas y documentos fiscales.</p>
+            <h1 className="text-3xl font-extrabold text-[#0F172A]">Reportes</h1>
+            <p className="mt-2 text-[#64748B]">Genera reportes personalizados de tus facturas y documentos fiscales.</p>
           </div>
 
           {/* Contenedor de filtros */}
-          <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.01)]">
+          <div className="rounded-2xl border-2 border-[#E2E8F0] bg-white p-6 shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* 1. Estatus de las facturas */}
               <div>

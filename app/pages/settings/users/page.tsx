@@ -32,21 +32,21 @@ type LabelProps = {
 
 function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
   const [showTooltip, setShowTooltip] = useState(false);
-  
+
   return (
     <div className="mb-2 flex items-center gap-1">
-      <label className="text-sm font-bold uppercase tracking-wide text-slate-400">
+      <label className="text-sm font-bold uppercase tracking-wide text-[#0F172A]">
         {children}
       </label>
       {withInfo && (
         <div className="relative">
-          <Info 
-            className="h-4 w-4 cursor-help text-[#1d9bf0]" 
+          <Info
+            className="h-4 w-4 cursor-help text-blue-600"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           />
           {showTooltip && (
-            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-white border border-[#E2E8F0] p-2 text-xs text-[#475569] shadow-lg">
               {infoText}
             </div>
           )}
@@ -174,13 +174,13 @@ const AlertModal = ({ isOpen, onClose, title, message, type }: { isOpen: boolean
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
+      <div className="relative max-w-md w-full rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
         <div className="p-6 text-center">
           <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${getBgColor()}`}>
             {getIcon()}
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
-          <p className="text-slate-400 mb-6">{message}</p>
+          <h2 className="text-xl font-bold text-[#0F172A] mb-2">{title}</h2>
+          <p className="text-[#64748B] mb-6">{message}</p>
           <button onClick={onClose} className="w-full rounded-xl bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-400">Aceptar</button>
         </div>
       </div>
@@ -195,13 +195,13 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }: { isOpen: 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
+      <div className="relative max-w-md w-full rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
         <div className="p-6 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-500/20">
             <AlertCircle className="h-10 w-10 text-yellow-500" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
-          <p className="text-slate-400 mb-6">{message}</p>
+          <h2 className="text-xl font-bold text-[#0F172A] mb-2">{title}</h2>
+          <p className="text-[#64748B] mb-6">{message}</p>
           <div className="flex gap-4">
             <button onClick={onClose} className="flex-1 rounded-xl bg-gray-600 px-4 py-2 font-medium text-white hover:bg-gray-500">Cancelar</button>
             <button onClick={onConfirm} className="flex-1 rounded-xl bg-red-500 px-4 py-2 font-medium text-white hover:bg-red-400">Eliminar</button>
@@ -220,7 +220,7 @@ const UserModal = ({ isOpen, onClose, onSave, editingUser }: { isOpen: boolean; 
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // Permisos
   const [crearFacturas, setCrearFacturas] = useState(editingUser?.permisos?.crearFacturas || false);
   const [consultar, setConsultar] = useState(editingUser?.permisos?.consultar || false);
@@ -229,7 +229,7 @@ const UserModal = ({ isOpen, onClose, onSave, editingUser }: { isOpen: boolean; 
   const [carritoCompras, setCarritoCompras] = useState(editingUser?.permisos?.carritoCompras || false);
   const [cancelarFacturas, setCancelarFacturas] = useState(editingUser?.permisos?.cancelarFacturas || false);
   const [mostrarIngresosGastos, setMostrarIngresosGastos] = useState(editingUser?.permisos?.mostrarIngresosGastos || false);
-  
+
   // Menú lateral
   const [menuFacturas, setMenuFacturas] = useState(editingUser?.menuLateral?.facturas || false);
   const [menuCatalogos, setMenuCatalogos] = useState(editingUser?.menuLateral?.catalogos || false);
@@ -295,11 +295,11 @@ const UserModal = ({ isOpen, onClose, onSave, editingUser }: { isOpen: boolean; 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-          <h2 className="text-xl font-bold text-white">{editingUser ? "Editar Usuario" : "Datos de Usuario"}</h2>
-          <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-[#0d1b35] hover:text-white">
+
+      <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
+          <h2 className="text-xl font-bold text-[#0F172A]">{editingUser ? "Editar Usuario" : "Datos de Usuario"}</h2>
+          <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -318,7 +318,7 @@ const UserModal = ({ isOpen, onClose, onSave, editingUser }: { isOpen: boolean; 
               <Label>Contraseña:</Label>
               <div className="relative">
                 <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className={`${inputStyle} pr-12`} />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
@@ -327,7 +327,7 @@ const UserModal = ({ isOpen, onClose, onSave, editingUser }: { isOpen: boolean; 
               <Label>Confirmar Contraseña:</Label>
               <div className="relative">
                 <input type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirme su contraseña" className={`${inputStyle} pr-12`} />
-                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                   {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
@@ -335,67 +335,67 @@ const UserModal = ({ isOpen, onClose, onSave, editingUser }: { isOpen: boolean; 
           </div>
 
           <div className="mt-6">
-            <h3 className="text-md font-bold text-white mb-4 border-b border-[#173156] pb-2">Permisos</h3>
+            <h3 className="text-md font-bold text-[#0F172A] mb-4 border-b border-[#E2E8F0] pb-2">Permisos</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={crearFacturas} onChange={(e) => setCrearFacturas(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
-                <span className="text-sm text-slate-300">Crear Facturas</span>
+                <input type="checkbox" checked={crearFacturas} onChange={(e) => setCrearFacturas(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
+                <span className="text-sm text-[#475569]">Crear Facturas</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={consultar} onChange={(e) => setConsultar(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
-                <span className="text-sm text-slate-300">Consultar</span>
+                <input type="checkbox" checked={consultar} onChange={(e) => setConsultar(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
+                <span className="text-sm text-[#475569]">Consultar</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={crearNominas} onChange={(e) => setCrearNominas(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
-                <span className="text-sm text-slate-300">Crear Nóminas</span>
+                <input type="checkbox" checked={crearNominas} onChange={(e) => setCrearNominas(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
+                <span className="text-sm text-[#475569]">Crear Nóminas</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={perfilFiscal} onChange={(e) => setPerfilFiscal(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
-                <span className="text-sm text-slate-300">Perfil Fiscal</span>
+                <input type="checkbox" checked={perfilFiscal} onChange={(e) => setPerfilFiscal(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
+                <span className="text-sm text-[#475569]">Perfil Fiscal</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={carritoCompras} onChange={(e) => setCarritoCompras(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
-                <span className="text-sm text-slate-300">Carrito de compras</span>
+                <input type="checkbox" checked={carritoCompras} onChange={(e) => setCarritoCompras(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
+                <span className="text-sm text-[#475569]">Carrito de compras</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={cancelarFacturas} onChange={(e) => setCancelarFacturas(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
-                <span className="text-sm text-slate-300">Cancelar facturas</span>
+                <input type="checkbox" checked={cancelarFacturas} onChange={(e) => setCancelarFacturas(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
+                <span className="text-sm text-[#475569]">Cancelar facturas</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={mostrarIngresosGastos} onChange={(e) => setMostrarIngresosGastos(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
-                <span className="text-sm text-slate-300">Mostrar Ingresos y gastos</span>
+                <input type="checkbox" checked={mostrarIngresosGastos} onChange={(e) => setMostrarIngresosGastos(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
+                <span className="text-sm text-[#475569]">Mostrar Ingresos y gastos</span>
               </label>
             </div>
           </div>
 
           <div className="mt-6">
-            <h3 className="text-md font-bold text-white mb-4 border-b border-[#173156] pb-2">Menú lateral</h3>
+            <h3 className="text-md font-bold text-[#0F172A] mb-4 border-b border-[#E2E8F0] pb-2">Menú lateral</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={menuFacturas} onChange={(e) => setMenuFacturas(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
-                <span className="text-sm text-slate-300">Facturas</span>
+                <input type="checkbox" checked={menuFacturas} onChange={(e) => setMenuFacturas(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
+                <span className="text-sm text-[#475569]">Facturas</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={menuCatalogos} onChange={(e) => setMenuCatalogos(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
-                <span className="text-sm text-slate-300">Catálogos</span>
+                <input type="checkbox" checked={menuCatalogos} onChange={(e) => setMenuCatalogos(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
+                <span className="text-sm text-[#475569]">Catálogos</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={menuCuentas} onChange={(e) => setMenuCuentas(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
-                <span className="text-sm text-slate-300">Cuentas</span>
+                <input type="checkbox" checked={menuCuentas} onChange={(e) => setMenuCuentas(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
+                <span className="text-sm text-[#475569]">Cuentas</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={menuEstadisticas} onChange={(e) => setMenuEstadisticas(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
-                <span className="text-sm text-slate-300">Estadísticas</span>
+                <input type="checkbox" checked={menuEstadisticas} onChange={(e) => setMenuEstadisticas(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
+                <span className="text-sm text-[#475569]">Estadísticas</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={menuCotizaciones} onChange={(e) => setMenuCotizaciones(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
-                <span className="text-sm text-slate-300">Cotizaciones</span>
+                <input type="checkbox" checked={menuCotizaciones} onChange={(e) => setMenuCotizaciones(e.target.checked)} className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500" />
+                <span className="text-sm text-[#475569]">Cotizaciones</span>
               </label>
             </div>
           </div>
         </div>
 
-        <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#173156] bg-[#071321] px-6 py-4">
+        <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
           <button onClick={onClose} className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] hover:bg-red-400">Cancelar</button>
           <button onClick={handleSubmit} className="rounded-xl bg-blue-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] hover:bg-blue-400">Guardar</button>
         </div>
@@ -451,21 +451,21 @@ export default function Users() {
 
   const getRolColor = (rol: string) => {
     switch (rol) {
-      case "Administrador": return "bg-red-500/20 text-red-400";
-      case "Contador": return "bg-blue-500/20 text-blue-400";
-      case "Vendedor": return "bg-emerald-500/20 text-emerald-400";
-      default: return "bg-gray-500/20 text-gray-400";
+      case "Administrador": return "bg-red-100 text-red-700";
+      case "Contador": return "bg-blue-100 text-blue-700";
+      case "Vendedor": return "bg-emerald-100 text-emerald-700";
+      default: return "bg-slate-100 text-slate-700";
     }
   };
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#071321] text-white">
+      <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
           <div className="mb-4 flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-extrabold text-white">Usuarios</h1>
-              <p className="mt-2 text-slate-400">Gestiona los usuarios y sus permisos dentro del sistema.</p>
+              <h1 className="text-3xl font-extrabold text-[#0F172A]">Usuarios</h1>
+              <p className="mt-2 text-[#64748B]">Gestiona los usuarios y sus permisos dentro del sistema.</p>
             </div>
             <button onClick={() => { setEditingUser(null); setIsModalOpen(true); }} className="flex items-center gap-2 rounded-xl bg-blue-500 px-6 py-3 font-semibold text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] hover:bg-blue-400">
               <Plus className="h-5 w-5" />Agregar Usuario
@@ -474,33 +474,33 @@ export default function Users() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {usuarios.map((usuario) => (
-              <div key={usuario.id} className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.01)] hover:border-blue-500/40 ransition-all duration-300 hover:-translate-y-2 cursor-pointer">
+              <div key={usuario.id} className="rounded-2xl border-2 border-[#E2E8F0] bg-white p-6 shadow-sm hover:border-blue-200 ransite-all duration-300 hover:-translate-y-2 cursor-pointer">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/20">
-                      <User className="h-6 w-6 text-blue-400" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50">
+                      <User className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">{usuario.nombre}</h3>
+                      <h3 className="text-lg font-bold text-[#0F172A]">{usuario.nombre}</h3>
                       <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${getRolColor(usuario.rol)}`}>{usuario.rol}</span>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => handleEditUser(usuario)} className="text-slate-400 hover:text-blue-400 transition-colors" title="Editar"><Pencil className="h-5 w-5" /></button>
-                    <button onClick={() => handleDeleteUser(usuario.id, usuario.nombre)} className="text-slate-400 hover:text-red-400 transition-colors" title="Eliminar"><Trash className="h-5 w-5" /></button>
+                    <button onClick={() => handleEditUser(usuario)} className="text-slate-400 hover:text-blue-600 transition-colors" title="Editar"><Pencil className="h-5 w-5" /></button>
+                    <button onClick={() => handleDeleteUser(usuario.id, usuario.nombre)} className="text-slate-400 hover:text-red-500 transition-colors" title="Eliminar"><Trash className="h-5 w-5" /></button>
                   </div>
                 </div>
-                
-                <div className="space-y-2 pt-2 border-t border-[#173156]">
+
+                <div className="space-y-2 pt-2 border-t border-[#E2E8F0]">
                   <div className="flex items-center gap-2 text-sm">
                     <Building2 className="h-4 w-4 text-slate-500" />
-                    <span className="text-slate-400">Empresa:</span>
-                    <span className="text-white">{usuario.empresa}</span>
+                    <span className="text-[#64748B]">Empresa:</span>
+                    <span className="text-[#0F172A]">{usuario.empresa}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Mail className="h-4 w-4 text-slate-500" />
-                    <span className="text-slate-400">Email:</span>
-                    <span className="text-white">{usuario.email}</span>
+                    <span className="text-[#64748B]">Email:</span>
+                    <span className="text-[#0F172A]">{usuario.email}</span>
                   </div>
                 </div>
               </div>

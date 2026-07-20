@@ -58,7 +58,7 @@ function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
       {withInfo && (
         <div className="relative">
           <Info 
-            className="h-4 w-4 cursor-help text-[#1d9bf0]" 
+            className="h-4 w-4 cursor-help text-blue-600" 
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           />
@@ -457,22 +457,22 @@ export default function CatalogoClientes() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
               <button className="flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E2E8F0] px-4 py-3 text-[#0F172A] hover:bg-[#F8FAFC] transition-colors hover:border-[#CBD5E1] shadow-sm">
-                <FileTextIcon className="h-5 w-5 text-[#1d9bf0]" />
+                <FileTextIcon className="h-5 w-5 text-blue-600" />
                 <span className="text-sm font-medium">Ejemplo de carga masiva</span>
               </button>
               
               <button className="flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E2E8F0] px-4 py-3 text-[#0F172A] hover:bg-[#F8FAFC] transition-colors hover:border-[#CBD5E1] shadow-sm">
-                <Download className="h-5 w-5 text-[#1d9bf0]" />
+                <Download className="h-5 w-5 text-blue-600" />
                 <span className="text-sm font-medium">Descarga .csv</span>
               </button>
               
               <button className="flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E2E8F0] px-4 py-3 text-[#0F172A] hover:bg-[#F8FAFC] transition-colors hover:border-[#CBD5E1] shadow-sm">
-                <Upload className="h-5 w-5 text-[#1d9bf0]" />
+                <Upload className="h-5 w-5 text-blue-600" />
                 <span className="text-sm font-medium">Subir archivo .csv</span>
               </button>
               
               <button className="flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E2E8F0] px-4 py-3 text-[#0F172A] hover:bg-[#F8FAFC] transition-colors hover:border-[#CBD5E1] shadow-sm">
-                <Activity className="h-5 w-5 text-[#1d9bf0]" />
+                <Activity className="h-5 w-5 text-blue-600" />
                 <span className="text-sm font-medium">Ver estado de los procesos</span>
               </button>
             </div>
@@ -855,7 +855,7 @@ export default function CatalogoClientes() {
                 <div className="md:col-span-2">
                   <button
                     onClick={() => setShowOptionalFields(!showOptionalFields)}
-                    className="flex items-center gap-2 text-[15px] font-semibold text-[#1d9bf0] hover:opacity-90 transition-opacity"
+                    className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 hover:opacity-90 transition-opacity"
                     type="button"
                   >
                     {showOptionalFields ? (

@@ -31,21 +31,21 @@ type LabelProps = {
 
 function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
   const [showTooltip, setShowTooltip] = useState(false);
-  
+
   return (
     <div className="mb-2 flex items-center gap-1">
-      <label className="text-sm font-bold uppercase tracking-wide text-slate-400">
+      <label className="text-sm font-bold uppercase tracking-wide text-[#0F172A]">
         {children}
       </label>
       {withInfo && (
         <div className="relative">
-          <Info 
-            className="h-4 w-4 cursor-help text-[#1d9bf0]" 
+          <Info
+            className="h-4 w-4 cursor-help text-blue-600"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           />
           {showTooltip && (
-            <div className="absolute bottom-full left-0 mb-2 z-50 w-80 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+            <div className="absolute bottom-full left-0 mb-2 z-50 w-80 rounded-lg bg-white border border-[#E2E8F0] p-2 text-xs text-[#475569] shadow-lg">
               {infoText}
             </div>
           )}
@@ -103,13 +103,13 @@ const AlertModal = ({ isOpen, onClose, title, message, type }: { isOpen: boolean
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
+      <div className="relative max-w-md w-full rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
         <div className="p-6 text-center">
           <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${getBgColor()}`}>
             {getIcon()}
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
-          <p className="text-slate-400 mb-6">{message}</p>
+          <h2 className="text-xl font-bold text-[#0F172A] mb-2">{title}</h2>
+          <p className="text-[#64748B] mb-6">{message}</p>
           <button onClick={onClose} className="w-full rounded-xl bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-400">Aceptar</button>
         </div>
       </div>
@@ -226,25 +226,25 @@ export default function DescargaFacturas() {
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [rfcFilter, setRfcFilter] = useState("");
   const [recibirEmail, setRecibirEmail] = useState(false);
-  
+
   // Estados para Por Fechas
   const [fechaInicial, setFechaInicial] = useState("");
   const [fechaFinal, setFechaFinal] = useState("");
-  
+
   // Estados para Por Folios
   const [folioInicial, setFolioInicial] = useState("");
   const [folioFinal, setFolioFinal] = useState("");
-  
+
   // Estados para Por Mes
   const [mesSeleccionado, setMesSeleccionado] = useState("");
   const [anioSeleccionado, setAnioSeleccionado] = useState(new Date().getFullYear().toString());
-  
+
   // Estado para procesamiento
   const [isProcessing, setIsProcessing] = useState(false);
-  
+
   // Estado para historial
   const [historial, setHistorial] = useState<HistorialDescarga[]>(historialMock);
-  
+
   // Estados para modales y toast
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: "", message: "", type: "success" as "success" | "error" | "warning" });
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
@@ -316,7 +316,7 @@ export default function DescargaFacturas() {
     if (!canGenerate()) return;
 
     setIsProcessing(true);
-    
+
     // Crear nuevo registro en el historial
     const newRegistro: HistorialDescarga = {
       id: Date.now().toString(),
@@ -330,25 +330,25 @@ export default function DescargaFacturas() {
       archivo: getNombreArchivo(),
       status: "processing",
     };
-    
+
     setHistorial(prev => [newRegistro, ...prev]);
-    
+
     // Simular el proceso
     setTimeout(() => {
       const maxProcesados = Math.floor(Math.random() * 50) + 10;
       let processed = 0;
-      
+
       const interval = setInterval(() => {
         processed += Math.floor(Math.random() * 10) + 1;
         if (processed >= maxProcesados) {
           processed = maxProcesados;
           clearInterval(interval);
-          
+
           // Actualizar el registro como completado
-          setHistorial(prev => prev.map(h => 
-            h.id === newRegistro.id 
-              ? { 
-                  ...h, 
+          setHistorial(prev => prev.map(h =>
+            h.id === newRegistro.id
+              ? {
+                  ...h,
                   mensaje: "Proceso finalizado.",
                   procesados: processed,
                   fin: new Date().toLocaleString(),
@@ -357,15 +357,15 @@ export default function DescargaFacturas() {
               : h
           ));
           setIsProcessing(false);
-          
+
           if (recibirEmail) {
             showToast("Archivo generado. Revisa tu correo electrónico para descargarlo", "success");
           } else {
             showToast(`Archivo "${newRegistro.archivo}" generado correctamente`, "success");
           }
         } else {
-          setHistorial(prev => prev.map(h => 
-            h.id === newRegistro.id 
+          setHistorial(prev => prev.map(h =>
+            h.id === newRegistro.id
               ? { ...h, procesados: processed }
               : h
           ));
@@ -382,30 +382,30 @@ export default function DescargaFacturas() {
   // Obtener el color del estado del mensaje
   const getMessageColor = (status: string) => {
     switch (status) {
-      case "completed": return "text-emerald-400";
-      case "error": return "text-red-400";
-      case "processing": return "text-yellow-400";
-      default: return "text-slate-400";
+      case "completed": return "text-emerald-600";
+      case "error": return "text-red-500";
+      case "processing": return "text-yellow-600";
+      default: return "text-[#64748B]";
     }
   };
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#071321] text-white">
+      <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
           <div className="mb-4">
-            <h1 className="text-3xl font-extrabold text-white">Descarga de Facturas</h1>
-            <p className="mt-2 text-slate-400">
+            <h1 className="text-3xl font-extrabold text-[#0F172A]">Descarga de Facturas</h1>
+            <p className="mt-2 text-[#64748B]">
               Descarga tus facturas en formato XML, PDF o ambos comprimidos en un archivo .ZIP
             </p>
           </div>
 
           {/* Contenedor principal */}
-          <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 mb-6">
+          <div className="rounded-2xl border-2 border-[#E2E8F0] bg-white p-6 mb-6 shadow-sm">
             {/* Leyenda */}
-            <div className="mb-6 p-4 rounded-xl bg-[#0a1424] border border-[#173156]">
-              <p className="text-slate-300 text-sm leading-relaxed">
-                Descarga las facturas del mes en un archivo .zip, el tiempo depende de la cantidad de facturas, 
+            <div className="mb-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+              <p className="text-[#475569] text-sm leading-relaxed">
+                Descarga las facturas del mes en un archivo .zip, el tiempo depende de la cantidad de facturas,
                 al termino te enviaremos el enlace de descarga.
               </p>
             </div>
@@ -565,7 +565,7 @@ export default function DescargaFacturas() {
             <div className="mb-6">
               <button
                 onClick={() => setShowMoreOptions(!showMoreOptions)}
-                className="flex items-center gap-2 text-[15px] font-semibold text-[#1d9bf0] hover:opacity-90 transition-opacity"
+                className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 hover:opacity-90 transition-opacity"
               >
                 {showMoreOptions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 {showMoreOptions ? "Mostrar menos opciones" : "Mostrar más opciones"}
@@ -574,7 +574,7 @@ export default function DescargaFacturas() {
 
             {/* Más opciones (ocultas) */}
             {showMoreOptions && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 pt-6 border-t border-[#16304f]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 pt-6 border-t border-[#E2E8F0]">
                 <div>
                   <Label>Filtrar por:</Label>
                   <input
@@ -589,15 +589,15 @@ export default function DescargaFacturas() {
             )}
 
             {/* Checkbox y botón de generar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-[#16304f]">
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-[#E2E8F0]">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={recibirEmail}
                   onChange={(e) => setRecibirEmail(e.target.checked)}
-                  className="w-4 h-4 rounded border-2 border-[#1e293b] text-blue-500 checked:bg-blue-500 checked:border-blue-500"
+                  className="w-4 h-4 rounded border-2 border-[#CBD5E1] text-blue-500 checked:bg-blue-500 checked:border-blue-500"
                 />
-                <span className="text-white">Recibir email con enlace de descarga</span>
+                <span className="text-[#0F172A]">Recibir email con enlace de descarga</span>
               </label>
 
               <button
@@ -612,13 +612,13 @@ export default function DescargaFacturas() {
           </div>
 
           {/* Tabla de historial de descargas */}
-          <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] overflow-hidden">
-            <div className="border-b border-[#16304f] p-4 bg-[#0a1424]">
-              <h3 className="text-lg font-bold text-white">Historial de Descargas</h3>
+          <div className="rounded-2xl border-2 border-[#E2E8F0] bg-white overflow-hidden">
+            <div className="border-b border-[#E2E8F0] p-4 bg-[#F8FAFC]">
+              <h3 className="text-lg font-bold text-[#0F172A]">Historial de Descargas</h3>
             </div>
 
             {historial.length === 0 ? (
-              <div className="text-center py-12 text-slate-400">
+              <div className="text-center py-12 text-[#64748B]">
                 <FileArchive className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p>No hay descargas registradas</p>
                 <p className="text-sm mt-1">Genera tu primera descarga</p>
@@ -626,8 +626,8 @@ export default function DescargaFacturas() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-[#16253e]">
-                    <tr className="text-left text-sm uppercase tracking-wide text-slate-400">
+                  <thead className="bg-[#F1F5F9]">
+                    <tr className="text-left text-sm uppercase tracking-wide text-[#475569]">
                       <th className="px-6 py-4">Tipo</th>
                       <th className="px-6 py-4">Filtro</th>
                       <th className="px-6 py-4">Mensaje</th>
@@ -640,21 +640,21 @@ export default function DescargaFacturas() {
                   </thead>
                   <tbody>
                     {historial.map((registro) => (
-                      <tr key={registro.id} className="border-t border-[#16304f] hover:bg-[#0d1b35] transition-colors">
+                      <tr key={registro.id} className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC] transition-colors">
                         <td className="px-6 py-4">
                           <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium ${
-                            registro.tipo === "Nóminas" 
-                              ? "bg-purple-500/10 text-purple-400" 
+                            registro.tipo === "Nóminas"
+                              ? "bg-purple-50 text-purple-600"
                               : registro.tipo === "Recibidas"
-                              ? "bg-emerald-500/10 text-emerald-400"
-                              : "bg-blue-500/10 text-blue-400"
+                              ? "bg-emerald-50 text-emerald-600"
+                              : "bg-blue-50 text-blue-600"
                           }`}>
                             {registro.status === "processing" && <Loader2 className="h-3 w-3 animate-spin" />}
                             {registro.status === "completed" && <CheckCircle2 className="h-3 w-3" />}
                             {registro.tipo}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-slate-300">{registro.filtro}</td>
+                        <td className="px-6 py-4 text-[#334155]">{registro.filtro}</td>
                         <td className={`px-6 py-4 ${getMessageColor(registro.status)}`}>
                           {registro.mensaje}
                           {registro.status === "processing" && (
@@ -667,23 +667,23 @@ export default function DescargaFacturas() {
                         <td className="px-6 py-4 text-center">
                           {registro.status === "processing" ? (
                             <div className="flex items-center justify-center gap-1">
-                              <Loader2 className="h-4 w-4 animate-spin text-yellow-400" />
-                              <span className="text-yellow-400">{registro.procesados}</span>
+                              <Loader2 className="h-4 w-4 animate-spin text-yellow-600" />
+                              <span className="text-yellow-600">{registro.procesados}</span>
                             </div>
                           ) : (
-                            <span className="font-bold text-emerald-400">{registro.procesados}</span>
+                            <span className="font-bold text-emerald-600">{registro.procesados}</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-slate-400 text-sm whitespace-nowrap">
+                        <td className="px-6 py-4 text-[#64748B] text-sm whitespace-nowrap">
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {registro.inicio}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-slate-400 text-sm whitespace-nowrap">
+                        <td className="px-6 py-4 text-[#64748B] text-sm whitespace-nowrap">
                           {registro.fin || (registro.status === "processing" ? "En proceso..." : "-")}
                         </td>
-                        <td className="px-6 py-4 text-slate-300">
+                        <td className="px-6 py-4 text-[#334155]">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3 text-slate-500" />
                             {registro.conceptoDescarga}
@@ -695,8 +695,8 @@ export default function DescargaFacturas() {
                             disabled={registro.status !== "completed"}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
                               registro.status === "completed"
-                                ? "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
-                                : "bg-slate-500/10 text-slate-500 cursor-not-allowed"
+                                ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                : "bg-slate-100 text-slate-400 cursor-not-allowed"
                             }`}
                           >
                             <Download className="h-4 w-4" />
@@ -711,10 +711,10 @@ export default function DescargaFacturas() {
             )}
 
             {/* Pie de la tabla */}
-            <div className="border-t border-[#16304f] p-4 bg-[#0a1424]">
+            <div className="border-t border-[#E2E8F0] p-4 bg-[#F8FAFC]">
               <div className="flex items-start gap-2">
-                <Info className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-slate-400">
+                <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-[#64748B]">
                   Los archivos generados están disponibles para descarga durante 7 días.
                 </p>
               </div>
@@ -724,12 +724,12 @@ export default function DescargaFacturas() {
       </div>
 
       {/* Modal de alerta */}
-      <AlertModal 
-        isOpen={alertModal.isOpen} 
-        onClose={() => setAlertModal({ ...alertModal, isOpen: false })} 
-        title={alertModal.title} 
-        message={alertModal.message} 
-        type={alertModal.type} 
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
       />
 
       {/* Toast */}

@@ -30,21 +30,21 @@ type LabelProps = {
 
 function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
   const [showTooltip, setShowTooltip] = useState(false);
-  
+
   return (
     <div className="mb-2 flex items-center gap-1">
-      <label className="text-sm font-bold uppercase tracking-wide text-slate-400">
+      <label className="text-sm font-bold uppercase tracking-wide text-[#0F172A]">
         {children}
       </label>
       {withInfo && (
         <div className="relative">
-          <Info 
-            className="h-4 w-4 cursor-help text-[#1d9bf0]" 
+          <Info
+            className="h-4 w-4 cursor-help text-blue-600"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           />
           {showTooltip && (
-            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-white border border-[#E2E8F0] p-2 text-xs text-[#475569] shadow-lg">
               {infoText}
             </div>
           )}
@@ -124,22 +124,22 @@ const ConfirmModal = ({
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onCancel} />
-      
-      <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl animate-in zoom-in-95 duration-200">
+
+      <div className="relative max-w-md w-full rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl animate-in zoom-in-95 duration-200">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className={`rounded-full p-2 bg-[#0d1b35] ${getIconColor()}`}>
+            <div className={`rounded-full p-2 bg-slate-100 ${getIconColor()}`}>
               <AlertTriangle className="h-6 w-6" />
             </div>
-            <h2 className="text-xl font-bold text-white">{title}</h2>
+            <h2 className="text-xl font-bold text-[#0F172A]">{title}</h2>
           </div>
-          
-          <p className="text-slate-300 mb-6">{message}</p>
-          
+
+          <p className="text-[#475569] mb-6">{message}</p>
+
           <div className="flex gap-3">
             <button
               onClick={onCancel}
-              className="flex-1 rounded-xl bg-[#1e293b] px-4 py-2 font-medium text-white hover:bg-[#2d3a4b] transition-colors"
+              className="flex-1 rounded-xl bg-white border-2 border-[#E2E8F0] px-4 py-2 font-medium text-[#475569] hover:bg-[#F8FAFC] transition-colors"
             >
               {cancelText}
             </button>
@@ -387,13 +387,13 @@ const LugarModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-          <h2 className="text-xl font-bold text-white">
+
+      <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
+          <h2 className="text-xl font-bold text-[#0F172A]">
             {isEditing ? "Editar Lugar de Expedición" : "Agregar Lugar de Expedición"}
           </h2>
-          <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-[#0d1b35] hover:text-white">
+          <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -425,7 +425,7 @@ const LugarModal = ({
           </div>
 
           <div className="mt-6">
-            <button onClick={() => setShowOptionalFields(!showOptionalFields)} className="flex items-center gap-2 text-[15px] font-semibold text-[#1d9bf0] hover:opacity-90">
+            <button onClick={() => setShowOptionalFields(!showOptionalFields)} className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 hover:opacity-90">
               {showOptionalFields ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               {showOptionalFields ? "Ocultar datos opcionales" : "Agregar datos opcionales"}
             </button>
@@ -451,7 +451,7 @@ const LugarModal = ({
           )}
         </div>
 
-        <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#173156] bg-[#071321] px-6 py-4">
+        <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
           <button onClick={onClose} className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] hover:bg-red-400">Cancelar</button>
           <button onClick={onSave} className="rounded-xl bg-blue-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] hover:bg-blue-400">Guardar</button>
         </div>
@@ -492,11 +492,11 @@ const SerieModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="relative max-w-md w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-          <h2 className="text-xl font-bold text-white">{editingSerieId ? "Editar Serie" : "Agregar Serie"}</h2>
-          <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-[#0d1b35] hover:text-white"><X className="h-5 w-5" /></button>
+
+      <div className="relative max-w-md w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
+          <h2 className="text-xl font-bold text-[#0F172A]">{editingSerieId ? "Editar Serie" : "Agregar Serie"}</h2>
+          <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700"><X className="h-5 w-5" /></button>
         </div>
 
         <div className="p-6 space-y-4">
@@ -505,7 +505,7 @@ const SerieModal = ({
           <div><Label>Folio inicial:</Label><input type="text" value={serieFolioInicial} onChange={(e) => setSerieFolioInicial(e.target.value)} placeholder="Ej: 1, 1000" className={inputStyle} /></div>
         </div>
 
-        <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#173156] bg-[#071321] px-6 py-4">
+        <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
           <button onClick={onClose} className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] hover:bg-red-400">Cerrar</button>
           <button onClick={onSave} className="rounded-xl bg-blue-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] hover:bg-blue-400">Guardar</button>
         </div>
@@ -563,10 +563,10 @@ const SeriesTable = ({
   );
 
   return (
-    <div className="mt-8 rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6">
+    <div className="mt-8 rounded-2xl border-2 border-[#E2E8F0] bg-white p-6 shadow-sm">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-white">Series - {selectedLugarForSeries.nombre}</h3>
-        <button onClick={onClose} className="text-slate-400 hover:text-white"><X className="h-5 w-5" /></button>
+        <h3 className="text-lg font-bold text-[#0F172A]">Series - {selectedLugarForSeries.nombre}</h3>
+        <button onClick={onClose} className="text-slate-400 hover:text-[#0F172A]"><X className="h-5 w-5" /></button>
       </div>
 
       <div className="flex items-center justify-between gap-4 mb-4">
@@ -575,7 +575,7 @@ const SeriesTable = ({
           <input type="text" placeholder="Buscar por serie o uso..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="box box-input-icon" />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-gray-400">MOSTRAR</span>
+          <span className="text-[#64748B]">MOSTRAR</span>
           <select value={rowsPerPage} onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }} className="box box-input">
             <option value={10}>10 registros</option>
             <option value={25}>25 registros</option>
@@ -590,8 +590,8 @@ const SeriesTable = ({
 
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-[#16253e]">
-            <tr className="text-left text-sm uppercase tracking-wide text-slate-400">
+          <thead className="bg-[#F1F5F9]">
+            <tr className="text-left text-sm uppercase tracking-wide text-[#475569]">
               <th className="px-6 py-4">Serie</th>
               <th className="px-6 py-4">Siguiente Folio</th>
               <th className="px-6 py-4">Descripción</th>
@@ -600,33 +600,33 @@ const SeriesTable = ({
           </thead>
           <tbody>
             {paginatedSeries.map((serie) => (
-              <tr key={serie.id} className="border-t border-[#16304f] hover:bg-[#0d1b35]">
+              <tr key={serie.id} className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC]">
                 <td className="px-6 py-4 font-bold">{serie.serie}</td>
                 <td className="px-6 py-4">{serie.folioInicial || "1"}</td>
-                <td className="px-6 py-4 text-slate-300">{serie.uso}</td>
+                <td className="px-6 py-4 text-[#64748B]">{serie.uso}</td>
                 <td className="px-6 py-4">
                   <div className="flex gap-2">
-                    <button onClick={() => onEditSerie(serie)} className="text-blue-400 hover:text-blue-300"><Pencil className="h-5 w-5" /></button>
-                    <button onClick={() => onDeleteSerie(serie.id, serie.serie)} className="text-red-400 hover:text-red-300"><Trash className="h-5 w-5" /></button>
+                    <button onClick={() => onEditSerie(serie)} className="text-blue-600 hover:text-blue-700"><Pencil className="h-5 w-5" /></button>
+                    <button onClick={() => onDeleteSerie(serie.id, serie.serie)} className="text-red-500 hover:text-red-600"><Trash className="h-5 w-5" /></button>
                   </div>
                 </td>
               </tr>
             ))}
             {paginatedSeries.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-6 py-16 text-center text-slate-400">No hay series registradas</td>
+                <td colSpan={4} className="px-6 py-16 text-center text-[#64748B]">No hay series registradas</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      <div className="flex justify-between items-center p-4 border-t border-[#232b36] text-gray-400 text-sm">
+      <div className="flex justify-between items-center p-4 border-t border-[#E2E8F0] text-[#64748B] text-sm">
         <span>Mostrando {paginatedSeries.length} de {filteredSeries.length} registros</span>
         <div className="flex gap-2">
-          <button onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="px-3 py-1 bg-[#1a222c] rounded disabled:opacity-50">Anterior</button>
+          <button onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="px-3 py-1 bg-white border border-[#E2E8F0] rounded disabled:opacity-50">Anterior</button>
           <span className="px-3 py-1 bg-blue-600 rounded text-white">{currentPage}</span>
-          <button onClick={() => setCurrentPage(Math.min(seriesTotalPages, currentPage + 1))} disabled={currentPage === seriesTotalPages} className="px-3 py-1 bg-[#1a222c] rounded disabled:opacity-50">Siguiente</button>
+          <button onClick={() => setCurrentPage(Math.min(seriesTotalPages, currentPage + 1))} disabled={currentPage === seriesTotalPages} className="px-3 py-1 bg-white border border-[#E2E8F0] rounded disabled:opacity-50">Siguiente</button>
         </div>
       </div>
     </div>
@@ -639,15 +639,15 @@ export default function LugaresExpedicion() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showOptionalFields, setShowOptionalFields] = useState(false);
-  
+
   // Estado para el modal de series
   const [isSerieModalOpen, setIsSerieModalOpen] = useState(false);
   const [editingSerieId, setEditingSerieId] = useState<string | null>(null);
-  
+
   // Estado para la tabla de series visible
   const [showSeriesTable, setShowSeriesTable] = useState(false);
   const [selectedLugarForSeries, setSelectedLugarForSeries] = useState<LugarExpedicion | null>(null);
-  
+
   // Estado para modales de confirmación
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
@@ -656,10 +656,10 @@ export default function LugaresExpedicion() {
     type: "danger" as "danger" | "warning" | "info",
     onConfirm: () => {},
   });
-  
+
   // Estado para Toast
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-  
+
   // Estados para el formulario de lugar
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
@@ -672,18 +672,18 @@ export default function LugaresExpedicion() {
   const [localidad, setLocalidad] = useState("");
   const [municipio, setMunicipio] = useState("");
   const [pais, setPais] = useState("México");
-  
+
   // Estados para el formulario de serie
   const [serieNombre, setSerieNombre] = useState("");
   const [serieUso, setSerieUso] = useState("");
   const [serieFolioInicial, setSerieFolioInicial] = useState("");
-  
+
   // Estados para la tabla de lugares
   const [lugares, setLugares] = useState<LugarExpedicion[]>(lugaresMock);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  
+
   // Estados para la tabla de series
   const [seriesSearchTerm, setSeriesSearchTerm] = useState("");
   const [seriesCurrentPage, setSeriesCurrentPage] = useState(1);
@@ -761,7 +761,7 @@ export default function LugaresExpedicion() {
       setLugares([...lugares, newLugar]);
       setToast({ message: "Lugar agregado correctamente", type: "success" });
     }
-    
+
     setIsModalOpen(false);
     resetForm();
   };
@@ -855,19 +855,19 @@ export default function LugaresExpedicion() {
         updatedSeries = [...selectedLugarForSeries.series, newSerie];
         setToast({ message: "Serie agregada correctamente", type: "success" });
       }
-      
-      setLugares(lugares.map(l => 
-        l.id === selectedLugarForSeries.id 
+
+      setLugares(lugares.map(l =>
+        l.id === selectedLugarForSeries.id
           ? { ...l, series: updatedSeries }
           : l
       ));
-      
+
       setSelectedLugarForSeries({
         ...selectedLugarForSeries,
         series: updatedSeries
       });
     }
-    
+
     setIsSerieModalOpen(false);
     resetSerieForm();
   };
@@ -882,8 +882,8 @@ export default function LugaresExpedicion() {
       onConfirm: () => {
         if (selectedLugarForSeries) {
           const updatedSeries = selectedLugarForSeries.series.filter(s => s.id !== serieId);
-          setLugares(lugares.map(l => 
-            l.id === selectedLugarForSeries.id 
+          setLugares(lugares.map(l =>
+            l.id === selectedLugarForSeries.id
               ? { ...l, series: updatedSeries }
               : l
           ));
@@ -916,12 +916,12 @@ export default function LugaresExpedicion() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#071321] text-white">
+      <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
           <div className="mb-4 flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-extrabold text-white">Lugares de Expedición</h1>
-              <p className="mt-2 text-slate-400">Administra los lugares desde donde emites tus facturas</p>
+              <h1 className="text-3xl font-extrabold text-[#0F172A]">Lugares de Expedición</h1>
+              <p className="mt-2 text-[#64748B]">Administra los lugares desde donde emites tus facturas</p>
             </div>
             <button onClick={() => { resetForm(); setIsEditing(false); setEditingId(null); setIsModalOpen(true); }} className="flex items-center gap-2 rounded-xl bg-blue-500 px-6 py-3 font-semibold text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] hover:bg-blue-400">
               <Plus className="h-5 w-5" />Agregar Lugar de Expedición
@@ -934,7 +934,7 @@ export default function LugaresExpedicion() {
               <input type="text" placeholder="Buscar por nombre, descripción, CP o estado..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="box box-input-icon" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-gray-400">MOSTRAR</span>
+              <span className="text-[#64748B]">MOSTRAR</span>
               <select value={rowsPerPage} onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }} className="box box-input">
                 <option value={10}>10 registros</option>
                 <option value={25}>25 registros</option>
@@ -944,11 +944,11 @@ export default function LugaresExpedicion() {
             </div>
           </div>
 
-          <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] overflow-hidden">
+          <div className="rounded-2xl border-2 border-[#E2E8F0] bg-white overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-[#16253e]">
-                  <tr className="text-left text-sm uppercase tracking-wide text-slate-400">
+                <thead className="bg-[#F1F5F9]">
+                  <tr className="text-left text-sm uppercase tracking-wide text-[#475569]">
                     <th className="px-6 py-4 w-16">Default</th>
                     <th className="px-6 py-4">Nombre</th>
                     <th className="px-6 py-4">Dirección</th>
@@ -957,18 +957,18 @@ export default function LugaresExpedicion() {
                 </thead>
                 <tbody>
                   {paginatedLugares.map((lugar) => (
-                    <tr key={lugar.id} className="border-t border-[#16304f] hover:bg-[#0d1b35] transition-colors">
+                    <tr key={lugar.id} className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC] transition-colors">
                       <td className="px-6 py-4">
-                        <input 
-                          type="radio" 
-                          name="defaultLocation" 
-                          checked={lugar.isDefault || false} 
-                          onChange={() => handleSetDefault(lugar.id, lugar.nombre)} 
-                          className="h-5 w-5 text-blue-500 cursor-pointer" 
+                        <input
+                          type="radio"
+                          name="defaultLocation"
+                          checked={lugar.isDefault || false}
+                          onChange={() => handleSetDefault(lugar.id, lugar.nombre)}
+                          className="h-5 w-5 text-blue-500 cursor-pointer"
                         />
                       </td>
                       <td className="px-6 py-4 font-bold">{lugar.nombre} <span className="text-xs text-slate-500 ml-2">{lugar.descripcion}</span></td>
-                      <td className="px-6 py-4 text-slate-300">
+                      <td className="px-6 py-4 text-[#64748B]">
                         {lugar.calle ? `${lugar.calle} ${lugar.noExterior}, ` : ""}
                         {lugar.colonia ? `${lugar.colonia}, ` : ""}
                         {lugar.cp ? `${lugar.cp}, ` : ""}
@@ -976,13 +976,13 @@ export default function LugaresExpedicion() {
                        </td>
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
-                          <button onClick={() => handleEditLugar(lugar)} className="p-1.5 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-colors">
+                          <button onClick={() => handleEditLugar(lugar)} className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors">
                             <Pencil className="h-5 w-5" />
                           </button>
-                          <button onClick={() => handleDeleteLugar(lugar.id, lugar.nombre)} className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors">
+                          <button onClick={() => handleDeleteLugar(lugar.id, lugar.nombre)} className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                             <Trash className="h-5 w-5" />
                           </button>
-                          <button onClick={() => handleViewSeries(lugar)} className="p-1.5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-colors">
+                          <button onClick={() => handleViewSeries(lugar)} className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors">
                             <Eye className="h-5 w-5" />
                           </button>
                         </div>
@@ -991,7 +991,7 @@ export default function LugaresExpedicion() {
                   ))}
                   {paginatedLugares.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-6 py-16 text-center text-slate-400">
+                      <td colSpan={4} className="px-6 py-16 text-center text-[#64748B]">
                         No hay lugares de expedición registrados
                       </td>
                     </tr>
@@ -999,14 +999,14 @@ export default function LugaresExpedicion() {
                 </tbody>
                </table>
             </div>
-            <div className="flex justify-between items-center p-4 border-t border-[#232b36] text-gray-400 text-sm">
+            <div className="flex justify-between items-center p-4 border-t border-[#E2E8F0] text-[#64748B] text-sm">
               <span>Mostrando {paginatedLugares.length} de {filteredLugares.length} registros</span>
               <div className="flex gap-2">
-                <button onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="px-3 py-1 bg-[#1a222c] rounded disabled:opacity-50 hover:bg-[#2a3543] transition-colors">
+                <button onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="px-3 py-1 bg-white border border-[#E2E8F0] rounded disabled:opacity-50 hover:bg-[#F8FAFC] transition-colors">
                   Anterior
                 </button>
                 <span className="px-3 py-1 bg-blue-600 rounded text-white">{currentPage}</span>
-                <button onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages} className="px-3 py-1 bg-[#1a222c] rounded disabled:opacity-50 hover:bg-[#2a3543] transition-colors">
+                <button onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages} className="px-3 py-1 bg-white border border-[#E2E8F0] rounded disabled:opacity-50 hover:bg-[#F8FAFC] transition-colors">
                   Siguiente
                 </button>
               </div>
