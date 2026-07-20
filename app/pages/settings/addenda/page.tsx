@@ -28,13 +28,13 @@ const AlertModal = ({ isOpen, onClose, title, message, type }: { isOpen: boolean
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
+      <div className="relative max-w-md w-full rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
         <div className="p-6 text-center">
           <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${getBgColor()}`}>
             {getIcon()}
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
-          <p className="text-slate-400 mb-6">{message}</p>
+          <h2 className="text-xl font-bold text-[#0F172A] mb-2">{title}</h2>
+          <p className="text-[#64748B] mb-6">{message}</p>
           <button onClick={onClose} className="w-full rounded-xl bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-400">Aceptar</button>
         </div>
       </div>
@@ -60,7 +60,7 @@ export default function Addendas() {
     });
     return initial;
   });
-  
+
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: "", message: "", type: "success" as "success" | "error" | "warning" });
 
   // Mostrar alerta
@@ -81,7 +81,7 @@ export default function Addendas() {
     const enabledAddendas = Object.entries(selectedAddendas)
       .filter(([, enabled]) => enabled)
       .map(([addenda]) => addenda);
-    
+
     console.log("Addendas seleccionadas:", enabledAddendas);
     showAlert("Configuración guardada", "Las addendas han sido actualizadas correctamente", "success");
   };
@@ -92,23 +92,23 @@ export default function Addendas() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#071321] text-white">
+      <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
           {/* Título principal */}
           <div className="mb-8">
-            <h1 className="text-3xl font-extrabold text-white">Addendas</h1>
-            <p className="mt-2 text-slate-400">
+            <h1 className="text-3xl font-extrabold text-[#0F172A]">Addendas</h1>
+            <p className="mt-2 text-[#64748B]">
               Administra las addendas que deseas incluir en tus comprobantes fiscales.
             </p>
           </div>
 
           {/* Card principal */}
-          <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.01)]">
+          <div className="rounded-2xl border-2 border-[#E2E8F0] bg-white p-6 shadow-sm">
             {/* Texto informativo */}
-            <div className="mb-6 p-4 rounded-xl bg-[#0a1424] border border-[#173156]">
-              <p className="text-slate-300 text-sm leading-relaxed">
-                Adquiere y activa las Addendas que requieras para tus operaciones comerciales. 
-                Una vez contratadas, podrás incorporarlas automáticamente en tus facturas según 
+            <div className="mb-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+              <p className="text-[#475569] text-sm leading-relaxed">
+                Adquiere y activa las Addendas que requieras para tus operaciones comerciales.
+                Una vez contratadas, podrás incorporarlas automáticamente en tus facturas según
                 el cliente o el tipo de transacción que estés realizando.
               </p>
             </div>
@@ -122,7 +122,7 @@ export default function Addendas() {
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                     selectedAddendas[addenda]
                       ? "bg-blue-500 text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] hover:bg-blue-400"
-                      : "bg-[#0d1b35] border-2 border-[#173156] text-slate-300 hover:bg-[#16233b] hover:border-[#3c83f666] hover:text-white"
+                      : "bg-white border-2 border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC] hover:border-blue-200 hover:text-[#0F172A]"
                   }`}
                 >
                   {addenda}
@@ -131,11 +131,11 @@ export default function Addendas() {
             </div>
 
             {/* Contador de selección y botón Guardar */}
-            <div className="mt-6 pt-4 border-t border-[#173156] flex justify-between items-center">
-              <p className="text-sm text-slate-400">
-                <span className="font-bold text-blue-400">{selectedCount}</span> de <span className="font-bold">{totalCount}</span> addendas seleccionadas
+            <div className="mt-6 pt-4 border-t border-[#E2E8F0] flex justify-between items-center">
+              <p className="text-sm text-[#64748B]">
+                <span className="font-bold text-blue-600">{selectedCount}</span> de <span className="font-bold">{totalCount}</span> addendas seleccionadas
               </p>
-              
+
               {/* Botón Guardar */}
               <button
                 onClick={handleSave}

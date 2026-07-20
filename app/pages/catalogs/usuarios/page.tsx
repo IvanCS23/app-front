@@ -12,8 +12,10 @@ import UsersTable from "@/app/components/users/UsersTable";
 import { useUsers } from "@/src/hooks/useUsers";
 import { ROLE_LABELS, STATUS_LABELS, type User } from "@/src/types/user";
 
-const selectStyle = "box box-input w-44";
-const inputStyle = "box box-input";
+const selectStyle =
+  "w-44 h-11 rounded-lg border-[1.5px] border-slate-300 bg-white px-4 text-sm text-slate-900 outline-none transition-colors [color-scheme:light] hover:border-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 cursor-pointer";
+const inputStyle =
+  "w-full h-11 rounded-lg border-[1.5px] border-slate-300 bg-white px-4 text-sm text-slate-900 outline-none transition-colors [color-scheme:light] placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10";
 
 export default function UsuariosPage() {
   const {

@@ -27,21 +27,21 @@ type LabelProps = {
 
 function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
   const [showTooltip, setShowTooltip] = useState(false);
-  
+
   return (
     <div className="mb-2 flex items-center gap-1">
-      <label className="text-sm font-bold uppercase tracking-wide text-slate-400">
+      <label className="text-sm font-bold uppercase tracking-wide text-[#0F172A]">
         {children}
       </label>
       {withInfo && (
         <div className="relative">
-          <Info 
-            className="h-4 w-4 cursor-help text-[#1d9bf0]" 
+          <Info
+            className="h-4 w-4 cursor-help text-blue-600"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           />
           {showTooltip && (
-            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-white border border-[#E2E8F0] p-2 text-xs text-[#475569] shadow-lg">
               {infoText}
             </div>
           )}
@@ -99,13 +99,13 @@ const AlertModal = ({ isOpen, onClose, title, message, type }: { isOpen: boolean
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
+      <div className="relative max-w-md w-full rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
         <div className="p-6 text-center">
           <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${getBgColor()}`}>
             {getIcon()}
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
-          <p className="text-slate-400 mb-6">{message}</p>
+          <h2 className="text-xl font-bold text-[#0F172A] mb-2">{title}</h2>
+          <p className="text-[#64748B] mb-6">{message}</p>
           <button onClick={onClose} className="w-full rounded-xl bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-400">Aceptar</button>
         </div>
       </div>
@@ -166,18 +166,18 @@ export default function FacturacionMasiva() {
     const today = new Date();
     return today.toISOString().split('T')[0];
   });
-  
+
   // Estado para el archivo seleccionado
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  
+
   // Estado para la tabla de archivos procesados
   const [archivosProcesados, setArchivosProcesados] = useState<ArchivoProcesado[]>([]);
-  
+
   // Estados para modales y toast
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: "", message: "", type: "success" as "success" | "error" | "warning" });
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
-  
+
   // Referencia para el input de archivo
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -244,7 +244,7 @@ export default function FacturacionMasiva() {
     if (!canStartProcess()) return;
 
     setIsProcessing(true);
-    
+
     // Crear nuevo registro en la tabla
     const newArchivo: ArchivoProcesado = {
       id: Date.now().toString(),
@@ -256,26 +256,26 @@ export default function FacturacionMasiva() {
       final: "",
       status: "processing",
     };
-    
+
     setArchivosProcesados(prev => [newArchivo, ...prev]);
-    
+
     // Simular el proceso (esto sería una llamada a API real)
     setTimeout(() => {
       // Simular el procesamiento
       const maxFacturas = Math.floor(Math.random() * 1000) + 100;
       let processed = 0;
-      
+
       const interval = setInterval(() => {
         processed += Math.floor(Math.random() * 50) + 10;
         if (processed >= maxFacturas) {
           processed = maxFacturas;
           clearInterval(interval);
-          
+
           // Actualizar el registro como completado
-          setArchivosProcesados(prev => prev.map(a => 
-            a.id === newArchivo.id 
-              ? { 
-                  ...a, 
+          setArchivosProcesados(prev => prev.map(a =>
+            a.id === newArchivo.id
+              ? {
+                  ...a,
                   mensaje: isCancelacion ? "Cancelación completada exitosamente" : "Proceso completado exitosamente",
                   facturasProcesadas: processed,
                   final: new Date().toLocaleString(),
@@ -284,20 +284,20 @@ export default function FacturacionMasiva() {
               : a
           ));
           setIsProcessing(false);
-          showToast(isCancelacion 
-            ? `Cancelación completada: ${processed} facturas canceladas` 
-            : `Proceso completado: ${processed} facturas procesadas`, 
+          showToast(isCancelacion
+            ? `Cancelación completada: ${processed} facturas canceladas`
+            : `Proceso completado: ${processed} facturas procesadas`,
             "success"
           );
-          
+
           // Limpiar selección de archivo
           setSelectedFile(null);
           if (fileInputRef.current) {
             fileInputRef.current.value = "";
           }
         } else {
-          setArchivosProcesados(prev => prev.map(a => 
-            a.id === newArchivo.id 
+          setArchivosProcesados(prev => prev.map(a =>
+            a.id === newArchivo.id
               ? { ...a, facturasProcesadas: processed }
               : a
           ));
@@ -309,26 +309,26 @@ export default function FacturacionMasiva() {
   // Obtener el color del estado del mensaje
   const getMessageColor = (status: string) => {
     switch (status) {
-      case "completed": return "text-emerald-400";
-      case "error": return "text-red-400";
-      case "processing": return "text-yellow-400";
-      default: return "text-slate-400";
+      case "completed": return "text-emerald-600";
+      case "error": return "text-red-500";
+      case "processing": return "text-yellow-600";
+      default: return "text-[#64748B]";
     }
   };
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#071321] text-white">
+      <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
           <div className="mb-4">
-            <h1 className="text-3xl font-extrabold text-white">Facturación Masiva</h1>
-            <p className="mt-2 text-ñ-slate-400">
+            <h1 className="text-3xl font-extrabold text-[#0F172A]">Facturación Masiva</h1>
+            <p className="mt-2 text-[#64748B]">
               {isCancelacion ? "Cancela múltiples facturas de manera simultánea" : "Procesa múltiples facturas de manera simultánea"}
             </p>
           </div>
 
           {/* Contenedor principal */}
-          <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 mb-6">
+          <div className="rounded-2xl border-2 border-[#E2E8F0] bg-white p-6 mb-6 shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Tipo de proceso */}
               <div>
@@ -418,7 +418,7 @@ export default function FacturacionMasiva() {
             </div>
 
             {/* Botones de acción */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-6 border-t border-[#16304f]">
+            <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-6 border-t border-[#E2E8F0]">
               <div className="flex items-center gap-4">
                 {/* Botón Subir archivo (sin fondo) */}
                 <input
@@ -430,16 +430,16 @@ export default function FacturacionMasiva() {
                 />
                 <button
                   onClick={handleSubirArchivo}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-blue-400 hover:text-blue-300 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-blue-600 hover:text-blue-700 transition-colors"
                 >
                   <Upload className="h-5 w-5" />
                   Subir archivo
                 </button>
-                
+
                 {/* Mostrar nombre del archivo seleccionado */}
                 {selectedFile && (
-                  <span className="text-sm text-slate-400">
-                    Archivo: <span className="text-emerald-400">{selectedFile.name}</span>
+                  <span className="text-sm text-[#64748B]">
+                    Archivo: <span className="text-emerald-600">{selectedFile.name}</span>
                   </span>
                 )}
               </div>
@@ -457,8 +457,8 @@ export default function FacturacionMasiva() {
 
             {/* Mensaje IMPORTANTE (solo si se selecciona Facturación) */}
             {!isCancelacion && (
-              <div className="mt-4 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
-                <p className="text-yellow-400 text-sm font-medium">
+              <div className="mt-4 p-3 rounded-xl bg-yellow-50 border border-yellow-200">
+                <p className="text-yellow-700 text-sm font-medium">
                   ⚠ IMPORTANTE: La plantilla acepta máximo 1000 conceptos y/o facturas
                 </p>
               </div>
@@ -466,8 +466,8 @@ export default function FacturacionMasiva() {
 
             {/* Mensaje para Cancelación */}
             {isCancelacion && (
-              <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30">
-                <p className="text-red-400 text-sm font-medium">
+              <div className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200">
+                <p className="text-red-600 text-sm font-medium">
                   ⚠ IMPORTANTE: Para cancelaciones, asegúrate de que el archivo contenga los folios fiscales de las facturas a cancelar
                 </p>
               </div>
@@ -475,13 +475,13 @@ export default function FacturacionMasiva() {
           </div>
 
           {/* Tabla de archivos procesados */}
-          <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] overflow-hidden">
-            <div className="border-b border-[#16304f] p-4 bg-[#0a1424]">
-              <h3 className="text-lg font-bold text-white">Historial de Procesos</h3>
+          <div className="rounded-2xl border-2 border-[#E2E8F0] bg-white overflow-hidden">
+            <div className="border-b border-[#E2E8F0] p-4 bg-[#F8FAFC]">
+              <h3 className="text-lg font-bold text-[#0F172A]">Historial de Procesos</h3>
             </div>
 
             {archivosProcesados.length === 0 ? (
-              <div className="text-center py-12 text-slate-400">
+              <div className="text-center py-12 text-[#64748B]">
                 <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p>No hay procesos registrados</p>
                 <p className="text-sm mt-1">Sube un archivo para comenzar</p>
@@ -489,8 +489,8 @@ export default function FacturacionMasiva() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-[#16253e]">
-                    <tr className="text-left text-sm uppercase tracking-wide text-slate-400">
+                  <thead className="bg-[#F1F5F9]">
+                    <tr className="text-left text-sm uppercase tracking-wide text-[#475569]">
                       <th className="px-6 py-4">Tipo</th>
                       <th className="px-6 py-4">Nombre archivo</th>
                       <th className="px-6 py-4">Mensaje</th>
@@ -503,12 +503,12 @@ export default function FacturacionMasiva() {
                   </thead>
                   <tbody>
                     {archivosProcesados.map((archivo) => (
-                      <tr key={archivo.id} className="border-t border-[#16304f] hover:bg-[#0d1b35] transition-colors">
+                      <tr key={archivo.id} className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC] transition-colors">
                         <td className="px-6 py-4">
                           <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium ${
-                            archivo.tipo === "Cancelación" 
-                              ? "bg-red-500/10 text-red-400" 
-                              : "bg-blue-500/10 text-blue-400"
+                            archivo.tipo === "Cancelación"
+                              ? "bg-red-50 text-red-600"
+                              : "bg-blue-50 text-blue-600"
                           }`}>
                             {archivo.status === "processing" && <Loader2 className="h-3 w-3 animate-spin" />}
                             {archivo.status === "completed" && <CheckCircle2 className="h-3 w-3" />}
@@ -518,7 +518,7 @@ export default function FacturacionMasiva() {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <FileText className="h-4 w-4 text-slate-400" />
-                            <span className="text-slate-300">{archivo.nombreArchivo}</span>
+                            <span className="text-[#334155]">{archivo.nombreArchivo}</span>
                           </div>
                         </td>
                         <td className={`px-6 py-4 ${getMessageColor(archivo.status)}`}>
@@ -533,20 +533,20 @@ export default function FacturacionMasiva() {
                         <td className="px-6 py-4 text-center">
                           {archivo.status === "processing" ? (
                             <div className="flex items-center justify-center gap-1">
-                              <Loader2 className="h-4 w-4 animate-spin text-yellow-400" />
-                              <span className="text-yellow-400">{archivo.facturasProcesadas}</span>
+                              <Loader2 className="h-4 w-4 animate-spin text-yellow-600" />
+                              <span className="text-yellow-600">{archivo.facturasProcesadas}</span>
                             </div>
                           ) : (
-                            <span className="font-bold text-emerald-400">{archivo.facturasProcesadas}</span>
+                            <span className="font-bold text-emerald-600">{archivo.facturasProcesadas}</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-slate-400 text-sm">
+                        <td className="px-6 py-4 text-[#64748B] text-sm">
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {archivo.inicio}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-slate-400 text-sm">
+                        <td className="px-6 py-4 text-[#64748B] text-sm">
                           {archivo.final || (archivo.status === "processing" ? "En proceso..." : "-")}
                         </td>
                       </tr>
@@ -557,10 +557,10 @@ export default function FacturacionMasiva() {
             )}
 
             {/* Nota al pie de la tabla */}
-            <div className="border-t border-[#16304f] p-4 bg-[#0a1424]">
+            <div className="border-t border-[#E2E8F0] p-4 bg-[#F8FAFC]">
               <div className="flex items-start gap-2">
-                <Info className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-slate-400">
+                <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-[#64748B]">
                   NOTA: Solo puedes tener un archivo procesando, sigue las indicaciones para un timbrado eficiente.
                 </p>
               </div>
@@ -570,12 +570,12 @@ export default function FacturacionMasiva() {
       </div>
 
       {/* Modal de alerta */}
-      <AlertModal 
-        isOpen={alertModal.isOpen} 
-        onClose={() => setAlertModal({ ...alertModal, isOpen: false })} 
-        title={alertModal.title} 
-        message={alertModal.message} 
-        type={alertModal.type} 
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
       />
 
       {/* Toast */}

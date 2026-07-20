@@ -29,21 +29,21 @@ type LabelProps = {
 
 function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
   const [showTooltip, setShowTooltip] = useState(false);
-  
+
   return (
     <div className="mb-2 flex items-center gap-1">
-      <label className="text-sm font-bold uppercase tracking-wide text-slate-400">
+      <label className="text-sm font-bold uppercase tracking-wide text-[#0F172A]">
         {children}
       </label>
       {withInfo && (
         <div className="relative">
-          <Info 
-            className="h-4 w-4 cursor-help text-[#1d9bf0]" 
+          <Info
+            className="h-4 w-4 cursor-help text-blue-600"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           />
           {showTooltip && (
-            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-white border border-[#E2E8F0] p-2 text-xs text-[#475569] shadow-lg">
               {infoText}
             </div>
           )}
@@ -206,8 +206,8 @@ const generarDatosTopProveedores = (fechaInicio: string, fechaFin: string) => {
 // Componente para la gráfica (simulada)
 const GraficaSimulada = ({ titulo, datos, tipo }: { titulo: string; datos: any; tipo: "bar" | "pie" | "line" }) => {
   return (
-    <div className="bg-[#0a1424] rounded-xl p-6 border border-[#173156]">
-      <h3 className="text-lg font-bold text-white mb-4 text-center">{titulo}</h3>
+    <div className="bg-[#F8FAFC] rounded-xl p-6 border border-[#E2E8F0]">
+      <h3 className="text-lg font-bold text-[#0F172A] mb-4 text-center">{titulo}</h3>
       <div className="flex justify-center items-center min-h-[300px]">
         <div className="w-full">
           {/* Simulación de gráfica de barras */}
@@ -218,15 +218,15 @@ const GraficaSimulada = ({ titulo, datos, tipo }: { titulo: string; datos: any; 
                 const maxValor = Math.max(...datos.datasets[0].data);
                 const altura = (valor / maxValor) * 100;
                 const color = datos.datasets[0].backgroundColor;
-                
+
                 return (
                   <div key={idx} className="space-y-1">
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">{label}</span>
-                      <span className="text-white font-bold">${valor.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <span className="text-[#64748B]">{label}</span>
+                      <span className="text-[#0F172A] font-bold">${valor.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    <div className="w-full bg-[#1e293b] rounded-full h-8 overflow-hidden">
-                      <div 
+                    <div className="w-full bg-[#E2E8F0] rounded-full h-8 overflow-hidden">
+                      <div
                         className="h-full rounded-full flex items-center justify-end px-2 text-xs font-bold text-white"
                         style={{ width: `${altura}%`, backgroundColor: typeof color === 'string' ? color : color[idx] }}
                       >
@@ -238,7 +238,7 @@ const GraficaSimulada = ({ titulo, datos, tipo }: { titulo: string; datos: any; 
               })}
             </div>
           )}
-          
+
           {/* Simulación de gráfica de pastel */}
           {tipo === "pie" && (
             <div className="flex flex-col md:flex-row gap-6 items-center justify-center">
@@ -257,7 +257,7 @@ const GraficaSimulada = ({ titulo, datos, tipo }: { titulo: string; datos: any; 
                     const x2 = 50 + 40 * Math.cos(radFin);
                     const y2 = 50 + 40 * Math.sin(radFin);
                     const largeArc = angulo > 180 ? 1 : 0;
-                    
+
                     acc.push({ inicio, fin, porcentaje, color: datos.datasets[0].backgroundColor[idx] });
                     return acc;
                   }, []).map((segmento: any, idx: number) => (
@@ -265,19 +265,19 @@ const GraficaSimulada = ({ titulo, datos, tipo }: { titulo: string; datos: any; 
                       key={idx}
                       d={`M 50 50 L ${50 + 40 * Math.cos((segmento.inicio - 90) * Math.PI / 180)} ${50 + 40 * Math.sin((segmento.inicio - 90) * Math.PI / 180)} A 40 40 0 ${segmento.porcentaje > 50 ? 1 : 0} 1 ${50 + 40 * Math.cos((segmento.fin - 90) * Math.PI / 180)} ${50 + 40 * Math.sin((segmento.fin - 90) * Math.PI / 180)} Z`}
                       fill={segmento.color}
-                      stroke="#0a1424"
+                      stroke="#F8FAFC"
                       strokeWidth="1"
                     />
                   ))}
-                  <circle cx="50" cy="50" r="20" fill="#0a1424" />
+                  <circle cx="50" cy="50" r="20" fill="#F8FAFC" />
                 </svg>
               </div>
               <div className="space-y-2">
                 {datos.labels.map((label: string, idx: number) => (
                   <div key={idx} className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: datos.datasets[0].backgroundColor[idx] }} />
-                    <span className="text-slate-300 text-sm">{label}</span>
-                    <span className="text-white font-bold ml-2">${datos.datasets[0].data[idx].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="text-[#475569] text-sm">{label}</span>
+                    <span className="text-[#0F172A] font-bold ml-2">${datos.datasets[0].data[idx].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 ))}
               </div>
@@ -365,15 +365,15 @@ export default function Estadisticas() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#071321] text-white">
+      <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
           <div className="mb-4">
-            <h1 className="text-3xl font-extrabold text-white">Estadísticas</h1>
-            <p className="mt-2 text-slate-400">Visualiza y analiza los datos financieros de tu empresa.</p>
+            <h1 className="text-3xl font-extrabold text-[#0F172A]">Estadísticas</h1>
+            <p className="mt-2 text-[#64748B]">Visualiza y analiza los datos financieros de tu empresa.</p>
           </div>
 
           {/* Contenedor de configuración */}
-          <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.01)] mb-6">
+          <div className="rounded-2xl border-2 border-[#E2E8F0] bg-white p-6 shadow-sm mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Dropdown de estadísticas */}
               <div>
@@ -460,15 +460,15 @@ export default function Estadisticas() {
 
           {/* Contenedor de la gráfica */}
           {datosGenerados && (
-            <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.01)]">
+            <div className="rounded-2xl border-2 border-[#E2E8F0] bg-white p-6 shadow-sm">
               <GraficaSimulada
                 titulo={getTitulo()}
                 datos={datosGenerados}
                 tipo={getTipoGrafica()}
               />
-              
+
               {/* Botones de descarga */}
-              <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-[#173156]">
+              <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-[#E2E8F0]">
                 <button className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-500 transition-colors">
                   <FileSpreadsheet className="h-4 w-4" />
                   Exportar Excel
@@ -483,9 +483,9 @@ export default function Estadisticas() {
 
           {/* Mensaje cuando no se ha generado nada */}
           {!datosGenerados && (
-            <div className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-12 text-center">
-              <BarChart3 className="h-16 w-16 text-slate-600 mx-auto mb-4" />
-              <p className="text-slate-400 text-lg">Selecciona un tipo de estadística y los filtros correspondientes, luego haz clic en "Generar Reporte" para visualizar los datos.</p>
+            <div className="rounded-2xl border-2 border-[#E2E8F0] bg-white p-12 text-center">
+              <BarChart3 className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+              <p className="text-[#64748B] text-lg">Selecciona un tipo de estadística y los filtros correspondientes, luego haz clic en "Generar Reporte" para visualizar los datos.</p>
             </div>
           )}
         </main>

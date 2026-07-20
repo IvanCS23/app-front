@@ -65,18 +65,18 @@ function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
   
   return (
     <div className="mb-2 flex items-center gap-1">
-      <label className="text-sm font-bold uppercase tracking-wide text-slate-400">
+      <label className="text-sm font-bold uppercase tracking-wide text-[#0F172A]">
         {children}
       </label>
       {withInfo && (
         <div className="relative">
-          <Info 
-            className="h-4 w-4 cursor-help text-[#1d9bf0]" 
+          <Info
+            className="h-4 w-4 cursor-help text-blue-600"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           />
           {showTooltip && (
-            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+            <div className="absolute bottom-full left-0 mb-2 z-50 w-64 rounded-lg bg-white border border-[#E2E8F0] p-2 text-xs text-[#475569] shadow-lg">
               {infoText}
             </div>
           )}
@@ -94,8 +94,8 @@ type SectionTitleProps = {
 function SectionTitle({ icon, title }: SectionTitleProps) {
   return (
     <div className="mb-6 flex items-center gap-3">
-      <div className="text-slate-300">{icon}</div>
-      <h2 className="text-[20px] font-bold text-white">{title}</h2>
+      <div className="text-[#475569]">{icon}</div>
+      <h2 className="text-[20px] font-bold text-[#0F172A]">{title}</h2>
     </div>
   );
 }
@@ -1314,14 +1314,14 @@ const closeSuccessModal = () => {
           onClick={closeSuccessModal}
         />
         
-        <div className="relative max-w-md w-full rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="relative max-w-md w-full rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl animate-in zoom-in-95 duration-300">
           <div className="p-6 text-center">
             {/* Icono de éxito */}
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20">
               <CheckCircle2 className="h-10 w-10 text-emerald-500" />
             </div>
             
-            <h2 className="text-2xl font-bold text-white mb-2">
+            <h2 className="text-2xl font-bold text-[#0F172A] mb-2">
               ¡Factura Generada!
             </h2>
             <p className="text-slate-400 mb-4">
@@ -1332,7 +1332,7 @@ const closeSuccessModal = () => {
             {showEmailForm ? (
   <div className="space-y-2 text-left">
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-1">
+      <label className="block text-sm font-medium text-[#475569] mb-1">
         Correo 1 <span className="text-red-500">*</span>
       </label>
       <input
@@ -1345,7 +1345,7 @@ const closeSuccessModal = () => {
     </div>
     
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-1">
+      <label className="block text-sm font-medium text-[#475569] mb-1">
         Correo 2 <span className="text-slate-500 text-xs">(Opcional)</span>
       </label>
       <input
@@ -1358,7 +1358,7 @@ const closeSuccessModal = () => {
     </div>
     
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-1">
+      <label className="block text-sm font-medium text-[#475569] mb-1">
         Asunto <span className="text-slate-500 text-xs">(Opcional)</span>
       </label>
       <input
@@ -1371,7 +1371,7 @@ const closeSuccessModal = () => {
     </div>
     
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-1">
+      <label className="block text-sm font-medium text-[#475569] mb-1">
         Mensaje <span className="text-slate-500 text-xs">(Opcional)</span>
       </label>
       <textarea
@@ -1380,7 +1380,7 @@ const closeSuccessModal = () => {
         placeholder="Escribe tu mensaje aquí..."
         rows={2}
         maxLength={500}
-        className="w-full rounded-xl border-2 border-[#1e293b] bg-[#081423] px-3 py-1.5 text-white outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 resize-none hover:border-[#0552cf66]"
+        className="w-full rounded-xl border-2 border-[#E2E8F0] bg-white px-3 py-1.5 text-[#0F172A] outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 resize-none hover:border-blue-300"
       />
       <p className="text-xs text-slate-500 mt-0.5 text-right">
         {message.length}/500 caracteres
@@ -1390,7 +1390,7 @@ const closeSuccessModal = () => {
     <div className="flex gap-3 pt-1">
       <button
         onClick={handleBack}
-        className="flex-1 rounded-xl border-2 border-[#1e293b] bg-[#081423] px-4 py-1.5 font-medium text-slate-300 transition hover:bg-[#0d1b35] hover:text-white hover:border-[#0552cf66]"
+        className="flex-1 rounded-xl border-2 border-[#E2E8F0] bg-white px-4 py-1.5 font-medium text-[#475569] transition hover:bg-slate-100 hover:text-slate-700 hover:border-blue-300"
       >
         Regresar
       </button>
@@ -1421,25 +1421,25 @@ const closeSuccessModal = () => {
                       closeSuccessModal();
                       window.location.reload();
                     }}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-[#3c83f666]"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-white border-2 border-[#E2E8F0] px-4 py-3 text-[#475569] hover:bg-[#F8FAFC] transition-colors focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-blue-300"
                   >
-                    <FilePlus className="h-5 w-5 text-[#1d9bf0]" />
+                    <FilePlus className="h-5 w-5 text-blue-600" />
                     <span className="text-sm font-medium">Crear Nueva Factura</span>
                   </button>
                   
                   <button
                     onClick={closeSuccessModal}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-[#3c83f666]"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-white border-2 border-[#E2E8F0] px-4 py-3 text-[#475569] hover:bg-[#F8FAFC] transition-colors focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-blue-300"
                   >
-                    <FileTextIcon className="h-5 w-5 text-[#1d9bf0]" />
+                    <FileTextIcon className="h-5 w-5 text-blue-600" />
                     <span className="text-sm font-medium">Anexar Addenda</span>
                   </button>
                   
                   <button
                     onClick={closeSuccessModal}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[#0d1b35] border-2 border-[#173156] px-4 py-3 text-white hover:bg-[#16233b] transition-colors focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-[#3c83f666]"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-white border-2 border-[#E2E8F0] px-4 py-3 text-[#475569] hover:bg-[#F8FAFC] transition-colors focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-blue-300"
                   >
-                    <CreditCard className="h-5 w-5 text-[#1d9bf0]" />
+                    <CreditCard className="h-5 w-5 text-blue-600" />
                     <span className="text-sm font-medium">Ir a Cuentas por Cobrar</span>
                   </button>
                 </div>
@@ -1456,9 +1456,9 @@ const closeSuccessModal = () => {
                   
                   <button
                     onClick={closeSuccessModal}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-[#173156] bg-[#0d1b35] px-6 py-2.5 font-medium text-white hover:bg-[#16233b] transition-colors flex-1 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-[#3c83f666]"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-6 py-2.5 font-medium text-[#475569] hover:bg-[#F8FAFC] transition-colors flex-1 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-blue-300"
                   >
-                    <ExternalLink className="h-5 w-5 text-[#1d9bf0]" />
+                    <ExternalLink className="h-5 w-5 text-blue-600" />
                     <span>Ver consultar</span>
                   </button>
                 </div>
@@ -1468,7 +1468,7 @@ const closeSuccessModal = () => {
           
           <button
             onClick={closeSuccessModal}
-            className="absolute right-4 top-4 rounded-xl p-1 text-slate-400 hover:bg-[#0d1b35] hover:text-white transition-colors"
+            className="absolute right-4 top-4 rounded-xl p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -1479,7 +1479,7 @@ const closeSuccessModal = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#071321] text-white">
+      <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         {/* Main */}
         <main className="mx-auto max-w-[1400px]">
           <SectionTitle
@@ -1487,13 +1487,13 @@ const closeSuccessModal = () => {
             title={
               <>
                 Datos de la Factura:{" "}
-                <span className="text-[#1d9bf0]">CFDI 4.0</span>
+                <span className="text-blue-600">CFDI 4.0</span>
               </>
             }
           />
 
           {/* Card formulario */}
-          <section className="rounded-2xl border-2 border-[#16304f] bg-[#09172b] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.01)]">
+          <section className="rounded-2xl border-2 border-[#E2E8F0] bg-white p-6 shadow-sm">
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
               {/* Nombre Emisor */}
               <div>
@@ -1510,14 +1510,14 @@ const closeSuccessModal = () => {
                       />
                       <button
                         onClick={handleSaveEmitterName}
-                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-emerald-500 hover:border-emerald-500"
+                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-emerald-500 hover:border-emerald-500"
                         title="Guardar"
                       >
                         <CheckCircle2 className="h-5 w-5" />
                       </button>
                       <button
                         onClick={handleCancelEditName}
-                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-red-500 hover:border-red-500"
+                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-red-500 hover:border-red-500"
                         title="Cancelar"
                       >
                         <X className="h-5 w-5" />
@@ -1529,11 +1529,11 @@ const closeSuccessModal = () => {
                         type="text"
                         value={emitterName}
                         readOnly
-                        className={`${inputStyle} flex-1 bg-[#0a1424] cursor-not-allowed opacity-75`}
+                        className={`${inputStyle} flex-1 bg-slate-100 cursor-not-allowed opacity-75`}
                       />
                       <button
                         onClick={handleEditEmitterName}
-                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-[#1d9bf0] hover:border-[#3c83f666]"
+                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-blue-600 hover:border-blue-300"
                         title="Editar"
                       >
                         <Pencil className="h-5 w-5" />
@@ -1559,14 +1559,14 @@ const closeSuccessModal = () => {
                       />
                       <button
                         onClick={handleSaveEmitterZip}
-                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-emerald-500 hover:border-emerald-500"
+                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-emerald-500 hover:border-emerald-500"
                         title="Guardar"
                       >
                         <CheckCircle2 className="h-5 w-5" />
                       </button>
                       <button
                         onClick={handleCancelEditZip}
-                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-red-500 hover:border-red-500"
+                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-red-500 hover:border-red-500"
                         title="Cancelar"
                       >
                         <X className="h-5 w-5" />
@@ -1578,11 +1578,11 @@ const closeSuccessModal = () => {
                         type="text"
                         value={emitterZip}
                         readOnly
-                        className={`${inputStyle} flex-1 bg-[#0a1424] cursor-not-allowed opacity-75`}
+                        className={`${inputStyle} flex-1 bg-slate-100 cursor-not-allowed opacity-75`}
                       />
                       <button
                         onClick={handleEditEmitterZip}
-                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-[#1d9bf0] hover:border-[#3c83f666]"
+                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-blue-600 hover:border-blue-300"
                         title="Editar"
                       >
                         <Pencil className="h-5 w-5" />
@@ -1618,13 +1618,13 @@ const closeSuccessModal = () => {
 
                   <button
                     onClick={openClientModal}
-                    className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-[#1d9bf0] hover:border-[#3c83f666]"
+                    className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-blue-600 hover:border-blue-300"
                     title="Agregar Cliente"
                   >
                     <Plus className="h-5 w-5" />
                   </button>
 
-                  <button className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-[#1d9bf0] hover:border-[#3c83f666]"
+                  <button className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-blue-600 hover:border-blue-300"
                     title="Editar Cliente">
                     <Pencil className="h-5 w-5" />
                   </button>
@@ -1678,7 +1678,7 @@ const closeSuccessModal = () => {
               <div className="flex items-end">
                 <button
                   onClick={() => setShowAdditionalOptions(!showAdditionalOptions)}
-                  className="flex items-center gap-2 text-[15px] font-semibold text-[#1d9bf0] hover:opacity-90"
+                  className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 hover:opacity-90"
                 >
                   {showAdditionalOptions ? (
                     <ChevronUp className="h-4 w-4" />
@@ -1692,7 +1692,7 @@ const closeSuccessModal = () => {
 
             {/* Opciones adicionales */}
             {showAdditionalOptions && (
-              <div className="mt-8 border-t border-[#16304f] pt-8">
+              <div className="mt-8 border-t border-[#E2E8F0] pt-8">
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
                   {/* Número de pedido */}
                   <div>
@@ -1824,7 +1824,7 @@ const closeSuccessModal = () => {
                           value={observationText}
                           onChange={(e) => setObservationText(e.target.value)}
                           rows={4}
-                          className="w-full rounded-xl border-2 border-[#1e293b] bg-[#081423] px-4 py-3 text-white placeholder:text-slate-500 outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 resize-y"
+                          className="w-full rounded-xl border-2 border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] placeholder:text-slate-500 outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 resize-y"
                         />
                         <p className="mt-1 text-xs text-slate-500">
                           Describe las observaciones relevantes para esta factura
@@ -1905,7 +1905,7 @@ const closeSuccessModal = () => {
                               <button
                                 type="button"
                                 onClick={addFolioFiscalField}
-                                className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-[#1d9bf0] hover:border-[#3c83f666]"
+                                className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-blue-600 hover:border-blue-300"
                               >
                                 <Plus className="h-5 w-5" />
                               </button>
@@ -1914,7 +1914,7 @@ const closeSuccessModal = () => {
                               <button
                                 type="button"
                                 onClick={() => removeFolioFiscalField(index)}
-                                className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-red-500 hover:border-red-500"
+                                className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-red-500 hover:border-red-500"
                               >
                                 <Minus className="h-5 w-5" />
                               </button>
@@ -1936,9 +1936,9 @@ const closeSuccessModal = () => {
               title="Seleccionar producto o servicio:"
             />
 
-            <section className="overflow-hidden rounded-2xl border-2 border-[#16304f] bg-[#09172b]">
+            <section className="overflow-hidden rounded-2xl border-2 border-[#E2E8F0] bg-white">
               {/* Buscador con dropdown */}
-              <div className="border-b border-[#16304f] p-6">
+              <div className="border-b border-[#E2E8F0] p-6">
                 <div className="relative" ref={dropdownRef}>
                   <div className="relative flex-1">
                     <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
@@ -1949,11 +1949,11 @@ const closeSuccessModal = () => {
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onFocus={() => setShowDropdown(true)}
                       placeholder="Busca tu producto o servicio (ej: laptop)"
-                      className="w-220 rounded-xl border-2 border-[#1e293b] bg-[#081423] py-3 pl-11 pr-4 text-white outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-[#3c83f666]"
+                      className="w-220 rounded-xl border-2 border-[#E2E8F0] bg-white py-3 pl-11 pr-4 text-[#0F172A] outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-blue-300"
                     />
                     <button
                       onClick={openProductModal}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 flex h-[53px] w-[53px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-[#1d9bf0] hover:border-[#3c83f666]"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 flex h-[53px] w-[53px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-blue-600 hover:border-blue-300"
                       title="Agregar Producto"
                     >
                       <Plus className="h-5 w-5" />
@@ -1963,19 +1963,19 @@ const closeSuccessModal = () => {
                   
                   {/* Dropdown de productos */}
                   {showDropdown && filteredProducts.length > 0 && (
-                    <div className="absolute z-50 mt-1 w-220 max-h-60 overflow-y-auto rounded-xl border border-[#173156] bg-[#0a1424] shadow-xl">
+                    <div className="absolute z-50 mt-1 w-220 max-h-60 overflow-y-auto rounded-xl border border-[#E2E8F0] bg-white shadow-xl">
                       {filteredProducts.map((producto, index) => (
                         <button
                           key={index}
                           onClick={() => seleccionarProducto(producto)}
-                          className="w-220 text-left px-4 py-3 hover:bg-[#0d1b35] transition-colors border-b border-[#173156] last:border-b-0"
+                          className="w-220 text-left px-4 py-3 hover:bg-[#F8FAFC] transition-colors border-b border-[#E2E8F0] last:border-b-0"
                         >
                           <div className="flex justify-between items-center">
                             <div>
-                              <p className="text-white font-medium">{producto.descripcion}</p>
+                              <p className="text-[#0F172A] font-medium">{producto.descripcion}</p>
                               <p className="text-xs text-slate-400">Clave: {producto.clave} | Unidad: {producto.unidad}</p>
                             </div>
-                            <p className="text-blue-400 font-bold">${producto.precio.toFixed(2)}</p>
+                            <p className="text-blue-600 font-bold">${producto.precio.toFixed(2)}</p>
                           </div>
                         </button>
                       ))}
@@ -1983,8 +1983,8 @@ const closeSuccessModal = () => {
                   )}
                   
                   {showDropdown && searchTerm && filteredProducts.length === 0 && (
-                    <div className="absolute z-50 mt-1 w-full rounded-xl border border-[#173156] bg-[#0a1424] p-4 text-center text-slate-400">
-                      No se encontraron productos. <button onClick={openProductModal} className="text-[#1d9bf0] hover:underline">Agrega uno nuevo</button>
+                    <div className="absolute z-50 mt-1 w-full rounded-xl border border-[#E2E8F0] bg-white p-4 text-center text-slate-400">
+                      No se encontraron productos. <button onClick={openProductModal} className="text-blue-600 hover:underline">Agrega uno nuevo</button>
                     </div>
                   )}
                 </div>
@@ -1993,8 +1993,8 @@ const closeSuccessModal = () => {
               {/* Tabla */}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1000px]">
-                  <thead className="bg-[#16253e]">
-                    <tr className="text-left text-sm uppercase tracking-wide text-slate-400">
+                  <thead className="bg-[#F1F5F9]">
+                    <tr className="text-left text-sm uppercase tracking-wide text-[#475569]">
                       <th className="px-6 py-4">Cant.</th>
                       <th className="px-6 py-4">Claves</th>
                       <th className="px-6 py-4">Descripción</th>
@@ -2004,7 +2004,7 @@ const closeSuccessModal = () => {
                           Subtotal
                           <div className="relative">
                             <Info 
-                              className="h-3.5 w-3.5 cursor-help text-[#1d9bf0]" 
+                              className="h-3.5 w-3.5 cursor-help text-blue-600" 
                               onMouseEnter={(e) => {
                                 const tooltip = e.currentTarget.nextElementSibling;
                                 if (tooltip) tooltip.classList.remove('hidden');
@@ -2014,7 +2014,7 @@ const closeSuccessModal = () => {
                                 if (tooltip) tooltip.classList.add('hidden');
                               }}
                             />
-                            <div className="hidden absolute left-0 mb-2 z-50 w-80 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+                            <div className="hidden absolute left-0 mb-2 z-50 w-80 rounded-lg bg-white border border-[#E2E8F0] p-2 text-xs text-[#475569] shadow-lg">
                               Es posible modificar el subtotal en ciertos rangos autorizados, esto permite cuadrar el monto, en caso de estar fuera de la variación permitida, la plataforma regresará en automático al subtotal calculado.
                             </div>
                           </div>
@@ -2036,7 +2036,7 @@ const closeSuccessModal = () => {
                       </tr>
                     ) : (
                       productos.map((producto) => (
-                        <tr key={producto.id} className="border-t border-[#16304f]">
+                        <tr key={producto.id} className="border-t border-[#E2E8F0]">
                           {/* Cantidad */}
                           <td className="px-6 py-4">
                             <input
@@ -2047,7 +2047,7 @@ const closeSuccessModal = () => {
                                 const nuevoProducto = recalcularProducto(producto, { cantidad: nuevaCantidad });
                                 setProductos(productos.map(p => p.id === producto.id ? nuevoProducto : p));
                               }}
-                              className="w-20 rounded-xl border-2 border-[#1e293b] bg-[#081423] px-3 py-2 text-white outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-[#3c83f666]"
+                              className="w-20 rounded-xl border-2 border-[#E2E8F0] bg-white px-3 py-2 text-[#0F172A] outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-blue-300"
                             />
                           </td>
                           
@@ -2059,7 +2059,7 @@ const closeSuccessModal = () => {
                                   value={`Clave Producto: ${producto.claves}`}
                                   readOnly
                                   placeholder="Clave Prod."
-                                  className="w-32 h-16 rounded-xl border-2 border-[#1e293b] bg-[#0a1424] px-2 py-1 text-sm text-white cursor-not-allowed opacity-75 resize-none overflow-hidden outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20  hover:border-[#3c83f666]"
+                                  className="w-32 h-16 rounded-xl border-2 border-[#E2E8F0] bg-slate-100 px-2 py-1 text-sm text-[#0F172A] cursor-not-allowed opacity-75 resize-none overflow-hidden outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20  hover:border-blue-300"
                                 />
                               </div>
                               <div className="flex items-center gap-2">
@@ -2067,7 +2067,7 @@ const closeSuccessModal = () => {
                                   value={`Clave Unidad: ${producto.claveUnidad}`}
                                   readOnly
                                   placeholder="Clave Unidad"
-                                  className="w-32 h-16 rounded-xl border-2 border-[#1e293b] bg-[#0a1424] px-2 py-1 text-sm text-white cursor-not-allowed opacity-75 resize-none overflow-hidden outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-[#3c83f666]"
+                                  className="w-32 h-16 rounded-xl border-2 border-[#E2E8F0] bg-slate-100 px-2 py-1 text-sm text-[#0F172A] cursor-not-allowed opacity-75 resize-none overflow-hidden outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 hover:border-blue-300"
                                 />
                               </div>
                             </div>
@@ -2080,7 +2080,7 @@ const closeSuccessModal = () => {
                               onChange={(e) => {
                                 setProductos(productos.map(p => p.id === producto.id ? { ...p, descripcion: e.target.value } : p));
                               }}
-                              className="w-52 h-32 rounded-xl border-2 border-[#1e293b] hover:border-[#3c83f666] bg-[#081423] px-3 py-2 text-white resize-none overflow-y-auto outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 "
+                              className="w-52 h-32 rounded-xl border-2 border-[#E2E8F0] hover:border-blue-300 bg-white px-3 py-2 text-[#0F172A] resize-none overflow-y-auto outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 "
                               style={{ minHeight: '60px', maxHeight: '200px' }}
                             />
                           </td>
@@ -2096,7 +2096,7 @@ const closeSuccessModal = () => {
                                 const nuevoProducto = recalcularProducto(producto, { precio: nuevoPrecio });
                                 setProductos(productos.map(p => p.id === producto.id ? nuevoProducto : p));
                               }}
-                              className="w-28 rounded-xl border-2 hover:border-[#3c83f666] border-[#1e293b] bg-[#081423] px-3 py-2 text-white outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20"
+                              className="w-28 rounded-xl border-2 hover:border-blue-300 border-[#E2E8F0] bg-white px-3 py-2 text-[#0F172A] outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20"
                             />
                           </td>
                           
@@ -2112,7 +2112,7 @@ const closeSuccessModal = () => {
                                 const total = nuevoSubtotal + impuestos;
                                 setProductos(productos.map(p => p.id === producto.id ? { ...p, subtotal: nuevoSubtotal, impuestos: impuestos, total: total } : p));
                               }}
-                              className="w-28 rounded-xl border-2 hover:border-[#3c83f666] border-[#1e293b] bg-[#081423] px-3 py-2 text-white outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 "
+                              className="w-28 rounded-xl border-2 hover:border-blue-300 border-[#E2E8F0] bg-white px-3 py-2 text-[#0F172A] outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 "
                             />
                           </td>
                           
@@ -2126,7 +2126,7 @@ const closeSuccessModal = () => {
                                   const nuevoProducto = recalcularProducto(producto, { descuentoTipo: nuevoTipo, descuentoValor: 0 });
                                   setProductos(productos.map(p => p.id === producto.id ? nuevoProducto : p));
                                 }}
-                                className="w-14 rounded-xl border-2 border-[#1e293b] hover:border-[#3c83f666] bg-[#081423] px-2 py-2 text-white outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 "
+                                className="w-14 rounded-xl border-2 border-[#E2E8F0] hover:border-blue-300 bg-white px-2 py-2 text-[#0F172A] outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 "
                               >
                                 <option value="-">-</option>
                                 <option value="$">$</option>
@@ -2141,30 +2141,30 @@ const closeSuccessModal = () => {
                                   const nuevoProducto = recalcularProducto(producto, { descuentoValor: nuevoValor });
                                   setProductos(productos.map(p => p.id === producto.id ? nuevoProducto : p));
                                 }}
-                                className={`w-24 rounded-xl border-2 border-[#1e293b] hover:border-[#3c83f666] bg-[#081423] px-3 py-2 text-white outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 ${producto.descuentoTipo === "-" ? "opacity-50 cursor-not-allowed" : ""}`}
+                                className={`w-24 rounded-xl border-2 border-[#E2E8F0] hover:border-blue-300 bg-white px-3 py-2 text-[#0F172A] outline-none focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 ${producto.descuentoTipo === "-" ? "opacity-50 cursor-not-allowed" : ""}`}
                                 placeholder={producto.descuentoTipo === "%" ? "Porcentaje" : "Monto"}
                               />
                             </div>
                           </td>
                           
                           {/* Impuestos */}
-                          <td className="px-6 py-4 text-white">${producto.impuestos.toFixed(2)}</td>
-                          
+                          <td className="px-6 py-4 text-[#0F172A]">${producto.impuestos.toFixed(2)}</td>
+
                           {/* Total */}
-                          <td className="px-6 py-4 text-white">${producto.total.toFixed(2)}</td>
+                          <td className="px-6 py-4 text-[#0F172A]">${producto.total.toFixed(2)}</td>
                           
                           {/* Acciones */}
                           <td className="px-6 py-4">
                             <div className="flex gap-2 justify-center">
                               <button
                                 onClick={() => setProductos(productos.filter(p => p.id !== producto.id))}
-                                className="text-red-500 hover:text-red-400 transition-colors"
+                                className="text-red-500 hover:text-red-600 transition-colors"
                                 title="Eliminar"
                               >
                                 <X className="h-5 w-5" />
                               </button>
                               <button
-                                className="text-[#1d9bf0] hover:text-blue-400 transition-colors"
+                                className="text-blue-600 hover:text-blue-700 transition-colors"
                                 title="Editar"
                               >
                                 <Pencil className="h-4 w-4" />
@@ -2182,25 +2182,25 @@ const closeSuccessModal = () => {
 
           {/* Totales y acciones - Sección sticky */}
           <div className="sticky bottom-0 z-20 mt-6">
-            <div className="flex flex-col gap-6 rounded-2xl border-2 border-[#16304f] bg-[#0d1c34] px-6 py-8 shadow-lg lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-6 rounded-2xl border-2 border-[#E2E8F0] bg-blue-50 px-6 py-8 shadow-lg lg:flex-row lg:items-center lg:justify-between">
               <div className="flex gap-10">
                 <div>
                   <p className="text-sm font-bold uppercase tracking-wide text-slate-400">
                     Subtotal
                   </p>
-                  <h3 className="mt-1 text-2xl font-bold text-white">${subtotalGeneral.toFixed(2)}</h3>
+                  <h3 className="mt-1 text-2xl font-bold text-[#0F172A]">${subtotalGeneral.toFixed(2)}</h3>
                 </div>
 
                 <div>
                   <p className="text-sm font-bold uppercase tracking-wide text-slate-400">
                     Total
                   </p>
-                  <h3 className="mt-1 text-2xl font-bold text-white">${totalGeneral.toFixed(2)}</h3>
+                  <h3 className="mt-1 text-2xl font-bold text-[#0F172A]">${totalGeneral.toFixed(2)}</h3>
                 </div>
               </div>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <div className="flex items-center gap-5 text-[#1d9bf0]">
+                <div className="flex items-center gap-5 text-blue-600">
                   <button className="hover:opacity-80">
                     <Folder className="h-6 w-6" />
                   </button>
@@ -2240,16 +2240,16 @@ const closeSuccessModal = () => {
           </div>
 
           {/* Alerta */}
-          <section className="mt-7 rounded-2xl border-2 border-[#164a7a] bg-[#0b1d32] p-6">
+          <section className="mt-7 rounded-2xl border-2 border-blue-100 bg-blue-50 p-6">
             <div className="flex items-start gap-4">
-              <div className="mt-1 text-[#1d9bf0]">
+              <div className="mt-1 text-blue-600">
                 <Info className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-[22px] font-bold text-white">
+                <h3 className="text-[22px] font-bold text-[#0F172A]">
                   Validación CFDI 4.0 Activa
                 </h3>
-                <p className="mt-1 text-[17px] text-slate-300">
+                <p className="mt-1 text-[17px] text-[#475569]">
                   Asegúrate de que los datos del cliente coincidan exactamente con su
                   Constancia de Situación Fiscal para evitar errores en el timbrado.
                 </p>
@@ -2261,18 +2261,18 @@ const closeSuccessModal = () => {
         <br />
 
         {/* Footer */}
-        <footer className="border-t border-[#16304f] px-6 py-8 text-sm text-slate-500">
+        <footer className="border-t border-[#E2E8F0] px-6 py-8 text-sm text-slate-500">
           <div className="mx-auto flex max-w-[1400px] flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <p>© 2023 FacturaPro. Todos los derechos reservados.</p>
 
             <div className="flex gap-6">
-              <a href="#" className="hover:text-white">
+              <a href="#" className="hover:text-[#0F172A]">
                 Términos y condiciones
               </a>
-              <a href="#" className="hover:text-white">
+              <a href="#" className="hover:text-[#0F172A]">
                 Privacidad
               </a>
-              <a href="#" className="hover:text-white">
+              <a href="#" className="hover:text-[#0F172A]">
                 Ayuda
               </a>
             </div>
@@ -2288,12 +2288,12 @@ const closeSuccessModal = () => {
             onClick={closeClientModal}
           />
           
-          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-              <h2 className="text-xl font-bold text-white">Agregar Nuevo Cliente</h2>
+          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
+              <h2 className="text-xl font-bold text-[#0F172A]">Agregar Nuevo Cliente</h2>
               <button
                 onClick={closeClientModal}
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-[#0d1b35] hover:text-white"
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-700"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -2412,7 +2412,7 @@ const closeSuccessModal = () => {
                 <div className="md:col-span-2">
                   <button
                     onClick={() => setShowOptionalFields(!showOptionalFields)}
-                    className="flex items-center gap-2 text-[15px] font-semibold text-[#1d9bf0] hover:opacity-90 transition-opacity"
+                    className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 hover:opacity-90 transition-opacity"
                   >
                     {showOptionalFields ? (
                       <ChevronUp className="h-4 w-4" />
@@ -2534,7 +2534,7 @@ const closeSuccessModal = () => {
               </div>
             </div>
 
-            <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#173156] bg-[#071321] px-6 py-4">
+            <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
               <button
                 onClick={closeClientModal}
                 className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] transition-colors duration-200 hover:bg-red-400"
@@ -2560,12 +2560,12 @@ const closeSuccessModal = () => {
             onClick={closeProductModal}
           />
           
-          <div className="relative max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-2xl border border-[#173156] bg-[#071321] shadow-2xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#173156] bg-[#071321] px-6 py-4">
-              <h2 className="text-xl font-bold text-white">Nuevo Producto</h2>
+          <div className="relative max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
+              <h2 className="text-xl font-bold text-[#0F172A]">Nuevo Producto</h2>
               <button
                 onClick={closeProductModal}
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-[#0d1b35] hover:text-white"
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-700"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -2576,7 +2576,7 @@ const closeSuccessModal = () => {
               <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                 {/* Columna izquierda - Datos del producto */}
                 <div>
-                  <h3 className="mb-4 text-lg font-bold text-white border-b border-[#173156] pb-2">Datos del producto</h3>
+                  <h3 className="mb-4 text-lg font-bold text-[#0F172A] border-b border-[#E2E8F0] pb-2">Datos del producto</h3>
                   <div className="space-y-4">
                     <div>
                       <Label>Nombre Interno:</Label>
@@ -2626,10 +2626,10 @@ const closeSuccessModal = () => {
 
                 {/* Columna derecha - Cambios obligatorios CFDI 4.0 SAT */}
                 <div>
-                  <h3 className="mb-4 text-lg font-bold text-white border-b border-[#173156] pb-2">Cambios obligatorios CFDI 4.0 SAT</h3>
+                  <h3 className="mb-4 text-lg font-bold text-[#0F172A] border-b border-[#E2E8F0] pb-2">Cambios obligatorios CFDI 4.0 SAT</h3>
                   <div className="space-y-4">
                     <div>
-                      <p className="text-sm text-slate-300 mb-2">
+                      <p className="text-sm text-[#475569] mb-2">
                         Asocia tu producto al CATALOGO del SAT<br />
                         Busca tu CLAVE, escríbela en el campo de abajo, espera opciones y selecciona una (8 caracteres):
                       </p>
@@ -2642,14 +2642,14 @@ const closeSuccessModal = () => {
                           className={`${inputStyle} flex-1`}
                           maxLength={8}
                         />
-                        <button className="flex h-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] px-4 text-[#1d9bf0] hover:border-[#3c83f666] whitespace-nowrap">
+                        <button className="flex h-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white px-4 text-blue-600 hover:border-blue-300 whitespace-nowrap">
                           Buscar Clave
                         </button>
                       </div>
                     </div>
 
                     <div>
-                      <p className="text-sm text-slate-300 mb-2">
+                      <p className="text-sm text-[#475569] mb-2">
                         Define la UNIDAD de tu producto<br />
                         Busca tu UNIDAD, escríbela en el campo, espera opciones y selecciona una (De 2 o 3 caracteres):
                       </p>
@@ -2662,14 +2662,14 @@ const closeSuccessModal = () => {
                           className={`${inputStyle} flex-1`}
                           maxLength={3}
                         />
-                        <button className="flex h-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] px-4 text-[#1d9bf0] hover:border-[#3c83f666] whitespace-nowrap">
+                        <button className="flex h-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white px-4 text-blue-600 hover:border-blue-300 whitespace-nowrap">
                           Buscar Unidad
                         </button>
                       </div>
                     </div>
 
                     <div>
-                      <p className="text-sm text-slate-300 mb-2">Objeto Impuesto</p>
+                      <p className="text-sm text-[#475569] mb-2">Objeto Impuesto</p>
                       <div className="relative">
                         <select
                           value={productObjetoImpuesto}
@@ -2691,12 +2691,12 @@ const closeSuccessModal = () => {
 
               {/* Sección Cuenta Predial - Opcionales */}
               <div className="mt-8">
-                <h3 className="mb-4 text-lg font-bold text-white border-b border-[#173156] pb-2">Opcionales</h3>
+                <h3 className="mb-4 text-lg font-bold text-[#0F172A] border-b border-[#E2E8F0] pb-2">Opcionales</h3>
                 
                 <div className="mb-6">
                   <button
                     onClick={addCuentaPredial}
-                    className="flex items-center gap-2 text-[15px] font-semibold text-[#1d9bf0] hover:opacity-90 transition-opacity"
+                    className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 hover:opacity-90 transition-opacity"
                   >
                     <Plus className="h-4 w-4" />
                     Agregar Cuenta Predial
@@ -2713,14 +2713,14 @@ const closeSuccessModal = () => {
                       />
                       <button
                         onClick={() => removeCuentaPredial(index)}
-                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-red-500 hover:border-red-500"
+                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-red-500 hover:border-red-500"
                       >
                         <Minus className="h-5 w-5" />
                       </button>
                       {index === cuentasPrediales.length - 1 && (
                         <button
                           onClick={addCuentaPredial}
-                          className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-[#1d9bf0] hover:border-[#3c83f666]"
+                          className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-blue-600 hover:border-blue-300"
                         >
                           <Plus className="h-5 w-5" />
                         </button>
@@ -2732,7 +2732,7 @@ const closeSuccessModal = () => {
 
               {/* Sección Impuestos Federales */}
               <div className="mt-6">
-                <h3 className="text-md font-bold text-white">Impuestos Federales</h3>
+                <h3 className="text-md font-bold text-[#0F172A]">Impuestos Federales</h3>
                 <p className="text-sm text-slate-400 mb-4">Selecciona únicamente los impuestos que necesite tu producto</p>
                 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -2786,9 +2786,9 @@ const closeSuccessModal = () => {
                             name="iepsType"
                             checked={iepsType === "tasa"}
                             onChange={() => setIepsType("tasa")}
-                            className="w-4 h-4 rounded-full border-slate-700 bg-[#081423] text-blue-500 focus:ring-blue-500 focus:ring-offset-0 checked:bg-blue-500 checked:border-blue-500 mb-2"
+                            className="w-4 h-4 rounded-full border-slate-300 bg-white text-blue-500 focus:ring-blue-500 focus:ring-offset-0 checked:bg-blue-500 checked:border-blue-500 mb-2"
                           />
-                          <span className="text-sm text-slate-300 mb-2">TASA</span>
+                          <span className="text-sm text-[#475569] mb-2">TASA</span>
                         </label>
                         <label className="flex items-center gap-1 cursor-pointer">
                           <input
@@ -2796,9 +2796,9 @@ const closeSuccessModal = () => {
                             name="iepsType"
                             checked={iepsType === "cuota"}
                             onChange={() => setIepsType("cuota")}
-                            className="w-4 h-4 rounded-full border-slate-700 bg-[#081423] text-blue-500 focus:ring-blue-500 focus:ring-offset-0 checked:bg-blue-500 checked:border-blue-500 mb-2"
+                            className="w-4 h-4 rounded-full border-slate-300 bg-white text-blue-500 focus:ring-blue-500 focus:ring-offset-0 checked:bg-blue-500 checked:border-blue-500 mb-2"
                           />
-                          <span className="text-sm text-slate-300 mb-2 mr-16">CUOTA</span>
+                          <span className="text-sm text-[#475569] mb-2 mr-16">CUOTA</span>
                         </label>
                       </div>
                     </div>
@@ -2853,12 +2853,12 @@ const closeSuccessModal = () => {
 
               {/* Sección Información Aduanera */}
               <div className="mt-8">
-                <h3 className="mb-2 text-md font-bold text-white">Información Aduanera</h3>
+                <h3 className="mb-2 text-md font-bold text-[#0F172A]">Información Aduanera</h3>
                 <p className="text-sm text-slate-400 mb-3">Numero de Pedimento</p>
                 
                 <button
                   onClick={addPedimento}
-                  className="flex items-center gap-2 text-[15px] font-semibold text-[#1d9bf0] hover:opacity-90 transition-opacity"
+                  className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 hover:opacity-90 transition-opacity"
                 >
                   <Plus className="h-4 w-4" />
                   Agregar Numero de Pedimento
@@ -2875,14 +2875,14 @@ const closeSuccessModal = () => {
                     />
                     <button
                       onClick={() => removePedimento(index)}
-                      className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-red-500 hover:border-red-500"
+                      className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-red-500 hover:border-red-500"
                     >
                       <Minus className="h-5 w-5" />
                     </button>
                     {index === pedimentos.length - 1 && (
                       <button
                         onClick={addPedimento}
-                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-[#1d9bf0] hover:border-[#3c83f666]"
+                        className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-blue-600 hover:border-blue-300"
                       >
                         <Plus className="h-5 w-5" />
                       </button>
@@ -2894,7 +2894,7 @@ const closeSuccessModal = () => {
               {/* Sección Impuestos Locales */}
               <div className="mt-8">
                 <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-md font-bold text-white">Impuestos Locales</h3>
+                  <h3 className="text-md font-bold text-[#0F172A]">Impuestos Locales</h3>
                   <div className="relative">
                     <Info 
                       className="h-4 w-4 cursor-help text-yellow-500" 
@@ -2907,7 +2907,7 @@ const closeSuccessModal = () => {
                         if (tooltip) tooltip.classList.add('hidden');
                       }}
                     />
-                    <div className="hidden absolute bottom-full left-0 mb-2 z-50 w-80 rounded-lg bg-[#0a0f1a] border border-[#2d3748] p-2 text-xs text-slate-300 shadow-lg">
+                    <div className="hidden absolute bottom-full left-0 mb-2 z-50 w-80 rounded-lg bg-white border border-[#E2E8F0] p-2 text-xs text-[#475569] shadow-lg">
                       En el nombre no se permiten caracteres especiales salvo el signo %.
                       <br /><br />
                       Si escribes la <b>Tasa</b>, el monto será calculado con base al subtotal.
@@ -2921,7 +2921,7 @@ const closeSuccessModal = () => {
                               
                 <button
                   onClick={addImpuestoLocal}
-                  className="flex items-center gap-2 text-[15px] font-semibold text-[#1d9bf0] hover:opacity-90 transition-opacity"
+                  className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 hover:opacity-90 transition-opacity"
                 >
                   <Plus className="h-4 w-4" />
                   Agregar Impuestos Locales
@@ -2974,7 +2974,7 @@ const closeSuccessModal = () => {
                     </div>
                     <button
                       onClick={() => removeImpuestoLocal(impuesto.id)}
-                      className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#1e293b] bg-[#081423] text-red-500 hover:border-red-500"
+                      className="flex h-[49px] w-[49px] items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-white text-red-500 hover:border-red-500"
                     >
                       <Minus className="h-5 w-5" />
                     </button>
@@ -2983,7 +2983,7 @@ const closeSuccessModal = () => {
               </div>
             </div>
 
-            <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#173156] bg-[#071321] px-6 py-4">
+            <div className="sticky bottom-0 flex justify-end gap-4 border-t border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
               <button
                 onClick={closeProductModal} 
                 className="rounded-xl bg-red-500 px-6 py-2 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] transition-colors duration-200 hover:bg-red-400"
