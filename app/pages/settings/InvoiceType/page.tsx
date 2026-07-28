@@ -19,6 +19,7 @@ import {
   Warehouse,
   X,
   AlertCircle,
+  Info,
 } from "lucide-react";
 
 const inputStyle =

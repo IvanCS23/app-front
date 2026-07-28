@@ -5,7 +5,7 @@ export async function getInvoicesCount(): Promise<number> {
   const token = getToken();
   if (!token) throw new Error("No hay sesión activa");
 
-  const res = await fetch(`${API_URL}/api/invoices`, {
+  const res = await fetch(`${API_URL}/api/legacy-invoices`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

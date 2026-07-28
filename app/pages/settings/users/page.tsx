@@ -16,6 +16,7 @@ import {
   EyeOff,
   Trash,
   Pencil,
+  Info,
 } from "lucide-react";
 
 const selectStyle =

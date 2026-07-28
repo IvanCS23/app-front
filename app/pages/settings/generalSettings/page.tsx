@@ -11,6 +11,7 @@ import {
   Mail,
   DollarSign,
   Settings as SettingsIcon,
+  Info,
 } from "lucide-react";
 
 const selectStyle =

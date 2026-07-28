@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Building2,
   User,
+  Info,
 } from "lucide-react";
 
 const selectStyle =

@@ -9,6 +9,7 @@ import {
   Plus,
   Trash,
   Pencil,
+  Info,
 } from "lucide-react";
 
 const inputStyle =

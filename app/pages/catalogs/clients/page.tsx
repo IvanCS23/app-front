@@ -432,14 +432,14 @@ export default function CatalogoClientes() {
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div
           className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-          onClick={closeBulkUploadModal}
+          onClick={() => setIsBulkUploadModalOpen(false)}
         />
         
         <div className="relative max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
             <h2 className="text-xl font-bold text-[#0F172A]">Carga Masiva de Clientes</h2>
             <button
-              onClick={closeBulkUploadModal}
+              onClick={() => setIsBulkUploadModalOpen(false)}
               className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-700"
             >
               <X className="h-5 w-5" />

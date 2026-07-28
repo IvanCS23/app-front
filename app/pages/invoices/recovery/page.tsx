@@ -11,6 +11,7 @@ import {
   AlertCircle,
   ChevronDown,
   Fingerprint,
+  Info,
 } from "lucide-react";
 
 const selectStyle =
