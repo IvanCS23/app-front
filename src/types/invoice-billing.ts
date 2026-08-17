@@ -1,0 +1,94 @@
+export type InvoicePacStatus = "draft" | "pending" | "valid" | "canceled" | string | null;
+export type InvoiceIssueStatus = "pending" | "succeeded" | "failed" | "reconciliation_required" | string | null;
+export type InvoiceCancellationStatus = "pending" | "verifying" | "accepted" | "rejected" | "expired" | string | null;
+
+export interface InvoicePacState {
+  provider: string | null;
+  status: InvoicePacStatus;
+  cancellation_status: InvoiceCancellationStatus;
+  issue_status: InvoiceIssueStatus;
+  reconciliation_required: boolean;
+  last_sync_at: string | null;
+}
+
+export interface InvoiceArtifactState {
+  status: string | null;
+  xml_available: boolean;
+  pdf_available: boolean;
+  downloaded_at: string | null;
+}
+
+export interface InvoiceCfdiState {
+  uuid: string | null;
+  stamped_at: string | null;
+  artifacts: InvoiceArtifactState;
+}
+
+export interface InvoiceCancellationReceiptState {
+  status: string | null;
+  available: boolean;
+  downloaded_at: string | null;
+  error_code: string | null;
+}
+
+export type InvoicePacEventContext = Record<string, string | number | boolean | string[] | null>;
+
+export interface InvoicePacTimelineEvent {
+  id: number;
+  type: string;
+  occurred_at: string | null;
+  pac_status: string | null;
+  cancellation_status: string | null;
+  issue_status: string | null;
+  pac_code: string | null;
+  context: InvoicePacEventContext;
+}
+
+export interface InvoiceBilling {
+  id: number;
+  folio: string;
+  status: InvoiceStatus | null;
+  actions: InvoiceBusinessActions;
+  pac: InvoicePacState;
+  cfdi: InvoiceCfdiState;
+  cancellation_receipt: InvoiceCancellationReceiptState;
+  timeline: InvoicePacTimelineEvent[];
+}
+
+export type InvoiceCancellationMode = "erp_only" | "pac" | "erp_convergence" | null;
+
+export interface InvoiceBusinessActions {
+  can_issue: boolean;
+  can_cancel: boolean;
+  can_reconcile: boolean;
+  cancellation_mode: InvoiceCancellationMode;
+}
+
+export interface InvoiceSummary {
+  id: number;
+  folio: string;
+  total: string | number;
+  currency: string;
+  client_name: string | null;
+}
+
+export type CfdiCancellationMotive = "01" | "02" | "03" | "04";
+
+export interface CancelInvoicePacPayload {
+  motive: CfdiCancellationMotive;
+  substitution_uuid?: string;
+  confirm: true;
+}
+
+export interface CancelInvoiceBusinessPayload {
+  motive?: CfdiCancellationMotive;
+  substitution_uuid?: string;
+  confirm: true;
+}
+
+export interface InvoiceApiErrorBody {
+  message?: string;
+  code?: string;
+  errors?: Record<string, string[]> | Array<{ code: string; field: string }>;
+}
+import type { InvoiceStatus } from "@/src/types/invoice";

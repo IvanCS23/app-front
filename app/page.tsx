@@ -44,13 +44,11 @@ const MaintenancePage: React.FC = () => {
             contacto@kluksblu.com.mx
           </p>
         </div>
-          <Link href="/login" className="mt-8 inline-block">
-            <button
-              type="button"
-              className="text-heading bg-gradient-to-r from-teal-200 to-lime-200 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 font-medium rounded-base text-sm px-4 py-2.5 text-center leading-5"
-            >
-              Teal to Lime
-            </button>
+          <Link
+            href="/login"
+            className="mt-8 inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-950/30 transition hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
+          >
+            Iniciar sesión
           </Link>
 
         {/* FOOTER */}

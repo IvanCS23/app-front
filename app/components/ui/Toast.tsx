@@ -15,6 +15,8 @@ export default function Toast({ message, type, onClose }: ToastProps) {
 
   return (
     <div
+      role={type === "error" ? "alert" : "status"}
+      aria-live={type === "error" ? "assertive" : "polite"}
       className={`fixed bottom-4 right-4 z-[100] flex items-center gap-3 rounded-xl px-4 py-3 shadow-lg animate-in slide-in-from-right-5 duration-300 ${
         type === "success" ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
       }`}
