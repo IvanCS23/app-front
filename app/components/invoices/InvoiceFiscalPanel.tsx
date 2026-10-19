@@ -58,6 +58,7 @@ function publicErrorMessage(error: unknown): string {
   const messages: Record<string, string> = {
     PAC_UNAVAILABLE: "El proveedor fiscal no está disponible. Intenta nuevamente más tarde.",
     PAC_ISSUANCE_IN_PROGRESS: "La emisión ya está en proceso. Actualiza el estado antes de volver a intentar.",
+    PAC_CANCELLATION_IN_PROGRESS: "La cancelación ya está en proceso. Actualiza el estado antes de volver a intentar.",
     PAC_RECONCILIATION_REQUIRED: "El estado fiscal requiere reconciliación antes de continuar.",
     PAC_DRAFT_NOT_READY: "El comprobante aún no está listo para emitirse.",
     INVOICE_LIFECYCLE_INCONSISTENT: "Los estados ERP y fiscal requieren revisión antes de continuar.",

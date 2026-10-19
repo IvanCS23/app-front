@@ -154,6 +154,16 @@ describe("panel fiscal de factura", () => {
     expect(api.cancelInvoiceBusiness).toHaveBeenCalledWith(3, { motive: "02", confirm: true });
   });
 
+  it("muestra mensaje sanitizado cuando la cancelación ya está en curso (409)", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.cancelInvoiceBusiness).mockRejectedValue(new api.InvoiceApiError("raw omitido", 409, "PAC_CANCELLATION_IN_PROGRESS"));
+    arrange();
+    await user.click(await screen.findByRole("button", { name: "Cancelar factura" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Cancelar factura" })).getByRole("button", { name: "Cancelar factura" }));
+    expect(await screen.findByText("La cancelación ya está en proceso. Actualiza el estado antes de volver a intentar.")).toBeInTheDocument();
+    expect(screen.queryByText("raw omitido")).not.toBeInTheDocument();
+  });
+
   it("cancelación sin CFDI explica ERP-only, omite motivo SAT y sincroniza el estado padre", async () => {
     const user = userEvent.setup();
     const onStatusChange = vi.fn();
