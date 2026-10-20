@@ -179,13 +179,31 @@ describe("panel fiscal de factura", () => {
     expect(screen.queryByText("raw omitido")).not.toBeInTheDocument();
   });
 
-  it("cancelación sin CFDI explica ERP-only, omite motivo SAT y sincroniza el estado padre", async () => {
+  it.each([
+    ["409", new api.InvoiceApiError("raw omitido", 409, "PAC_RECONCILIATION_REQUIRED")],
+    ["503", new api.InvoiceApiError("raw omitido", 503, "PAC_UNAVAILABLE")],
+  ])("tras un error %s al emitir recarga el estado fiscal y avisa al padre", async (_status, error) => {
     const user = userEvent.setup();
-    const onStatusChange = vi.fn();
+    const onSettled = vi.fn();
+    vi.mocked(api.getInvoiceBilling).mockResolvedValue(fixture("unstamped"));
+    vi.mocked(api.getInvoiceSummary).mockResolvedValue(summary);
+    vi.mocked(api.issueInvoiceBusiness).mockRejectedValue(error);
+    render(<InvoiceFiscalPanel invoiceId={3} onFiscalActionSettled={onSettled} />);
+
+    await user.click(await screen.findByRole("button", { name: "Emitir factura" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Emitir factura" })).getByRole("button", { name: "Emitir factura" }));
+
+    await waitFor(() => expect(onSettled).toHaveBeenCalledTimes(1));
+    expect(api.getInvoiceBilling).toHaveBeenCalledTimes(2);
+  });
+
+  it("cancelación sin CFDI explica ERP-only, omite motivo SAT y avisa al padre para recargar la factura", async () => {
+    const user = userEvent.setup();
+    const onSettled = vi.fn();
     vi.mocked(api.getInvoiceBilling).mockResolvedValue(fixture("unstamped"));
     vi.mocked(api.getInvoiceSummary).mockResolvedValue(summary);
     vi.mocked(api.cancelInvoiceBusiness).mockResolvedValue(fixture("canceled"));
-    render(<InvoiceFiscalPanel invoiceId={3} onInvoiceStatusChange={onStatusChange} />);
+    render(<InvoiceFiscalPanel invoiceId={3} onFiscalActionSettled={onSettled} />);
 
     await user.click(await screen.findByRole("button", { name: "Cancelar factura" }));
     const dialog = screen.getByRole("dialog", { name: "Cancelar factura" });
@@ -194,7 +212,7 @@ describe("panel fiscal de factura", () => {
     await user.click(within(dialog).getByRole("button", { name: "Cancelar factura" }));
 
     expect(api.cancelInvoiceBusiness).toHaveBeenCalledWith(3, { confirm: true });
-    expect(onStatusChange).toHaveBeenCalledWith("cancelled");
+    await waitFor(() => expect(onSettled).toHaveBeenCalledTimes(1));
   });
 
   it("factura cancelada oculta cancelar y ofrece ambos archivos del acuse", async () => {

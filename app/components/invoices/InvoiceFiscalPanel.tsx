@@ -77,13 +77,14 @@ export default function InvoiceFiscalPanel({
   summary: providedSummary,
   embedded = false,
   erpStatus,
-  onInvoiceStatusChange,
+  onFiscalActionSettled,
 }: {
   invoiceId: number;
   summary?: InvoiceSummary;
   embedded?: boolean;
   erpStatus?: InvoiceStatus;
-  onInvoiceStatusChange?: (status: InvoiceStatus) => void;
+  /** Se invoca al terminar cada acción fiscal, con éxito o con error. */
+  onFiscalActionSettled?: () => void;
 }) {
   const { user } = useAuth();
   const [billing, setBilling] = useState<InvoiceBilling | null>(null);
@@ -133,17 +134,20 @@ export default function InvoiceFiscalPanel({
     try {
       const next = await request();
       setBilling(next);
-      if (next.status) onInvoiceStatusChange?.(next.status);
       setToast({ type: "success", message: typeof success === "function" ? success(next) : success });
       setIssueOpen(false);
       setCancelOpen(false);
     } catch (error) {
       setToast({ type: "error", message: publicErrorMessage(error) });
-      if (error instanceof InvoiceApiError && error.status === 409) await load();
+      // Emitir, cancelar y reconciliar pueden cambiar el estado aunque fallen
+      // (p. ej. ERP ready -> issued antes de un 503 del PAC).
+      const mayHaveChangedState = action === "issue" || action === "cancel" || action === "reconcile";
+      if (mayHaveChangedState || (error instanceof InvoiceApiError && error.status === 409)) await load();
     } finally {
       setActiveAction(null);
+      onFiscalActionSettled?.();
     }
-  }, [activeAction, load, onInvoiceStatusChange]);
+  }, [activeAction, load, onFiscalActionSettled]);
 
   const download = useCallback(async (kind: DownloadKind, request: () => Promise<void>) => {
     if (activeDownload) return;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, CalendarDays, CheckCircle2, FileText, Loader2, Pencil, RefreshCw, Trash2 } from "lucide-react";
@@ -53,7 +53,36 @@ export default function InvoiceDetailPage() {
     return () => controller.abort();
   }, [invoiceId, retryKey, validId]);
 
-  const billingSummary = useMemo(() => invoice ? ({ id: invoice.id, folio: invoice.folio, total: invoice.total, currency: invoice.currency, client_name: invoice.client_name }) : undefined, [invoice]);
+  // Memorizado por campos: recargar la factura no debe crear un resumen nuevo
+  // que obligue al panel fiscal a volver a pedir su estado.
+  const summaryId = invoice?.id;
+  const summaryFolio = invoice?.folio;
+  const summaryTotal = invoice?.total;
+  const summaryCurrency = invoice?.currency;
+  const summaryClient = invoice?.client_name;
+  const billingSummary = useMemo(
+    () => summaryId !== undefined && summaryFolio !== undefined && summaryTotal !== undefined && summaryCurrency !== undefined
+      ? { id: summaryId, folio: summaryFolio, total: summaryTotal, currency: summaryCurrency, client_name: summaryClient ?? null }
+      : undefined,
+    [summaryId, summaryFolio, summaryTotal, summaryCurrency, summaryClient],
+  );
+
+  // Fase 6.20: tras cada acción fiscal (con éxito o error) se recarga la
+  // factura completa: el ERP puede cambiar status, issued_at o cancelled_at
+  // aunque el PAC falle. Sin spinner de página y conservando el detalle si
+  // la recarga falla.
+  const refreshController = useRef<AbortController | null>(null);
+  const refreshInvoice = useCallback(() => {
+    refreshController.current?.abort();
+    const controller = new AbortController();
+    refreshController.current = controller;
+    void getInvoiceDetail(invoiceId, controller.signal)
+      .then((result) => setInvoice(result))
+      .catch(() => {
+        if (!controller.signal.aborted) setToast({ type: "error", message: "No fue posible actualizar el resumen ERP. Recarga la página para ver el estado más reciente." });
+      });
+  }, [invoiceId]);
+  useEffect(() => () => refreshController.current?.abort(), []);
 
   const address: string[] = invoice ? [
     [invoice.client_calle, invoice.client_no_exterior && `No. ${invoice.client_no_exterior}`, invoice.client_no_interior && `Int. ${invoice.client_no_interior}`].filter(Boolean).join(" "),
@@ -141,7 +170,7 @@ export default function InvoiceDetailPage() {
 
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]" aria-labelledby="totals-title"><div className="app-card p-5 sm:p-6"><h2 className="font-bold text-[#0F172A]">Integridad comercial</h2><p className="mt-2 text-sm text-[#64748B]">Los importes mostrados son snapshots persistidos. El frontend no recalcula impuestos, descuentos ni totales.</p></div><div className="app-card p-5 sm:p-6"><h2 id="totals-title" className="font-bold text-[#0F172A]">Totales</h2><dl className="mt-4 space-y-3"><div className="flex justify-between gap-4"><dt className="text-[#64748B]">Subtotal</dt><dd className="font-semibold">{formatInvoiceMoney(invoice.subtotal, invoice.currency)}</dd></div><div className="flex justify-between gap-4"><dt className="text-[#64748B]">Descuento</dt><dd className="font-semibold">{formatInvoiceMoney(invoice.discount_total, invoice.currency)}</dd></div><div className="flex justify-between gap-4"><dt className="text-[#64748B]">Impuestos</dt><dd className="font-semibold">{formatInvoiceMoney(invoice.tax_total, invoice.currency)}</dd></div><div className="flex justify-between gap-4 border-t border-[#CBD5E1] pt-3"><dt className="font-bold">Total</dt><dd className="text-lg font-extrabold text-emerald-600">{formatInvoiceMoney(invoice.total, invoice.currency)}</dd></div></dl></div></section>
 
-        <section aria-labelledby="fiscal-section-title" className="space-y-4"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#64748B]">Flujo PAC / CFDI</p><h2 id="fiscal-section-title" className="mt-1 text-xl font-extrabold text-[#0F172A]">Estado CFDI</h2><p className="mt-1 text-sm text-[#64748B]">Estado fiscal independiente del estado ERP mostrado arriba.</p></div><InvoiceFiscalPanel invoiceId={invoice.id} summary={billingSummary} embedded erpStatus={invoice.status} onInvoiceStatusChange={(status) => setInvoice((current) => current ? { ...current, status } : current)} /></section>
+        <section aria-labelledby="fiscal-section-title" className="space-y-4"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#64748B]">Flujo PAC / CFDI</p><h2 id="fiscal-section-title" className="mt-1 text-xl font-extrabold text-[#0F172A]">Estado CFDI</h2><p className="mt-1 text-sm text-[#64748B]">Estado fiscal independiente del estado ERP mostrado arriba.</p></div><InvoiceFiscalPanel invoiceId={invoice.id} summary={billingSummary} embedded erpStatus={invoice.status} onFiscalActionSettled={refreshInvoice} /></section>
       </main>
 
       <FiscalActionModal open={editOpen} title="Editar notas comerciales" confirmLabel="Guardar notas" busyLabel="Guardando..." busy={activeAction === "edit"} confirmDisabled={notesDraft.length > 1000} onClose={() => setEditOpen(false)} onConfirm={() => void saveNotes()}><div><label htmlFor="invoice-notes" className="mb-2 block font-semibold text-[#0F172A]">Notas</label><textarea id="invoice-notes" value={notesDraft} onChange={(event) => setNotesDraft(event.target.value)} maxLength={1000} rows={6} className="app-input min-h-32 resize-y" autoFocus /><p className="mt-2 text-right text-xs text-[#64748B]">{notesDraft.length}/1000</p></div></FiscalActionModal>

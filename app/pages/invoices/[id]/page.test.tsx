@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
+import { formatInvoiceDate } from "@/src/lib/invoice";
 import { invoiceDetailFixture } from "@/src/test-fixtures/invoice";
 import * as invoices from "@/src/services/invoice.services";
 import InvoiceDetailPage from "./page";
@@ -15,7 +16,12 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/app/components/layout/AppLayout", () => ({ default: ({ children }: { children: ReactNode }) => <div>{children}</div> }));
 vi.mock("@/app/components/invoices/InvoiceFiscalPanel", () => ({
-  default: ({ invoiceId, embedded }: { invoiceId: number; embedded?: boolean }) => <div data-testid="fiscal-panel" data-invoice={invoiceId} data-embedded={embedded}>{fiscal.label}</div>,
+  default: ({ invoiceId, embedded, onFiscalActionSettled }: { invoiceId: number; embedded?: boolean; onFiscalActionSettled?: () => void }) => (
+    <div data-testid="fiscal-panel" data-invoice={invoiceId} data-embedded={embedded}>
+      {fiscal.label}
+      <button type="button" onClick={() => onFiscalActionSettled?.()}>Simular acción fiscal</button>
+    </div>
+  ),
 }));
 vi.mock("@/src/services/invoice.services", () => ({
   getInvoiceDetail: vi.fn(),
@@ -130,6 +136,38 @@ describe("detalle comercial de factura", () => {
     expect(screen.getByRole("button", { name: "Actualizando..." })).toBeDisabled();
     resolveReady({ ...draft, status: "ready" });
     expect(await screen.findByText("Lista para emitir")).toBeInTheDocument();
+  });
+
+  it("recarga la factura completa tras una acción fiscal: Emisión ERP deja de mostrar —", async () => {
+    const user = userEvent.setup();
+    vi.mocked(invoices.getInvoiceDetail)
+      .mockResolvedValueOnce(invoiceDetailFixture({ status: "ready", issued_at: null }))
+      .mockResolvedValueOnce(invoiceDetailFixture({ status: "issued", issued_at: "2026-10-20T19:52:44Z" }));
+    render(<InvoiceDetailPage />);
+
+    const issuedFact = async () => (await screen.findByText("Emisión ERP")).parentElement as HTMLElement;
+    expect(await screen.findByText("Lista para emitir")).toBeInTheDocument();
+    expect(within(await issuedFact()).getByText("—")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Simular acción fiscal" }));
+
+    expect(await screen.findByText("Emitida")).toBeInTheDocument();
+    expect(within(await issuedFact()).getByText(formatInvoiceDate("2026-10-20T19:52:44Z"))).toBeInTheDocument();
+    expect(invoices.getInvoiceDetail).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole("status", { name: "Cargando detalle comercial" })).not.toBeInTheDocument();
+  });
+
+  it("si la recarga posterior a una acción fiscal falla, conserva el detalle y avisa", async () => {
+    const user = userEvent.setup();
+    vi.mocked(invoices.getInvoiceDetail)
+      .mockResolvedValueOnce(invoiceDetailFixture())
+      .mockRejectedValueOnce(new Error("red caída"));
+    render(<InvoiceDetailPage />);
+
+    await user.click(await screen.findByRole("button", { name: "Simular acción fiscal" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("No fue posible actualizar el resumen ERP.");
+    expect(screen.getByRole("heading", { name: "FAC-00000003" })).toBeInTheDocument();
   });
 
   it("muestra un error de acción con aria-live y conserva el detalle", async () => {
