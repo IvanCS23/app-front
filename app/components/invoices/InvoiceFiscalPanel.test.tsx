@@ -110,6 +110,21 @@ describe("panel fiscal de factura", () => {
     expect(screen.queryByText("raw omitido")).not.toBeInTheDocument();
   });
 
+  it.each([
+    ["PAC_AUTHENTICATION_FAILED", 503, "El proveedor fiscal rechazó las credenciales configuradas. Pide a un administrador que revise la llave del PAC."],
+    ["PAC_CONFIGURATION_INVALID", 503, "La conexión con el proveedor fiscal no está configurada para operar. Pide a un administrador que revise la configuración."],
+    ["PAC_OPERATION_IN_PROGRESS", 409, "El proveedor fiscal todavía procesa otra operación sobre este comprobante. Actualiza el estado antes de volver a intentar."],
+    ["PAC_INVOICE_NOT_FOUND", 409, "El comprobante no existe en el proveedor fiscal con la configuración actual."],
+  ])("muestra un mensaje específico para %s, sin texto crudo ni 'temporalmente'", async (code, status, message) => {
+    const user = userEvent.setup();
+    vi.mocked(api.issueInvoiceBusiness).mockRejectedValue(new api.InvoiceApiError("raw omitido temporalmente", status, code));
+    arrange(fixture("unstamped"));
+    await user.click(await screen.findByRole("button", { name: "Emitir factura" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Emitir factura" })).getByRole("button", { name: "Emitir factura" }));
+    expect(await screen.findByText(message)).toBeInTheDocument();
+    expect(screen.queryByText(/temporalmente/)).not.toBeInTheDocument();
+  });
+
   it("reconcilia de forma prominente y usa la respuesta sin GET redundante en éxito", async () => {
     const user = userEvent.setup();
     vi.mocked(api.reconcileInvoicePac).mockResolvedValue(fixture("valid"));

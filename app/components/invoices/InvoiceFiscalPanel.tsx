@@ -57,6 +57,10 @@ function publicErrorMessage(error: unknown): string {
   if (!(error instanceof InvoiceApiError)) return error instanceof Error ? error.message : "No fue posible completar la operación.";
   const messages: Record<string, string> = {
     PAC_UNAVAILABLE: "El proveedor fiscal no está disponible. Intenta nuevamente más tarde.",
+    PAC_AUTHENTICATION_FAILED: "El proveedor fiscal rechazó las credenciales configuradas. Pide a un administrador que revise la llave del PAC.",
+    PAC_CONFIGURATION_INVALID: "La conexión con el proveedor fiscal no está configurada para operar. Pide a un administrador que revise la configuración.",
+    PAC_OPERATION_IN_PROGRESS: "El proveedor fiscal todavía procesa otra operación sobre este comprobante. Actualiza el estado antes de volver a intentar.",
+    PAC_INVOICE_NOT_FOUND: "El comprobante no existe en el proveedor fiscal con la configuración actual.",
     PAC_ISSUANCE_IN_PROGRESS: "La emisión ya está en proceso. Actualiza el estado antes de volver a intentar.",
     PAC_CANCELLATION_IN_PROGRESS: "La cancelación ya está en proceso. Actualiza el estado antes de volver a intentar.",
     PAC_RECONCILIATION_REQUIRED: "El estado fiscal requiere reconciliación antes de continuar.",
