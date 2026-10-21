@@ -186,7 +186,9 @@ export default function InvoiceFiscalPanel({
   }
 
   const folio = billing.folio || summary.folio;
-  const artifactsMissing = billing.pac.status === "valid" && (!billing.cfdi.artifacts.xml_available || !billing.cfdi.artifacts.pdf_available);
+  // Fase 6.21: Laravel decide (CFDI vigente o cancelado, sin XML/PDF, sin
+  // descarga en curso y con permiso); el panel no deduce la regla.
+  const canFetchArtifacts = billing.actions.can_fetch_artifacts;
   const receiptMismatch = billing.cancellation_receipt.error_code === "CANCELLATION_RECEIPT_UUID_MISMATCH";
   const canRequestReceipt = billing.pac.status === "canceled" && billing.pac.cancellation_status === "accepted" && !billing.cancellation_receipt.available;
   const cancellationMode = billing.actions.cancellation_mode;
@@ -226,14 +228,14 @@ export default function InvoiceFiscalPanel({
               <div className="flex flex-col gap-3 p-5 sm:flex-row sm:flex-wrap sm:p-6">
                 {canManagePac && billing.actions.can_issue && <button type="button" onClick={() => setIssueOpen(true)} disabled={activeAction !== null} className="app-button-primary"><Send className="h-4 w-4" />Emitir factura</button>}
                 {canManagePac && billing.actions.can_reconcile && <button type="button" onClick={() => void runAction("reconcile", () => reconcileInvoicePac(invoiceId), "Estado fiscal reconciliado") } disabled={activeAction !== null} className="inline-flex h-10 items-center justify-center gap-2 rounded-[0.625rem] bg-amber-500 px-4 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50">{activeAction === "reconcile" ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}Reconciliar con PAC</button>}
-                {canManagePac && artifactsMissing && <button type="button" onClick={() => void runAction("artifacts", () => fetchInvoiceArtifacts(invoiceId), "XML y PDF disponibles") } disabled={activeAction !== null} className="app-button-secondary">{activeAction === "artifacts" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}Obtener XML/PDF</button>}
+                {canFetchArtifacts && <button type="button" onClick={() => void runAction("artifacts", () => fetchInvoiceArtifacts(invoiceId), "XML y PDF disponibles") } disabled={activeAction !== null} className="app-button-secondary">{activeAction === "artifacts" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}Obtener XML/PDF</button>}
                 {billing.cfdi.artifacts.xml_available && <button type="button" onClick={() => void download("cfdi-xml", () => downloadCfdiXml(invoiceId, folio))} disabled={activeDownload !== null} className="app-button-secondary">{activeDownload === "cfdi-xml" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Descargar XML</button>}
                 {billing.cfdi.artifacts.pdf_available && <button type="button" onClick={() => void download("cfdi-pdf", () => downloadCfdiPdf(invoiceId, folio))} disabled={activeDownload !== null} className="app-button-secondary">{activeDownload === "cfdi-pdf" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Descargar PDF</button>}
                 {billing.actions.can_cancel && <button type="button" onClick={() => setCancelOpen(true)} disabled={activeAction !== null} className="inline-flex h-10 items-center justify-center gap-2 rounded-[0.625rem] border border-red-200 bg-white px-4 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50"><XCircle className="h-4 w-4" />Cancelar factura</button>}
                 {canManagePac && canRequestReceipt && <button type="button" onClick={() => void runAction("receipt", () => fetchCancellationReceipt(invoiceId), "Acuse de cancelación actualizado") } disabled={activeAction !== null} className="app-button-secondary">{activeAction === "receipt" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}{receiptMismatch ? "Reintentar acuse" : "Obtener acuse"}</button>}
                 {billing.cancellation_receipt.available && <><button type="button" onClick={() => void download("receipt-xml", () => downloadCancellationReceiptXml(invoiceId, folio))} disabled={activeDownload !== null} className="app-button-secondary"><Download className="h-4 w-4" />Descargar XML acuse</button><button type="button" onClick={() => void download("receipt-pdf", () => downloadCancellationReceiptPdf(invoiceId, folio))} disabled={activeDownload !== null} className="app-button-secondary"><Download className="h-4 w-4" />Descargar PDF acuse</button></>}
                 {!canManagePac && <p className="text-sm text-[#64748B]">Puedes consultar y descargar los documentos disponibles. Las acciones que contactan al PAC requieren permisos de administración o contabilidad.</p>}
-                {canManagePac && billing.pac.issue_status === "succeeded" && !artifactsMissing && !billing.actions.can_cancel && !canRequestReceipt && !billing.cancellation_receipt.available && <p className="text-sm text-[#64748B]">No hay acciones fiscales pendientes.</p>}
+                {canManagePac && billing.pac.issue_status === "succeeded" && !canFetchArtifacts && !billing.actions.can_cancel && !canRequestReceipt && !billing.cancellation_receipt.available && <p className="text-sm text-[#64748B]">No hay acciones fiscales pendientes.</p>}
               </div>
             </section>
           </div>

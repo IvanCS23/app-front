@@ -24,7 +24,7 @@ const summary: InvoiceSummary = { id: 3, folio: "FAC-00000003", total: "1160.00"
 function fixture(kind: "valid" | "unstamped" | "canceled" | "reconcile" = "valid"): InvoiceBilling {
   const base: InvoiceBilling = {
     id: 3, folio: "FAC-00000003", status: "issued",
-    actions: { can_issue: false, can_cancel: true, can_reconcile: false, cancellation_mode: "pac" },
+    actions: { can_issue: false, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, cancellation_mode: "pac" },
     pac: { provider: "facturapi", status: "valid", cancellation_status: null, issue_status: "succeeded", reconciliation_required: false, last_sync_at: "2026-08-13T12:00:00Z" },
     cfdi: { uuid: "96013e83-154b-4153-8e61-c38b8966e560", stamped_at: "2026-08-13T12:00:00Z", artifacts: { status: "stored", xml_available: true, pdf_available: true, downloaded_at: "2026-08-13T12:01:00Z" } },
     cancellation_receipt: { status: null, available: false, downloaded_at: null, error_code: null },
@@ -34,9 +34,9 @@ function fixture(kind: "valid" | "unstamped" | "canceled" | "reconcile" = "valid
       { id: 3, type: "future_event", occurred_at: "2026-08-13T12:01:00Z", pac_status: "valid", cancellation_status: null, issue_status: "succeeded", pac_code: null, context: {} },
     ],
   };
-  if (kind === "unstamped") return { ...base, status: "ready", actions: { can_issue: true, can_cancel: true, can_reconcile: false, cancellation_mode: "erp_only" }, pac: { ...base.pac, status: null, issue_status: null }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
-  if (kind === "canceled") return { ...base, status: "cancelled", actions: { can_issue: false, can_cancel: false, can_reconcile: false, cancellation_mode: null }, pac: { ...base.pac, status: "canceled", cancellation_status: "accepted" }, cancellation_receipt: { status: "stored", available: true, downloaded_at: "2026-08-13T13:00:00Z", error_code: null } };
-  if (kind === "reconcile") return { ...base, actions: { can_issue: false, can_cancel: false, can_reconcile: true, cancellation_mode: null }, pac: { ...base.pac, status: "pending", issue_status: "reconciliation_required", reconciliation_required: true }, cfdi: { ...base.cfdi, uuid: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } } };
+  if (kind === "unstamped") return { ...base, status: "ready", actions: { can_issue: true, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, cancellation_mode: "erp_only" }, pac: { ...base.pac, status: null, issue_status: null }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
+  if (kind === "canceled") return { ...base, status: "cancelled", actions: { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, cancellation_mode: null }, pac: { ...base.pac, status: "canceled", cancellation_status: "accepted" }, cancellation_receipt: { status: "stored", available: true, downloaded_at: "2026-08-13T13:00:00Z", error_code: null } };
+  if (kind === "reconcile") return { ...base, actions: { can_issue: false, can_cancel: false, can_reconcile: true, can_fetch_artifacts: false, cancellation_mode: null }, pac: { ...base.pac, status: "pending", issue_status: "reconciliation_required", reconciliation_required: true }, cfdi: { ...base.cfdi, uuid: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } } };
   return base;
 }
 
@@ -138,11 +138,31 @@ describe("panel fiscal de factura", () => {
     const user = userEvent.setup();
     const missing = fixture("valid");
     missing.cfdi.artifacts = { status: null, xml_available: false, pdf_available: false, downloaded_at: null };
+    missing.actions = { ...missing.actions, can_fetch_artifacts: true };
     vi.mocked(api.fetchInvoiceArtifacts).mockResolvedValue(fixture("valid"));
     arrange(missing);
     await user.click(await screen.findByRole("button", { name: "Obtener XML/PDF" }));
     expect(api.fetchInvoiceArtifacts).toHaveBeenCalledWith(3);
     expect(await screen.findByRole("button", { name: /Descargar XML$/ })).toBeInTheDocument();
+  });
+
+  it("ofrece obtener XML/PDF de un CFDI cancelado cuando Laravel lo permite", async () => {
+    const user = userEvent.setup();
+    const canceled = fixture("canceled");
+    canceled.cfdi.artifacts = { status: null, xml_available: false, pdf_available: false, downloaded_at: null };
+    canceled.actions = { ...canceled.actions, can_fetch_artifacts: true };
+    vi.mocked(api.fetchInvoiceArtifacts).mockResolvedValue(fixture("canceled"));
+    arrange(canceled);
+    await user.click(await screen.findByRole("button", { name: "Obtener XML/PDF" }));
+    expect(api.fetchInvoiceArtifacts).toHaveBeenCalledWith(3);
+  });
+
+  it("no muestra Obtener XML/PDF sin can_fetch_artifacts aunque falten los archivos (p. ej. descarga en curso)", async () => {
+    const pending = fixture("valid");
+    pending.cfdi.artifacts = { status: "pending", xml_available: false, pdf_available: false, downloaded_at: null };
+    arrange(pending);
+    expect(await screen.findByRole("button", { name: "Cancelar factura" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Obtener XML/PDF" })).not.toBeInTheDocument();
   });
 
   it("modal de cancelación contiene motivos SAT y exige UUID para motivo 01", async () => {

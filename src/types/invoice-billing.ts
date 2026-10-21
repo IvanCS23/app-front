@@ -61,6 +61,8 @@ export interface InvoiceBusinessActions {
   can_issue: boolean;
   can_cancel: boolean;
   can_reconcile: boolean;
+  /** Fase 6.21: CFDI vigente o cancelado sin XML/PDF y sin descarga en curso. */
+  can_fetch_artifacts: boolean;
   cancellation_mode: InvoiceCancellationMode;
 }
 
