@@ -24,8 +24,8 @@ const summary: InvoiceSummary = { id: 3, folio: "FAC-00000003", total: "1160.00"
 function fixture(kind: "valid" | "unstamped" | "canceled" | "reconcile" = "valid"): InvoiceBilling {
   const base: InvoiceBilling = {
     id: 3, folio: "FAC-00000003", status: "issued",
-    actions: { can_issue: false, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, cancellation_mode: "pac" },
-    pac: { provider: "facturapi", status: "valid", cancellation_status: null, issue_status: "succeeded", reconciliation_required: false, last_sync_at: "2026-08-13T12:00:00Z" },
+    actions: { can_issue: false, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "pac" },
+    pac: { mode: "test", provider: "facturapi", status: "valid", cancellation_status: null, issue_status: "succeeded", reconciliation_required: false, last_sync_at: "2026-08-13T12:00:00Z" },
     cfdi: { uuid: "96013e83-154b-4153-8e61-c38b8966e560", stamped_at: "2026-08-13T12:00:00Z", artifacts: { status: "stored", xml_available: true, pdf_available: true, downloaded_at: "2026-08-13T12:01:00Z" } },
     cancellation_receipt: { status: null, available: false, downloaded_at: null, error_code: null },
     timeline: [
@@ -34,9 +34,9 @@ function fixture(kind: "valid" | "unstamped" | "canceled" | "reconcile" = "valid
       { id: 3, type: "future_event", occurred_at: "2026-08-13T12:01:00Z", pac_status: "valid", cancellation_status: null, issue_status: "succeeded", pac_code: null, context: {} },
     ],
   };
-  if (kind === "unstamped") return { ...base, status: "ready", actions: { can_issue: true, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, cancellation_mode: "erp_only" }, pac: { ...base.pac, status: null, issue_status: null }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
-  if (kind === "canceled") return { ...base, status: "cancelled", actions: { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, cancellation_mode: null }, pac: { ...base.pac, status: "canceled", cancellation_status: "accepted" }, cancellation_receipt: { status: "stored", available: true, downloaded_at: "2026-08-13T13:00:00Z", error_code: null } };
-  if (kind === "reconcile") return { ...base, actions: { can_issue: false, can_cancel: false, can_reconcile: true, can_fetch_artifacts: false, cancellation_mode: null }, pac: { ...base.pac, status: "pending", issue_status: "reconciliation_required", reconciliation_required: true }, cfdi: { ...base.cfdi, uuid: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } } };
+  if (kind === "unstamped") return { ...base, status: "ready", actions: { can_issue: true, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "erp_only" }, pac: { ...base.pac, status: null, issue_status: null }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
+  if (kind === "canceled") return { ...base, status: "cancelled", actions: { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null }, pac: { ...base.pac, status: "canceled", cancellation_status: "accepted" }, cancellation_receipt: { status: "stored", available: true, downloaded_at: "2026-08-13T13:00:00Z", error_code: null } };
+  if (kind === "reconcile") return { ...base, actions: { can_issue: false, can_cancel: false, can_reconcile: true, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null }, pac: { ...base.pac, status: "pending", issue_status: "reconciliation_required", reconciliation_required: true }, cfdi: { ...base.cfdi, uuid: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } } };
   return base;
 }
 
@@ -243,19 +243,40 @@ describe("panel fiscal de factura", () => {
     expect(screen.getByRole("button", { name: "Descargar PDF acuse" })).toBeInTheDocument();
   });
 
-  it("bloquea mismatch sin UUID ajeno ni descarga forzada y permite reintentar acuse", async () => {
+  it("en live bloquea el mismatch por seguridad y permite reintentar mientras Laravel lo ofrece", async () => {
     const mismatch = fixture("canceled");
+    mismatch.pac = { ...mismatch.pac, mode: "live" };
+    mismatch.actions = { ...mismatch.actions, can_fetch_cancellation_receipt: true };
     mismatch.cancellation_receipt = { status: "reconciliation_required", available: false, downloaded_at: null, error_code: "CANCELLATION_RECEIPT_UUID_MISMATCH" };
     arrange(mismatch);
     expect(await screen.findByText("Acuse bloqueado por seguridad")).toBeInTheDocument();
-    expect(screen.getByText(/no corresponde a este CFDI/)).toBeInTheDocument();
+    expect(screen.getByText(/El archivo fue bloqueado por seguridad/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Descargar .* acuse/ })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Reintentar acuse" })).toBeInTheDocument();
+  });
+
+  it("en test explica que el acuse de prueba no corresponde y no ofrece reintentos inútiles", async () => {
+    const mismatch = fixture("canceled");
+    mismatch.cancellation_receipt = { status: "reconciliation_required", available: false, downloaded_at: null, error_code: "CANCELLATION_RECEIPT_UUID_MISMATCH" };
+    arrange(mismatch);
+    expect(await screen.findByText("Acuse de prueba no corresponde al CFDI")).toBeInTheDocument();
+    expect(screen.getByText(/En el entorno de pruebas, Facturapi entrega un acuse/)).toBeInTheDocument();
+    expect(screen.queryByText("Acuse bloqueado por seguridad")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /acuse/i })).not.toBeInTheDocument();
+  });
+
+  it("sin can_fetch_cancellation_receipt no ofrece obtener el acuse aunque falte", async () => {
+    const missing = fixture("canceled");
+    missing.cancellation_receipt = { status: null, available: false, downloaded_at: null, error_code: null };
+    arrange(missing);
+    await screen.findByText("CFDI cancelado");
+    expect(screen.queryByRole("button", { name: "Obtener acuse" })).not.toBeInTheDocument();
   });
 
   it("reintenta acuse usando la acción Laravel y actualiza su estado", async () => {
     const user = userEvent.setup();
     const pending = fixture("canceled");
+    pending.actions = { ...pending.actions, can_fetch_cancellation_receipt: true };
     pending.cancellation_receipt = { status: null, available: false, downloaded_at: null, error_code: null };
     vi.mocked(api.fetchCancellationReceipt).mockResolvedValue(fixture("canceled"));
     arrange(pending);

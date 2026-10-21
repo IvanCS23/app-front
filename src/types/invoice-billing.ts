@@ -3,6 +3,8 @@ export type InvoiceIssueStatus = "pending" | "succeeded" | "failed" | "reconcili
 export type InvoiceCancellationStatus = "pending" | "verifying" | "accepted" | "rejected" | "expired" | string | null;
 
 export interface InvoicePacState {
+  /** Fase 6.22: modo PAC configurado; nunca incluye la llave. */
+  mode: "test" | "live" | null;
   provider: string | null;
   status: InvoicePacStatus;
   cancellation_status: InvoiceCancellationStatus;
@@ -63,6 +65,8 @@ export interface InvoiceBusinessActions {
   can_reconcile: boolean;
   /** Fase 6.21: CFDI vigente o cancelado sin XML/PDF y sin descarga en curso. */
   can_fetch_artifacts: boolean;
+  /** Fase 6.22: acuse obtenible; en test se apaga tras el primer bloqueo de identidad, en live tras 3. */
+  can_fetch_cancellation_receipt: boolean;
   cancellation_mode: InvoiceCancellationMode;
 }
 
