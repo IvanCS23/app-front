@@ -112,13 +112,6 @@ export default function RecuperacionFacturas() {
       return;
     }
 
-    console.log("Recuperando facturas:", {
-      rfc: rfcPerfil,
-      tipo: tipoFactura,
-      fechaInicial,
-      fechaFinal,
-    });
-
     showAlert("Recuperación iniciada", "Se están recuperando las facturas. Este proceso puede tomar unos momentos.", "success");
   };
 

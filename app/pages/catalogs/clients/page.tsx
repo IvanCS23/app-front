@@ -418,9 +418,8 @@ export default function CatalogoClientes() {
     setConfirmDeleteId(null);
   };
 
-  const handleViewClient = (client: ClientType) => {
+  const handleViewClient = () => {
     // Implementar lógica para ver detalles del cliente
-    console.log("Ver cliente:", client);
     setToast({ message: "Vista de detalles en desarrollo", type: "success" });
   };
 
@@ -601,7 +600,7 @@ export default function CatalogoClientes() {
                           <Trash className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleViewClient(client)}
+                          onClick={() => handleViewClient()}
                           className="text-[#94A3B8] hover:text-emerald-600 transition-colors"
                           title="Ver detalles"
                         >
