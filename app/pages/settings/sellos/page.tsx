@@ -285,18 +285,6 @@ export default function SellosDigitales() {
     }
 
     // Aquí iría la lógica real de guardado
-    console.log("Datos guardados:", {
-      csd: {
-        cerFile: cerFileInfo,
-        keyFile: keyFileInfo,
-        password: csdPassword,
-      },
-      fiel: {
-        cerFile: fielCerFileInfo,
-        keyFile: fielKeyFileInfo,
-        password: fielPassword,
-      },
-    });
 
     // Mostrar toast de éxito
     showToast("Certificados guardados correctamente", "success");

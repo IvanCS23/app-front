@@ -1032,25 +1032,6 @@ const closeSuccessModal = () => {
       return;
     }
 
-    console.log("Cliente guardado:", {
-      name: clientName,
-      rfc: clientRfc,
-      invoiceUsage: clientInvoiceUsage,
-      taxRegime: clientTaxRegime,
-      email: clientEmail,
-      emailOptional1: clientEmailOptional1,
-      emailOptional2: clientEmailOptional2,
-      cp: clientCp,
-      street: clientStreet,
-      exteriorNumber: clientExteriorNumber,
-      interiorNumber: clientInteriorNumber,
-      neighborhood: clientNeighborhood,
-      locality: clientLocality,
-      municipality: clientMunicipality,
-      state: clientState,
-      country: clientCountry,
-    });
-    
     setToast({ message: "Cliente agregado correctamente", type: "success" });
     closeClientModal();
   };
@@ -1110,24 +1091,6 @@ const closeSuccessModal = () => {
       return;
     }
 
-    console.log("Producto guardado:", {
-      internalName: productInternalName,
-      noIdentificacion: productNoIdentificacion,
-      description: productDescription,
-      unitPrice: productUnitPrice,
-      claveSat: productClaveSat,
-      unidadSat: productUnidadSat,
-      objetoImpuesto: productObjetoImpuesto,
-      cuentasPrediales,
-      iva: productIVA,
-      ivaRet: productIVARet,
-      iepsType,
-      iepsValue: iepsType === "tasa" ? iepsTasaValue : iepsCuotaValue,
-      isr: productISR,
-      pedimentos,
-      impuestosLocales,
-    });
-    
     setToast({ message: "Producto agregado correctamente", type: "success" });
     closeProductModal();
   };
