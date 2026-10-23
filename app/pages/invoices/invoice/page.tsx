@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import DemoNotice, { DEMO_ACTION_CLASS, demoActionProps } from "@/app/components/ui/DemoNotice";
 import {
   Search,
   FileText,
@@ -1359,8 +1360,8 @@ const closeSuccessModal = () => {
       </button>
       <button
         onClick={handleSendEmail}
-        disabled={isSendingEmail}
-        className={`flex-1 rounded-xl bg-blue-500 px-4 py-1.5 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-all duration-200 ${
+        {...demoActionProps}
+        className={`${DEMO_ACTION_CLASS} flex-1 rounded-xl bg-blue-500 px-4 py-1.5 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-all duration-200 ${
           isSendingEmail ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-400"
         }`}
       >
@@ -1445,6 +1446,7 @@ const closeSuccessModal = () => {
       <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         {/* Main */}
         <main className="mx-auto max-w-[1400px]">
+          <DemoNotice />
           <SectionTitle
             icon={<FileText className="h-6 w-6" />}
             title={
@@ -2179,8 +2181,8 @@ const closeSuccessModal = () => {
 
                 <button
                   onClick={handleSendInvoice}
-                  disabled={isSending || productos.length === 0}
-                  className={`flex items-center justify-center gap-2 rounded-xl px-8 py-3 font-bold text-white shadow-lg transition-all duration-200 ${
+                  {...demoActionProps}
+                  className={`${DEMO_ACTION_CLASS} flex items-center justify-center gap-2 rounded-xl px-8 py-3 font-bold text-white shadow-lg transition-all duration-200 ${
                     isSending || productos.length === 0
                       ? "bg-emerald-500/50 cursor-not-allowed"
                       : "bg-emerald-500 hover:bg-emerald-400 shadow-emerald-500/20"

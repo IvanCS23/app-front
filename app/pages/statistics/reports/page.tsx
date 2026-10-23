@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import DemoNotice, { DEMO_ACTION_CLASS, demoActionProps } from "@/app/components/ui/DemoNotice";
 import {
   ChevronDown,
   Download,
@@ -264,6 +265,7 @@ export default function Reportes() {
     <AppLayout>
       <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
+          <DemoNotice />
           <div className="mb-4">
             <h1 className="text-3xl font-extrabold text-[#0F172A]">Reportes</h1>
             <p className="mt-2 text-[#64748B]">Genera reportes personalizados de tus facturas y documentos fiscales.</p>
@@ -447,8 +449,8 @@ export default function Reportes() {
             <div className="flex justify-center mt-8">
               <button
                 onClick={handleDescargarReporte}
-                disabled={isLoading}
-                className="flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-8 py-3 font-semibold text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-all duration-200 hover:bg-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                {...demoActionProps}
+                className={`flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-8 py-3 font-semibold text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-all duration-200 hover:bg-blue-400 disabled:opacity-50 disabled:cursor-not-allowed ${DEMO_ACTION_CLASS}`}
               >
                 {isLoading ? (
                   <>

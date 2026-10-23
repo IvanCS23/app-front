@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import DemoNotice, { DEMO_ACTION_CLASS, demoActionProps } from "@/app/components/ui/DemoNotice";
 import {
   Info,
   Eye,
@@ -294,6 +295,7 @@ export default function SellosDigitales() {
     <AppLayout>
       <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
+          <DemoNotice />
           {/* Título principal */}
           <div className="mb-8">
             <h1 className="text-3xl font-extrabold text-[#0F172A]">Certificados y Sellos Digitales</h1>
@@ -611,7 +613,8 @@ export default function SellosDigitales() {
           <div className="mt-8 flex justify-center">
             <button
               onClick={handleSave}
-              className="flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-8 py-3 font-semibold text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-all duration-200 hover:bg-blue-400"
+              {...demoActionProps}
+              className={`flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-8 py-3 font-semibold text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-all duration-200 hover:bg-blue-400 ${DEMO_ACTION_CLASS}`}
             >
               <Save className="h-5 w-5" />
               Guardar Certificados

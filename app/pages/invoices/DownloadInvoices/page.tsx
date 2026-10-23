@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import DemoNotice, { DEMO_ACTION_CLASS, demoActionProps } from "@/app/components/ui/DemoNotice";
 import {
   ChevronDown,
   Info,
@@ -393,6 +394,7 @@ export default function DescargaFacturas() {
     <AppLayout>
       <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
+          <DemoNotice />
           <div className="mb-4">
             <h1 className="text-3xl font-extrabold text-[#0F172A]">Descarga de Facturas</h1>
             <p className="mt-2 text-[#64748B]">
@@ -602,8 +604,8 @@ export default function DescargaFacturas() {
 
               <button
                 onClick={handleGenerar}
-                disabled={isProcessing}
-                className="flex items-center gap-2 rounded-xl bg-blue-500 px-6 py-2.5 font-semibold text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-all duration-200 hover:bg-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                {...demoActionProps}
+                className={`flex items-center gap-2 rounded-xl bg-blue-500 px-6 py-2.5 font-semibold text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-all duration-200 hover:bg-blue-400 disabled:opacity-50 disabled:cursor-not-allowed ${DEMO_ACTION_CLASS}`}
               >
                 {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileArchive className="h-5 w-5" />}
                 Generar archivo
@@ -692,8 +694,8 @@ export default function DescargaFacturas() {
                         <td className="px-6 py-4">
                           <button
                             onClick={() => handleDescargar(registro.archivo)}
-                            disabled={registro.status !== "completed"}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                            {...demoActionProps}
+                            className={`${DEMO_ACTION_CLASS} flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
                               registro.status === "completed"
                                 ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
                                 : "bg-slate-100 text-slate-400 cursor-not-allowed"

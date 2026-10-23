@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import DemoNotice, { demoActionProps } from "@/app/components/ui/DemoNotice";
 import {
   FileText,
   CheckCircle2,
@@ -169,6 +170,7 @@ export default function CargaXML() {
     <AppLayout>
       <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
+          <DemoNotice />
           <div className="mb-8">
             <h1 className="text-3xl font-extrabold text-[#0F172A]">Carga de XML</h1>
             <p className="mt-2 text-[#64748B]">
@@ -188,6 +190,7 @@ export default function CargaXML() {
                 type="file"
                 accept=".xml,.XML"
                 onChange={handleFileChange}
+                {...demoActionProps}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
               <div className="flex flex-col items-center justify-center text-center">
