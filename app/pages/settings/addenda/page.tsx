@@ -78,11 +78,6 @@ export default function Addendas() {
 
   // Guardar configuración
   const handleSave = () => {
-    const enabledAddendas = Object.entries(selectedAddendas)
-      .filter(([, enabled]) => enabled)
-      .map(([addenda]) => addenda);
-
-    console.log("Addendas seleccionadas:", enabledAddendas);
     showAlert("Configuración guardada", "Las addendas han sido actualizadas correctamente", "success");
   };
 

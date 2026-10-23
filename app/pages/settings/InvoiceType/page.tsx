@@ -148,11 +148,6 @@ export default function InvoiceTypes() {
 
   // Guardar configuración
   const handleSave = () => {
-    const enabledTypes = Object.entries(selectedTypes)
-      .filter(([, enabled]) => enabled)
-      .map(([id]) => invoiceTypes.find(t => t.id === id)?.label);
-
-    console.log("Tipos de factura seleccionados:", enabledTypes);
     showAlert("Configuración guardada", "Los tipos de factura han sido actualizados correctamente", "success");
   };
 

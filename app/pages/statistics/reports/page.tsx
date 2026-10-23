@@ -250,16 +250,6 @@ export default function Reportes() {
     setTimeout(() => {
       setIsLoading(false);
       showAlert("Reporte generado", "El reporte se ha descargado correctamente", "success");
-
-      console.log("Generando reporte con filtros:", {
-        estatus,
-        tipoComprobante,
-        tipoFactura: isEmitidas ? tipoFactura : "Bloqueado",
-        tipoRelacion: isEmitidasORecibidas ? tipoRelacion : "Bloqueado",
-        sucursales: isEmitidas ? sucursales : "Bloqueado",
-        ...(incluirPrimerConcepto === "primer_concepto" ? { mes, anio } : { fechaInicial, fechaFinal }),
-        incluirPrimerConcepto,
-      });
     }, 2000);
   };
 

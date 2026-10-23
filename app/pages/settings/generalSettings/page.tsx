@@ -105,11 +105,6 @@ export default function ConfiguracionGeneral() {
   };
 
   const handleSave = () => {
-    console.log("Configuración guardada:", {
-      decimales,
-      porcentajeDecimales,
-      dejarRecibirCorreos,
-    });
     showAlert("Configuración guardada", "Los cambios han sido aplicados correctamente", "success");
   };
 
