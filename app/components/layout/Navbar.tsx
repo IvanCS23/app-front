@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/src/hooks/useAuth";
 import { getInitials } from "@/src/lib/initials";
+import { navState } from "@/src/data/screenStatus";
+import ScreenBadge from "@/app/components/ui/ScreenBadge";
 import {
   Menu,
   Search,
@@ -16,6 +18,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 
+const NUEVA_VENTA_HREF = "/pages/invoices/nueva-venta";
+
 type NavbarProps = {
   onOpenSidebar: () => void;
   isCollapsed: boolean;
@@ -23,6 +27,7 @@ type NavbarProps = {
 
 export default function Navbar({ onOpenSidebar, isCollapsed }: NavbarProps) {
   const { user, loading, logout } = useAuth();
+  const nuevaVentaState = navState(NUEVA_VENTA_HREF);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -114,14 +119,27 @@ export default function Navbar({ onOpenSidebar, isCollapsed }: NavbarProps) {
             <HelpCircle className="h-4 w-4" />
           </button>
 
-          {/* Nueva venta CTA */}
-          <Link
-            href="/pages/invoices/nueva-venta"
-            className="hidden sm:flex items-center gap-1.5 rounded-xl px-4 h-9 text-[13px] font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            Nueva venta
-          </Link>
+          {/* Nueva venta CTA (Fase 6.24: según el registro de pantallas) */}
+          {nuevaVentaState === "unavailable" ? (
+            <span
+              aria-disabled="true"
+              title="Próximamente"
+              className="hidden sm:flex cursor-not-allowed items-center gap-1.5 rounded-xl px-4 h-9 text-[13px] font-semibold text-slate-400 bg-slate-100"
+            >
+              <Plus className="h-4 w-4" />
+              Nueva venta
+              <ScreenBadge state={nuevaVentaState} />
+            </span>
+          ) : nuevaVentaState !== "hidden" && (
+            <Link
+              href={NUEVA_VENTA_HREF}
+              className="hidden sm:flex items-center gap-1.5 rounded-xl px-4 h-9 text-[13px] font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Nueva venta
+              <ScreenBadge state={nuevaVentaState} />
+            </Link>
+          )}
 
           {/* User dropdown */}
           {loading ? (

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import { menuGroups } from "@/app/components/layout/MenuItems";
+import { visibleMenuGroups } from "@/app/components/layout/MenuItems";
+import ScreenBadge from "@/app/components/ui/ScreenBadge";
 
 type SidebarProps = {
   isOpenMobile: boolean;
@@ -92,7 +93,7 @@ export default function Sidebar({
             [&::-webkit-scrollbar-thumb]:bg-gray-200"
         >
           <nav>
-            {menuGroups.map((group, gi) => (
+            {visibleMenuGroups().map((group, gi) => (
               <div key={gi} className={gi > 0 ? "mt-6" : ""}>
 
                 {/* Group label — expanded */}
@@ -114,19 +115,24 @@ export default function Sidebar({
                   {group.items.map((item) => {
                     const isActive = activeItem === item.id;
                     const hasSubMenu = !!item.subMenu?.length;
+                    // Fase 6.24: sin página detrás no hay enlace.
+                    const isUnavailable = item.state === "unavailable" && !hasSubMenu;
 
                     const itemInner = (
                       <div
                         className={`
                           group flex items-center rounded-lg
-                          transition-all duration-200 cursor-pointer
+                          transition-all duration-200
+                          ${isUnavailable ? "cursor-not-allowed" : "cursor-pointer"}
                           ${isCollapsed
                             ? "justify-center px-3 py-2.5"
                             : "gap-3 px-4 py-2.5"
                           }
-                          ${isActive
-                            ? "bg-blue-700 text-white shadow-sm"
-                            : "text-gray-600 hover:bg-blue-500 hover:text-white"
+                          ${isUnavailable
+                            ? "text-gray-400"
+                            : isActive
+                              ? "bg-blue-700 text-white shadow-sm"
+                              : "text-gray-600 hover:bg-blue-500 hover:text-white"
                           }
                         `}
                         title={isCollapsed ? item.label : ""}
@@ -143,6 +149,8 @@ export default function Sidebar({
                           </span>
                         )}
 
+                        {!isCollapsed && !hasSubMenu && <ScreenBadge state={item.state} />}
+
                         {/* Chevron */}
                         {!isCollapsed && hasSubMenu && (
                           <ChevronRight
@@ -156,7 +164,11 @@ export default function Sidebar({
 
                     return (
                       <div key={item.id}>
-                        {item.href ? (
+                        {isUnavailable ? (
+                          <div aria-disabled="true" title="Próximamente" className="block">
+                            {itemInner}
+                          </div>
+                        ) : item.href ? (
                           <Link
                             href={item.href}
                             onClick={() => {
@@ -182,19 +194,32 @@ export default function Sidebar({
                         {/* Submenu */}
                         {!isCollapsed && isActive && item.subMenu && (
                           <div className="ml-6 mt-1 mb-1 space-y-0.5 border-l border-gray-200 pl-3">
-                            {item.subMenu.map((sub) => (
-                              <Link
-                                key={sub.href}
-                                href={sub.href}
-                                onClick={() => {
-                                  onChangeSection(item.id);
-                                  onCloseMobile();
-                                }}
-                                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-blue-500 hover:text-white"
-                              >
-                                {sub.label}
-                              </Link>
-                            ))}
+                            {item.subMenu.map((sub) =>
+                              sub.state === "unavailable" ? (
+                                <div
+                                  key={sub.href}
+                                  aria-disabled="true"
+                                  title="Próximamente"
+                                  className="flex cursor-not-allowed items-center justify-between gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-400"
+                                >
+                                  {sub.label}
+                                  <ScreenBadge state={sub.state} />
+                                </div>
+                              ) : (
+                                <Link
+                                  key={sub.href}
+                                  href={sub.href}
+                                  onClick={() => {
+                                    onChangeSection(item.id);
+                                    onCloseMobile();
+                                  }}
+                                  className="flex items-center justify-between gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-blue-500 hover:text-white"
+                                >
+                                  {sub.label}
+                                  <ScreenBadge state={sub.state} />
+                                </Link>
+                              ),
+                            )}
                           </div>
                         )}
                       </div>

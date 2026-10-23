@@ -18,7 +18,8 @@ import {
   Users,
   Webhook,
 } from "lucide-react";
-import type { SettingCategory } from "@/src/types/settings";
+import type { SettingCategory, SettingItem } from "@/src/types/settings";
+import { navState, showDemoScreens } from "@/src/data/screenStatus";
 
 export const settingsCatalog: SettingCategory[] = [
   {
@@ -226,3 +227,27 @@ export const settingsCatalog: SettingCategory[] = [
     ],
   },
 ];
+
+/**
+ * Fase 6.24: catálogo según el registro de pantallas. Un "coming-soon"
+ * explícito se respeta (p. ej. "Datos fiscales" no es la pantalla de
+ * generalSettings); si no, manda el registro: real → disponible,
+ * demo → "demo" sólo con NEXT_PUBLIC_SHOW_DEMO_SCREENS=true (si no, se
+ * oculta), sin página → "coming-soon".
+ */
+export function visibleSettingsCatalog(showDemo: boolean = showDemoScreens()): SettingCategory[] {
+  return settingsCatalog
+    .map((category) => ({
+      ...category,
+      items: category.items.flatMap((item): SettingItem[] => {
+        if (item.status === "coming-soon") return [item];
+
+        const state = navState(item.href, showDemo);
+
+        if (state === "hidden") return [];
+
+        return [{ ...item, status: state === "real" ? "available" : state === "demo" ? "demo" : "coming-soon" }];
+      }),
+    }))
+    .filter((category) => category.items.length > 0);
+}

@@ -53,6 +53,10 @@ export default function SettingCard({
           <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-500">
             Próximamente
           </span>
+        ) : status === "demo" ? (
+          <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-800">
+            Demo
+          </span>
         ) : (
           <span />
         )}

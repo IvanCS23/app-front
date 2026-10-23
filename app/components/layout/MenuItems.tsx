@@ -20,6 +20,7 @@ import {
   BarChart3,
   Settings,
 } from "lucide-react";
+import { navState, showDemoScreens, type NavState } from "@/src/data/screenStatus";
 
 export type SubMenuItem = {
   label: string;
@@ -211,3 +212,45 @@ export const menuGroups: MenuGroup[] = [
 
 // Flat array kept for backward compatibility with AppLayout path-matching logic
 export const menuItems = menuGroups.flatMap((g) => g.items);
+
+export type VisibleSubMenuItem = SubMenuItem & { state: Exclude<NavState, "hidden"> };
+
+export type VisibleMenuItem = Omit<MenuItem, "subMenu"> & {
+  state: Exclude<NavState, "hidden">;
+  subMenu?: VisibleSubMenuItem[];
+};
+
+export type VisibleMenuGroup = { group?: string; items: VisibleMenuItem[] };
+
+/**
+ * Fase 6.24: menú según el registro de pantallas. Las demo se ocultan salvo
+ * con NEXT_PUBLIC_SHOW_DEMO_SCREENS=true; las no disponibles se muestran
+ * como "Próximamente" sin enlace. Un submenú sin entradas visibles y un
+ * grupo vacío desaparecen.
+ */
+export function visibleMenuGroups(showDemo: boolean = showDemoScreens()): VisibleMenuGroup[] {
+  return menuGroups
+    .map((group) => ({
+      group: group.group,
+      items: group.items.flatMap((item): VisibleMenuItem[] => {
+        if (item.subMenu) {
+          const subMenu = item.subMenu.flatMap((sub): VisibleSubMenuItem[] => {
+            const state = navState(sub.href, showDemo);
+
+            return state === "hidden" ? [] : [{ ...sub, state }];
+          });
+
+          if (subMenu.length === 0) return [];
+
+          const state = subMenu.every((sub) => sub.state === "unavailable") ? "unavailable" : "real";
+
+          return [{ ...item, subMenu, state }];
+        }
+
+        const state = item.href ? navState(item.href, showDemo) : "real";
+
+        return state === "hidden" ? [] : [{ ...item, subMenu: undefined, state }];
+      }),
+    }))
+    .filter((group) => group.items.length > 0);
+}

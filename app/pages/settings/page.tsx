@@ -10,17 +10,11 @@ import SettingsSearch from "@/app/components/settings/SettingsSearch";
 import SettingsSection from "@/app/components/settings/SettingsSection";
 import FavoriteSettings from "@/app/components/settings/FavoriteSettings";
 import RecentSettings from "@/app/components/settings/RecentSettings";
-import { settingsCatalog } from "@/src/data/settingsCatalog";
+import { visibleSettingsCatalog } from "@/src/data/settingsCatalog";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useSettingsFavorites } from "@/src/hooks/useSettingsFavorites";
 import { useRecentSettings } from "@/src/hooks/useRecentSettings";
 import type { SettingItem } from "@/src/types/settings";
-
-const allItems: SettingItem[] = settingsCatalog.flatMap((category) => category.items);
-
-function findItem(id: string): SettingItem | undefined {
-  return allItems.find((item) => item.id === id);
-}
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -29,12 +23,18 @@ export default function SettingsPage() {
   const { recent, addRecent } = useRecentSettings();
   const [search, setSearch] = useState("");
 
+  // Fase 6.24: sólo lo que el registro permite mostrar; favoritos y
+  // recientes de pantallas ocultas desaparecen.
+  const catalog = useMemo(() => visibleSettingsCatalog(), []);
+  const allItems = useMemo(() => catalog.flatMap((category) => category.items), [catalog]);
+  const findItem = (id: string): SettingItem | undefined => allItems.find((item) => item.id === id);
+
   const normalizedSearch = search.trim().toLowerCase();
 
   const filteredCategories = useMemo(() => {
-    if (!normalizedSearch) return settingsCatalog;
+    if (!normalizedSearch) return catalog;
 
-    return settingsCatalog
+    return catalog
       .map((category) => ({
         ...category,
         items: category.items.filter(
@@ -44,16 +44,17 @@ export default function SettingsPage() {
         ),
       }))
       .filter((category) => category.items.length > 0);
-  }, [normalizedSearch]);
+  }, [catalog, normalizedSearch]);
 
   const favoriteItems = useMemo(
     () => allItems.filter((item) => favorites.includes(item.id)),
-    [favorites]
+    [allItems, favorites]
   );
 
   const hasResults = filteredCategories.some((category) => category.items.length > 0);
 
   const handleNavigate = (item: SettingItem) => {
+    if (item.status === "coming-soon") return;
     addRecent(item.id, user?.name ?? "Usuario");
     router.push(item.href);
   };

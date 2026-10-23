@@ -3,6 +3,10 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import AppLayout from "@/app/components/layout/AppLayout";
+import ScreenBadge from "@/app/components/ui/ScreenBadge";
+import { navState } from "@/src/data/screenStatus";
+
+const NEW_INVOICE_HREF = "/pages/invoices/invoice";
 
 import {
   Receipt,
@@ -42,27 +46,43 @@ const StatCard = ({ title, value, badge, badgeColor, icon, iconBg }: StatCardPro
   </div>
 );
 
+// Fase 6.24: el destino decide si la acción se muestra, se marca como demo
+// o queda deshabilitada como "Próximamente" (ver src/data/screenStatus.ts).
 const QuickAction = ({
   icon,
   title,
-  onClick,
+  href,
 }: {
   icon: React.ReactNode;
   title: string;
-  onClick?: () => void;
-}) => (
-  <button
-    onClick={onClick}
-    className="flex h-32 flex-col items-center justify-center rounded-2xl border border-[#E2E8F0] bg-white text-center transition hover:border-blue-200 hover:bg-[#EFF6FF] hover:shadow-sm"
-  >
-    <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-      {icon}
-    </div>
-    <span className="max-w-[110px] text-[13px] font-semibold text-[#334155]">
-      {title}
-    </span>
-  </button>
-);
+  href: string;
+}) => {
+  const router = useRouter();
+  const state = navState(href);
+
+  if (state === "hidden") return null;
+
+  const unavailable = state === "unavailable";
+
+  return (
+    <button
+      onClick={unavailable ? undefined : () => router.push(href)}
+      disabled={unavailable}
+      title={unavailable ? "Próximamente" : undefined}
+      className={`flex h-32 flex-col items-center justify-center gap-1 rounded-2xl border border-[#E2E8F0] bg-white text-center transition ${
+        unavailable ? "cursor-not-allowed opacity-60" : "hover:border-blue-200 hover:bg-[#EFF6FF] hover:shadow-sm"
+      }`}
+    >
+      <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+        {icon}
+      </div>
+      <span className="max-w-[110px] text-[13px] font-semibold text-[#334155]">
+        {title}
+      </span>
+      <ScreenBadge state={state} />
+    </button>
+  );
+};
 
 const TopClient = ({
   initials,
@@ -248,6 +268,7 @@ const RecentTable = () => {
 
 export default function DashboardFacturaPro() {
   const router = useRouter();
+  const newInvoiceState = navState(NEW_INVOICE_HREF);
 
   return (
     <AppLayout>
@@ -267,13 +288,16 @@ export default function DashboardFacturaPro() {
             <Calendar className="h-4 w-4" />
             Últimos 30 días
           </button>
-          <button
-            onClick={() => router.push("/pages/invoices/invoice")}
-            className="flex h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-[13px] font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            Nueva Factura
-          </button>
+          {newInvoiceState !== "hidden" && (
+            <button
+              onClick={() => router.push(NEW_INVOICE_HREF)}
+              className="flex h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-[13px] font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Nueva Factura
+              <ScreenBadge state={newInvoiceState} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -331,22 +355,22 @@ export default function DashboardFacturaPro() {
               <QuickAction
                 icon={<Plus className="h-5 w-5" />}
                 title="Crear Nueva Factura"
-                onClick={() => router.push("/pages/invoices/invoice")}
+                href="/pages/invoices/invoice"
               />
               <QuickAction
                 icon={<FileText className="h-5 w-5" />}
                 title="Nueva Cotización"
-                onClick={() => router.push("/pages/quotes/new")}
+                href="/pages/quotes/new"
               />
               <QuickAction
                 icon={<UserPlus className="h-5 w-5" />}
                 title="Añadir Clientes"
-                onClick={() => router.push("/pages/catalogs/clients")}
+                href="/pages/catalogs/clients"
               />
               <QuickAction
                 icon={<Upload className="h-5 w-5" />}
                 title="Importar Datos"
-                onClick={() => router.push("/pages/import")}
+                href="/pages/import"
               />
             </div>
           </div>
