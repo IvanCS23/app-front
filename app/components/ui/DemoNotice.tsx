@@ -15,15 +15,21 @@ export const demoActionProps = {
 /** Clases para que una acción deshabilitada se vea como tal. */
 export const DEMO_ACTION_CLASS = "disabled:cursor-not-allowed disabled:opacity-50";
 
-/** Aviso fijo en las pantallas de demostración (src/data/screenStatus.ts). */
-export default function DemoNotice() {
+/**
+ * Aviso fijo en las pantallas de demostración (src/data/screenStatus.ts).
+ * `readOnly`: la pantalla envuelve su contenido en un <fieldset disabled>
+ * y todos sus controles quedan deshabilitados.
+ */
+export default function DemoNotice({ readOnly = false }: { readOnly?: boolean }) {
   return (
     <div role="note" aria-label="Vista de demostración" className="mb-4 flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
       <FlaskConical className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
       <div>
         <p className="font-bold">Vista de demostración</p>
         <p className="mt-1">
-          Esta pantalla todavía no guarda ni envía información. Los datos que se muestran son de ejemplo y las acciones finales están deshabilitadas.
+          {readOnly
+            ? "Esta pantalla es de solo lectura: todavía no guarda ni envía información, los datos son de ejemplo y sus controles están deshabilitados."
+            : "Esta pantalla todavía no guarda ni envía información. Los datos que se muestran son de ejemplo y las acciones finales están deshabilitadas."}
         </p>
       </div>
     </div>

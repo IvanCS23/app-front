@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import DemoNotice from "@/app/components/ui/DemoNotice";
 import {
   CheckCircle2,
   X,
@@ -274,6 +275,8 @@ export default function Observaciones() {
     <AppLayout>
       <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
+          <DemoNotice readOnly />
+          <fieldset disabled className="contents">
           <div className="mb-8 flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-extrabold text-[#0F172A]">Observaciones</h1>
@@ -335,6 +338,7 @@ export default function Observaciones() {
               </table>
             </div>
           </div>
+          </fieldset>
         </main>
       </div>
 

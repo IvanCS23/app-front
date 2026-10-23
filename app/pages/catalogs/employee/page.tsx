@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import DemoNotice from "@/app/components/ui/DemoNotice";
 import {
   Save,
   CheckCircle2,
@@ -814,6 +815,8 @@ export default function Empleados() {
     <AppLayout>
       <div className="min-h-screen bg-slate-50 p-6 text-[#0F172A]">
         <main className="mx-auto max-w-7xl space-y-6">
+          <DemoNotice readOnly />
+          <fieldset disabled className="contents">
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
@@ -858,6 +861,7 @@ export default function Empleados() {
               </table>
             </div>
           </div>
+          </fieldset>
         </main>
       </div>
 

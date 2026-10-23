@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import DemoNotice from "@/app/components/ui/DemoNotice";
 import {
   Save,
   CheckCircle2,
@@ -112,6 +113,8 @@ export default function ConfiguracionGeneral() {
     <AppLayout>
       <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
+          <DemoNotice readOnly />
+          <fieldset disabled className="contents">
           {/* Título principal */}
           <div className="mb-4">
             <h1 className="text-3xl font-extrabold text-[#0F172A]">Configuración General</h1>
@@ -205,6 +208,7 @@ export default function ConfiguracionGeneral() {
               Guardar configuración
             </button>
           </div>
+          </fieldset>
         </main>
       </div>
 

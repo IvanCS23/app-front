@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import DemoNotice from "@/app/components/ui/DemoNotice";
 
 export default function PerfilFiscalPage() {
   const [whatsapp, setWhatsapp] = useState("");
@@ -9,6 +10,8 @@ export default function PerfilFiscalPage() {
 
   return (
     <AppLayout>
+      <DemoNotice readOnly />
+      <fieldset disabled className="contents">
       <div className="min-h-screen text-[#0F172A] flex gap-8">
         {/* Sidebar */}
         <aside className="w-[320px] flex flex-col items-center bg-white border-2 border-[#E2E8F0] rounded-2xl p-6 shadow-sm">
@@ -190,6 +193,7 @@ export default function PerfilFiscalPage() {
           </div>
         </div>
       </div>
+      </fieldset>
     </AppLayout>
   );
 }

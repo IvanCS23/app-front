@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import DemoNotice from "@/app/components/ui/DemoNotice";
 import {
   Search,
   ChevronDown,
@@ -480,6 +481,8 @@ export default function CuentasPorPagar() {
     <AppLayout>
       <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
+          <DemoNotice readOnly />
+          <fieldset disabled className="contents">
           <div className="mb-4">
             <h1 className="text-3xl font-extrabold text-[#0F172A]">Cuentas por Pagar</h1>
             <p className="mt-2 text-[#64748B]">Administra y gestiona tus facturas y cotizaciones pendientes de pago.</p>
@@ -617,6 +620,7 @@ export default function CuentasPorPagar() {
               </table>
             </div>
           </div>
+          </fieldset>
         </main>
       </div>
 

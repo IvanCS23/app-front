@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import DemoNotice from "@/app/components/ui/DemoNotice";
 import {
   ChevronDown,
   TrendingUp,
@@ -367,6 +368,8 @@ export default function Estadisticas() {
     <AppLayout>
       <div className="min-h-screen rounded-lg bg-[#F8FAFC]">
         <main className="mx-auto max-w-[1400px]">
+          <DemoNotice readOnly />
+          <fieldset disabled className="contents">
           <div className="mb-4">
             <h1 className="text-3xl font-extrabold text-[#0F172A]">Estadísticas</h1>
             <p className="mt-2 text-[#64748B]">Visualiza y analiza los datos financieros de tu empresa.</p>
@@ -488,6 +491,7 @@ export default function Estadisticas() {
               <p className="text-[#64748B] text-lg">Selecciona un tipo de estadística y los filtros correspondientes, luego haz clic en "Generar Reporte" para visualizar los datos.</p>
             </div>
           )}
+          </fieldset>
         </main>
       </div>
     </AppLayout>
