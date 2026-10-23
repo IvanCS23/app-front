@@ -1506,7 +1506,6 @@ export default function CatalogoProductos() {
                       <th className="px-4 py-3.5 font-semibold">Nombre</th>
                       <th className="px-4 py-3.5 font-semibold">Descripción</th>
                       <th className="px-4 py-3.5 font-semibold">Clave Unidad</th>
-                      <th className="px-4 py-3.5 font-semibold">Unidad</th>
                       <th className="px-4 py-3.5 text-right font-semibold">Precio</th>
                     </tr>
                   </thead>
@@ -1538,7 +1537,6 @@ export default function CatalogoProductos() {
                         </td>
                         <td className="px-4 py-4 font-semibold text-[#0F172A]">{producto.name}</td>
                         <td className="px-4 py-4 text-[#64748B]">{producto.descripcion}</td>
-                        <td className="px-4 py-4 text-[#64748B]">{producto.clave_unidad || "-"}</td>
                         <td className="px-4 py-4 text-[#64748B]">{producto.clave_unidad || "-"}</td>
                         <td className="px-4 py-4 text-right text-sm font-semibold text-blue-600">
                           ${producto.precio_unitario?.toLocaleString()}

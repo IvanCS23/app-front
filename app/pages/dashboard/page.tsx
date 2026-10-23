@@ -5,9 +5,6 @@ import { useRouter } from "next/navigation";
 import AppLayout from "@/app/components/layout/AppLayout";
 import ScreenBadge from "@/app/components/ui/ScreenBadge";
 import { navState } from "@/src/data/screenStatus";
-
-const NEW_INVOICE_HREF = "/pages/invoices/invoice";
-
 import {
   Receipt,
   FileText,
@@ -19,7 +16,10 @@ import {
   MoreVertical,
   UserPlus,
   Upload,
+  FlaskConical,
 } from "lucide-react";
+
+const NEW_INVOICE_HREF = "/pages/invoices/invoice";
 
 type StatCardProps = {
   title: string;
@@ -272,6 +272,14 @@ export default function DashboardFacturaPro() {
 
   return (
     <AppLayout>
+      {/* Fase 6.24: los indicadores todavía no se calculan con datos reales. */}
+      <div role="note" aria-label="Datos de ejemplo" className="mb-5 flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <FlaskConical className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+        <p>
+          <span className="font-bold">Datos de ejemplo.</span> Los indicadores, las gráficas y la actividad reciente de este panel todavía no se calculan con tus facturas.
+        </p>
+      </div>
+
       {/* Page header */}
       <div className="mb-7 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>

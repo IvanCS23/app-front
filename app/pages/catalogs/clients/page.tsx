@@ -3,10 +3,11 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { 
-  SquarePen, Trash, Eye, Plus, X, ChevronDown, ChevronUp, Info, CheckCircle2, Loader2,
+  SquarePen, Trash, Eye, Plus, X, ChevronDown, ChevronUp, Info, Loader2,
   Download, Upload, Activity, FileText as FileTextIcon 
 } from "lucide-react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import Toast, { type ToastData } from "@/app/components/ui/Toast";
 import { 
   getClients, 
   createClient, 
@@ -17,29 +18,6 @@ import {
 
 const selectStyle = "box box-input";
 const inputStyle = "box box-input";
-
-// Componente Toast
-const Toast = ({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) => {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose();
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
-
-  return (
-    <div className={`fixed bottom-4 right-4 z-[100] flex items-center gap-3 rounded-xl px-4 py-3 shadow-lg animate-in slide-in-from-right-5 duration-300 ${
-      type === "success" ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
-    }`}>
-      {type === "success" ? (
-        <CheckCircle2 className="h-5 w-5" />
-      ) : (
-        <X className="h-5 w-5" />
-      )}
-      <span className="text-sm font-medium">{message}</span>
-    </div>
-  );
-};
 
 type LabelProps = {
   children: React.ReactNode;
@@ -173,7 +151,7 @@ export default function CatalogoClientes() {
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
   const [showOptionalFields, setShowOptionalFields] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [toast, setToast] = useState<ToastData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingClientId, setEditingClientId] = useState<number | null>(null);
@@ -420,7 +398,7 @@ export default function CatalogoClientes() {
 
   const handleViewClient = () => {
     // Implementar lógica para ver detalles del cliente
-    setToast({ message: "Vista de detalles en desarrollo", type: "success" });
+    setToast({ message: "Vista de detalles en desarrollo", type: "info" });
   };
 
   // Modal de carga masiva

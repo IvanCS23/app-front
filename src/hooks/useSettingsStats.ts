@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getUsers } from "@/src/services/users";
-import { getInvoicesCount } from "@/src/services/invoices.services";
+import { getInvoices } from "@/src/services/invoice.services";
 
 export function useSettingsStats() {
   const [usersCount, setUsersCount] = useState<number | null>(null);
@@ -12,10 +12,12 @@ export function useSettingsStats() {
   useEffect(() => {
     let cancelled = false;
 
-    Promise.allSettled([getUsers({ page: 1 }), getInvoicesCount()]).then(([usersRes, invoicesRes]) => {
+    // Fase 6.24: "Facturas emitidas" cuenta facturas reales en ERP issued
+    // (meta.total de GET /api/invoices), no el arreglo de /api/legacy-invoices.
+    Promise.allSettled([getUsers({ page: 1 }), getInvoices({ status: "issued", per_page: 10 })]).then(([usersRes, invoicesRes]) => {
       if (cancelled) return;
       if (usersRes.status === "fulfilled") setUsersCount(usersRes.value.meta.total);
-      if (invoicesRes.status === "fulfilled") setInvoicesCount(invoicesRes.value);
+      if (invoicesRes.status === "fulfilled") setInvoicesCount(invoicesRes.value.meta.total);
       setIsLoading(false);
     });
 
