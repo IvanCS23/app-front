@@ -36,7 +36,6 @@ export const SCREEN_STATUS: Readonly<Record<string, ScreenStatus>> = {
   "/pages/accounts/receivable": "demo",
   "/pages/catalogs/employee": "demo",
   "/pages/invoices/DownloadInvoices": "demo",
-  "/pages/invoices/invoice": "demo",
   "/pages/invoices/massive": "demo",
   "/pages/invoices/recovery": "demo",
   "/pages/invoices/xml": "demo",
@@ -52,7 +51,6 @@ export const SCREEN_STATUS: Readonly<Record<string, ScreenStatus>> = {
   "/pages/statistics/reports": "demo",
 
   // Enlazadas sin página.
-  "/pages/invoices/nueva-venta": "unavailable",
   "/cotizaciones/crear": "unavailable",
   "/cotizaciones/aprobadas": "unavailable",
   "/cotizaciones/mis-cotizaciones": "unavailable",

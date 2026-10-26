@@ -18,7 +18,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-const NUEVA_VENTA_HREF = "/pages/invoices/nueva-venta";
+const NUEVA_VENTA_HREF = "/pages/sales/new";
 
 type NavbarProps = {
   onOpenSidebar: () => void;

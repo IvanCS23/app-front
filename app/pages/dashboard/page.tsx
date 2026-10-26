@@ -19,7 +19,8 @@ import {
   FlaskConical,
 } from "lucide-react";
 
-const NEW_INVOICE_HREF = "/pages/invoices/invoice";
+// Fase 6.25: los accesos del Dashboard llevan al flujo real de ventas.
+const NEW_SALE_HREF = "/pages/sales/new";
 
 type StatCardProps = {
   title: string;
@@ -268,7 +269,7 @@ const RecentTable = () => {
 
 export default function DashboardFacturaPro() {
   const router = useRouter();
-  const newInvoiceState = navState(NEW_INVOICE_HREF);
+  const newSaleState = navState(NEW_SALE_HREF);
 
   return (
     <AppLayout>
@@ -296,14 +297,14 @@ export default function DashboardFacturaPro() {
             <Calendar className="h-4 w-4" />
             Últimos 30 días
           </button>
-          {newInvoiceState !== "hidden" && (
+          {newSaleState !== "hidden" && (
             <button
-              onClick={() => router.push(NEW_INVOICE_HREF)}
+              onClick={() => router.push(NEW_SALE_HREF)}
               className="flex h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-[13px] font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors"
             >
               <Plus className="h-4 w-4" />
-              Nueva Factura
-              <ScreenBadge state={newInvoiceState} />
+              Nueva venta
+              <ScreenBadge state={newSaleState} />
             </button>
           )}
         </div>
@@ -362,8 +363,8 @@ export default function DashboardFacturaPro() {
             <div className="grid grid-cols-2 gap-3">
               <QuickAction
                 icon={<Plus className="h-5 w-5" />}
-                title="Crear Nueva Factura"
-                href="/pages/invoices/invoice"
+                title="Nueva venta"
+                href={NEW_SALE_HREF}
               />
               <QuickAction
                 icon={<FileText className="h-5 w-5" />}

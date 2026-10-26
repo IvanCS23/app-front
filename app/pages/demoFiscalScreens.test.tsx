@@ -1,7 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ComponentType, ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
-import FacturaPage from "./invoices/invoice/page";
 import MassivePage from "./invoices/massive/page";
 import XmlPage from "./invoices/xml/page";
 import DownloadPage from "./invoices/DownloadInvoices/page";
@@ -20,7 +19,6 @@ vi.mock("@/app/components/layout/AppLayout", () => ({ default: ({ children }: { 
 const FAKE_SUCCESS = /¡Factura Generada!|completada exitosamente|procesado correctamente|descargado correctamente|guardados correctamente|Recuperación iniciada|generado correctamente/i;
 
 const cases: [string, ComponentType, RegExp][] = [
-  ["invoices/invoice", FacturaPage, /Crear Factura/],
   ["invoices/massive", MassivePage, /Empezar el proceso/],
   ["invoices/DownloadInvoices", DownloadPage, /Generar/i],
   ["invoices/recovery", RecoveryPage, /Recuperar facturas/],

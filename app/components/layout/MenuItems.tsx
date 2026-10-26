@@ -19,6 +19,7 @@ import {
   Lock,
   BarChart3,
   Settings,
+  ClipboardList,
 } from "lucide-react";
 import { navState, showDemoScreens, type NavState } from "@/src/data/screenStatus";
 
@@ -58,7 +59,13 @@ export const menuGroups: MenuGroup[] = [
         id: "nueva-venta",
         label: "Nueva venta",
         icon: <ShoppingCart className="h-5 w-5" />,
-        href: "/pages/invoices/nueva-venta",
+        href: "/pages/sales/new",
+      },
+      {
+        id: "ventas",
+        label: "Ventas",
+        icon: <ClipboardList className="h-5 w-5" />,
+        href: "/pages/sales",
       },
       {
         id: "cotizaciones",

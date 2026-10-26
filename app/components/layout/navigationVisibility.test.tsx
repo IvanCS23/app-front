@@ -47,22 +47,23 @@ describe.each([
     vi.stubEnv("NEXT_PUBLIC_SHOW_DEMO_SCREENS", value);
     renderSidebar();
 
-    expect(screen.queryByRole("link", { name: /Nueva venta/ })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Agregar Addenda/ })).not.toBeInTheDocument();
     const addenda = screen.getByText("Agregar Addenda").closest("[aria-disabled]");
     expect(addenda).toHaveAttribute("aria-disabled", "true");
     expect(within(addenda as HTMLElement).getByText("Próximamente")).toBeInTheDocument();
   });
 
-  it("Navbar: 'Nueva venta' no enlaza a una página inexistente", () => {
+  it("Navbar y Sidebar: 'Nueva venta' lleva al flujo real de ventas (Fase 6.25)", () => {
     vi.stubEnv("NEXT_PUBLIC_SHOW_DEMO_SCREENS", value);
     render(<Navbar onOpenSidebar={vi.fn()} isCollapsed={false} />);
+    expect(screen.getByRole("link", { name: /Nueva venta/ })).toHaveAttribute("href", "/pages/sales/new");
 
-    expect(screen.queryByRole("link", { name: /Nueva venta/ })).not.toBeInTheDocument();
-    expect(screen.getByText("Nueva venta").closest("[aria-disabled]")).toHaveAttribute("aria-disabled", "true");
+    renderSidebar("");
+    expect(screen.getAllByRole("link", { name: /Nueva venta/ }).map((link) => link.getAttribute("href"))).toContain("/pages/sales/new");
+    expect(screen.getByRole("link", { name: /^Ventas/ })).toHaveAttribute("href", "/pages/sales");
   });
 
-  it("Dashboard: la maqueta de factura según la variable; lo inexistente deshabilitado", () => {
+  it("Dashboard: 'Nueva venta' siempre disponible; lo inexistente deshabilitado", () => {
     vi.stubEnv("NEXT_PUBLIC_SHOW_DEMO_SCREENS", value);
     render(<DashboardFacturaPro />);
 
@@ -70,12 +71,11 @@ describe.each([
     expect(screen.getByRole("button", { name: /Nueva Cotización/ })).toBeDisabled();
     expect(screen.getByRole("button", { name: /Importar Datos/ })).toBeDisabled();
 
-    if (showDemo) {
-      expect(within(screen.getByRole("button", { name: /Crear Nueva Factura/ })).getByText("Demo")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /^Nueva Factura/ })).toBeInTheDocument();
-    } else {
-      expect(screen.queryByRole("button", { name: /Crear Nueva Factura/ })).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: /^Nueva Factura/ })).not.toBeInTheDocument();
-    }
+    // Fase 6.25: la maqueta de factura se eliminó; ambos accesos son reales.
+    const newSale = screen.getAllByRole("button", { name: /Nueva venta/ });
+    expect(newSale).toHaveLength(2);
+    newSale.forEach((button) => expect(button).toBeEnabled());
+    expect(screen.queryByText("Demo")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Nueva Factura/ })).not.toBeInTheDocument();
   });
 });

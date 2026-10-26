@@ -72,7 +72,7 @@ describe("registro de pantallas", () => {
   ] as const)("con demos=%s una pantalla demo queda %s; real y no disponible no cambian", (showDemo, demoState) => {
     expect(navState("/pages/invoices/massive", showDemo)).toBe(demoState);
     expect(navState("/pages/invoices/consult", showDemo)).toBe("real");
-    expect(navState("/pages/invoices/nueva-venta", showDemo)).toBe("unavailable");
+    expect(navState("/pages/quotes/new", showDemo)).toBe("unavailable");
   });
 });
 
@@ -99,8 +99,10 @@ describe("menú según el registro", () => {
   it.each([false, true])("con demos=%s los destinos sin página quedan como no disponibles", (showDemo) => {
     const items = visibleMenuGroups(showDemo).flatMap((group) => group.items);
 
-    expect(items.find((item) => item.label === "Nueva venta")?.state).toBe("unavailable");
     expect(items.find((item) => item.label === "Cotizaciones")?.state).toBe("unavailable");
+    // Fase 6.25: el flujo de ventas es real.
+    expect(items.find((item) => item.label === "Nueva venta")?.state).toBe("real");
+    expect(items.find((item) => item.label === "Ventas")?.state).toBe("real");
   });
 });
 
