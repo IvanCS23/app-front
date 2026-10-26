@@ -26,6 +26,7 @@ export const SCREEN_STATUS: Readonly<Record<string, ScreenStatus>> = {
   "/pages/catalogs/products": "real",
   "/pages/catalogs/usuarios": "real",
   "/pages/settings": "real",
+  "/pages/sales": "real",
 
   // Maquetas: no guardan ni envían nada.
   "/pages/accounts/journal": "demo",
