@@ -79,20 +79,22 @@ export function clientFiscalErrors(input: ClientFiscalInput, catalogs: SatCatalo
   const use = catalogs.cfdi_uses.find((entry) => entry.code === input.uso_cfdi);
   const personLabel = person === "moral" ? "moral" : "física";
 
+  // Fase 6.26.1: con un RFC genérico se exige 616/S01 antes que revisar el
+  // tipo de persona (XAXX/XEXX se leen como persona física y confundía).
   if (input.regimen_fiscal !== "" && !regime) {
     errors.regimen_fiscal = `El régimen fiscal ${input.regimen_fiscal} no existe en el catálogo del SAT.`;
+  } else if (regime && isGenericRfc(rfc) && regime.code !== GENERIC_REGIME) {
+    errors.regimen_fiscal = "Con un RFC genérico el régimen fiscal debe ser 616.";
   } else if (regime && !appliesTo(regime, person)) {
     errors.regimen_fiscal = `El régimen fiscal ${regime.code} no aplica a una persona ${personLabel}.`;
-  } else if (regime && isGenericRfc(rfc) && regime.code !== GENERIC_REGIME) {
-    errors.regimen_fiscal = "Con un RFC genérico el régimen fiscal debe ser 616 (Sin obligaciones fiscales).";
   }
 
   if (input.uso_cfdi !== "" && !use) {
     errors.uso_cfdi = `El uso de CFDI ${input.uso_cfdi} no existe en el catálogo del SAT.`;
-  } else if (use && !appliesTo(use, person)) {
-    errors.uso_cfdi = `El uso de CFDI ${use.code} no aplica a una persona ${personLabel}.`;
   } else if (use && isGenericRfc(rfc) && use.code !== GENERIC_USE) {
     errors.uso_cfdi = "Con un RFC genérico el uso de CFDI debe ser S01 (Sin efectos fiscales).";
+  } else if (use && !appliesTo(use, person)) {
+    errors.uso_cfdi = `El uso de CFDI ${use.code} no aplica a una persona ${personLabel}.`;
   } else if (use && regime && !errors.regimen_fiscal && !use.regimes.includes(regime.code)) {
     errors.uso_cfdi = `El uso de CFDI ${use.code} no es compatible con el régimen fiscal ${regime.code}.`;
   }

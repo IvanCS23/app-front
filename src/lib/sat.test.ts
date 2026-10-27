@@ -51,6 +51,15 @@ describe("validación SAT en el frontend (Fase 6.26)", () => {
     });
   });
 
+  it("con un RFC genérico pide el régimen 616 aunque el elegido aplique a otro tipo de persona (Fase 6.26.1)", () => {
+    const catalogs = satCatalogsFixture();
+    for (const regime of ["601", "612"]) {
+      expect(clientFiscalErrors({ rfc: "XAXX010101000", codigo_postal: "06600", regimen_fiscal: regime, uso_cfdi: "S01" }, catalogs)).toEqual({
+        regimen_fiscal: "Con un RFC genérico el régimen fiscal debe ser 616.",
+      });
+    }
+  });
+
   it("sin catálogos sólo valida formato de RFC y código postal", () => {
     expect(clientFiscalErrors({ rfc: "CFI010203AB1", codigo_postal: "06600", regimen_fiscal: "999", uso_cfdi: "Z01" }, null)).toEqual({});
   });
