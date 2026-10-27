@@ -1,4 +1,5 @@
 import { API_URL } from "@/src/config/api";
+import type { FiscalIssue } from "@/src/types/sat";
 
 export interface ApiError {
     message: string;
@@ -26,6 +27,10 @@ export interface Product {
     iva_retenido?:number;
     ieps?:number;
     isr?:number;
+    /** Fase 6.26: IVA del producto como tasa de tax_rates (16 %, 0 % o exento); `iva` queda derivado. */
+    tax_rate_id?: number | null;
+    /** Fase 6.26: problemas SAT del producto guardado (sólo lectura). */
+    fiscal_issues?: FiscalIssue[];
 }
 
 export interface ProductListResponse {

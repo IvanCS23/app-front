@@ -1,17 +1,32 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { 
+import {
   SquarePen, Trash, Plus, Minus, X, ChevronDown, Info, CheckCircle2, Loader2, Search,
-  Download, Upload, Activity, FileText as FileTextIcon 
+  Download, Upload, Activity, FileText as FileTextIcon, AlertTriangle
 } from "lucide-react";
 import AppLayout from "@/app/components/layout/AppLayout";
-import { 
-  getProducts, 
-  createProduct, 
-  updateProduct, 
+import SatKeySearch, { type SatKeyOption } from "@/app/components/sat/SatKeySearch";
+import {
+  getProducts,
+  createProduct,
+  updateProduct,
   deleteProduct,
-  Product 
+  Product
 } from "@/src/services/product.services";
+import { getSatCatalogs, searchProductKeys, searchUnitKeys } from "@/src/services/sat.services";
+import { getTaxRates } from "@/src/services/sale.services";
+import { TAX_OBJECT_TAXED, taxObjectError } from "@/src/lib/sat";
+import type { TaxRate } from "@/src/types/sale";
+import type { FiscalIssue, SatCatalogEntry } from "@/src/types/sat";
+
+// Fase 6.26: búsquedas en los catálogos SAT locales (estables, fuera del componente).
+const searchProductKeyOptions = (query: string, signal: AbortSignal): Promise<SatKeyOption[]> =>
+  searchProductKeys(query, signal).then((keys) => keys.map((key) => ({ code: key.code, label: key.description })));
+const searchUnitKeyOptions = (query: string, signal: AbortSignal): Promise<SatKeyOption[]> =>
+  searchUnitKeys(query, signal).then((keys) => keys.map((key) => ({ code: key.code, label: key.symbol ? `${key.name} (${key.symbol})` : key.name })));
+const upperCase = (value: string) => value.toUpperCase();
+
+type ProductFiscalField = "clave_producto" | "clave_unidad" | "objeto_imp" | "tax_rate_id";
 
 const fieldStyle =
   "w-full rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-sm text-[#0F172A] placeholder:text-[#64748B] shadow-sm transition-colors duration-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
@@ -124,25 +139,9 @@ const taxRegimeOptions = [
   { label: "626 - Régimen Simplificado de Confianza", value: "626" },
 ];
 
-// Opciones para Objeto Impuesto
-const objetoImpuestoOptions = [
-  { label: "01 - No objeto de impuesto", value: "01" },
-  { label: "02 - Sí objeto de impuesto", value: "02" },
-  { label: "03 - Sí objeto del impuesto y no obligado al desglose", value: "03" },
-  { label: "04 - Sí objeto del impuesto y no causa impuesto", value: "04" },
-  { label: "05 - Si Objeto del Impuesto, IVA Crédito PODEBI", value: "05" },
-  { label: "06 - Sí objeto del IVA, No traslado IVA", value: "06" },
-  { label: "07 - No traslado del IVA, Si desglose IEPS", value: "07" },
-  { label: "08 - No traslado del IVA, No desglose IEPS", value: "08" },
-];
-
-// Opciones para IVA
-const ivaOptions = [
-  { label: "IVA 16%", value: "16" },
-  { label: "IVA 8%", value: "8" },
-  { label: "IVA 0%", value: "0" },
-  { label: "Exento", value: "exento" },
-];
+// Fase 6.26: el objeto de impuesto viene del catálogo c_ObjetoImp del SAT y el
+// IVA es una tasa de tax_rates (16 %, 0 % o exento): un número no distinguía
+// "exento" de la tasa 0 % y "Exento" llegaba al backend como null.
 
 // Opciones para IVA RET
 const ivaRetOptions = [
@@ -492,8 +491,12 @@ type ProductModalProps = {
   removeCuentaPredial: (index: number) => void;
   updateCuentaPredial: (index: number, value: string) => void;
   showCuentasPrediales: boolean;
-  productIVA: string;
-  setProductIVA: (value: string) => void;
+  productTaxRateId: string;
+  setProductTaxRateId: (value: string) => void;
+  taxRates: TaxRate[];
+  taxObjects: SatCatalogEntry[];
+  fiscalErrors: Partial<Record<ProductFiscalField, string>>;
+  savedFiscalIssues: FiscalIssue[];
   productIVARet: string;
   setProductIVARet: (value: string) => void;
   iepsType: "tasa" | "cuota";
@@ -542,8 +545,12 @@ const ProductModal = ({
   removeCuentaPredial,
   updateCuentaPredial,
   showCuentasPrediales,
-  productIVA,
-  setProductIVA,
+  productTaxRateId,
+  setProductTaxRateId,
+  taxRates,
+  taxObjects,
+  fiscalErrors,
+  savedFiscalIssues,
   productIVARet,
   setProductIVARet,
   iepsType,
@@ -589,6 +596,20 @@ const ProductModal = ({
         </div>
 
         <div className="bg-slate-50 p-6">
+          {savedFiscalIssues.length > 0 && (
+            <div role="alert" className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              <p className="flex items-center gap-2 font-semibold">
+                <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+                Este producto se guardó con datos que el SAT no acepta
+              </p>
+              <p className="mt-1">Corrígelos para poder facturarlo; al guardar se validan de nuevo.</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {savedFiscalIssues.map((issue) => (
+                  <li key={`${issue.code}-${issue.field}`}>{issue.message}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
             <div>
               <h3 className="mb-4 border-b border-[#E2E8F0] pb-2 text-lg font-bold text-[#0F172A]">Datos del producto</h3>
@@ -644,60 +665,58 @@ const ProductModal = ({
               <div className="space-y-4">
                 <div>
                   <p className="mb-2 text-sm text-[#64748B]">
-                    Asocia tu producto al CATALOGO del SAT<br />
-                    Busca tu CLAVE, escríbela en el campo de abajo, espera opciones y selecciona una (8 caracteres):
+                    Asocia tu producto al catálogo c_ClaveProdServ del SAT<br />
+                    Escribe la clave (8 dígitos) o una palabra y elige una opción:
                   </p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={productClaveSat}
-                      onChange={(e) => setProductClaveSat(e.target.value)}
-                      placeholder="Clave de Producto o Servicio"
-                      className={`${inputStyle} flex-1`}
-                      maxLength={8}
-                    />
-                    <button className="flex h-12 items-center justify-center whitespace-nowrap rounded-xl border border-[#E2E8F0] bg-white px-4 text-sm font-semibold text-blue-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:shadow-md">
-                      Buscar Clave
-                    </button>
-                  </div>
+                  <SatKeySearch
+                    label="Clave de Producto o Servicio"
+                    value={productClaveSat}
+                    onChange={setProductClaveSat}
+                    search={searchProductKeyOptions}
+                    placeholder="Ej. 43232408 o software"
+                    error={fiscalErrors.clave_producto}
+                  />
                 </div>
 
                 <div>
                   <p className="mb-2 text-sm text-[#64748B]">
-                    Define la UNIDAD de tu producto<br />
-                    Busca tu UNIDAD, escríbela en el campo, espera opciones y selecciona una (De 2 o 3 caracteres):
+                    Define la unidad (catálogo c_ClaveUnidad del SAT)<br />
+                    Escribe la clave (2 o 3 caracteres) o el nombre y elige una opción:
                   </p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={productUnidadSat}
-                      onChange={(e) => setProductUnidadSat(e.target.value)}
-                      placeholder="Unidad"
-                      className={`${inputStyle} flex-1`}
-                      maxLength={3}
-                    />
-                    <button className="flex h-12 items-center justify-center whitespace-nowrap rounded-xl border border-[#E2E8F0] bg-white px-4 text-sm font-semibold text-blue-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:shadow-md">
-                      Buscar Unidad
-                    </button>
-                  </div>
+                  <SatKeySearch
+                    label="Unidad"
+                    value={productUnidadSat}
+                    onChange={setProductUnidadSat}
+                    search={searchUnitKeyOptions}
+                    normalize={upperCase}
+                    placeholder="Ej. H87, E48 o pieza"
+                    error={fiscalErrors.clave_unidad}
+                  />
                 </div>
 
                 <div>
                   <p className="mb-2 text-sm text-[#64748B]">Objeto Impuesto</p>
                   <div className="relative">
                     <select
+                      aria-label="Objeto de impuesto"
                       value={productObjetoImpuesto}
                       onChange={(e) => setProductObjetoImpuesto(e.target.value)}
                       className={`${selectStyle} appearance-none`}
+                      aria-invalid={Boolean(fiscalErrors.objeto_imp)}
                     >
-                      {objetoImpuestoOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
+                      <option value="">{taxObjects.length > 0 ? "Seleccione un objeto de impuesto" : "Cargando catálogo del SAT..."}</option>
+                      {productObjetoImpuesto !== "" && !taxObjects.some((entry) => entry.code === productObjetoImpuesto) && (
+                        <option value={productObjetoImpuesto}>{productObjetoImpuesto}</option>
+                      )}
+                      {taxObjects.map((entry) => (
+                        <option key={entry.code} value={entry.code}>
+                          {entry.code} - {entry.description}
                         </option>
                       ))}
                     </select>
                     <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   </div>
+                  {fiscalErrors.objeto_imp && <p className="mt-1 text-xs font-medium text-red-600">{fiscalErrors.objeto_imp}</p>}
                 </div>
               </div>
             </div>
@@ -749,21 +768,27 @@ const ProductModal = ({
             
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
               <div>
-                <Label>IVA</Label>
+                <Label withInfo infoText="Exento y tasa 0 % son tratamientos fiscales distintos. Con objeto de impuesto 02 el producto necesita IVA; con 01, 03 o 04 no lleva.">
+                  IVA
+                </Label>
                 <div className="relative">
                   <select
-                    value={productIVA}
-                    onChange={(e) => setProductIVA(e.target.value)}
+                    aria-label="IVA"
+                    value={productTaxRateId}
+                    onChange={(e) => setProductTaxRateId(e.target.value)}
                     className={`${selectStyle} appearance-none`}
+                    aria-invalid={Boolean(fiscalErrors.tax_rate_id)}
                   >
-                    {ivaOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
+                    <option value="">Sin IVA</option>
+                    {taxRates.map((taxRate) => (
+                      <option key={taxRate.id} value={String(taxRate.id)}>
+                        {taxRate.name}
                       </option>
                     ))}
                   </select>
                   <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 </div>
+                {fiscalErrors.tax_rate_id && <p className="mt-1 text-xs font-medium text-red-600">{fiscalErrors.tax_rate_id}</p>}
               </div>
 
               <div>
@@ -1110,10 +1135,16 @@ export default function CatalogoProductos() {
   const [productUnitPrice, setProductUnitPrice] = useState("");
   const [productClaveSat, setProductClaveSat] = useState("");
   const [productUnidadSat, setProductUnidadSat] = useState("");
-  const [productObjetoImpuesto, setProductObjetoImpuesto] = useState("01");
+  // Fase 6.26: por omisión "02" con IVA 16 % (antes "01", que dejaba
+  // productos con IVA marcados como "no objeto de impuesto").
+  const [productObjetoImpuesto, setProductObjetoImpuesto] = useState(TAX_OBJECT_TAXED);
   const [cuentasPrediales, setCuentasPrediales] = useState<string[]>([]);
   const [showCuentasPrediales, setShowCuentasPrediales] = useState(false);
-  const [productIVA, setProductIVA] = useState("16");
+  const [productTaxRateId, setProductTaxRateId] = useState("");
+  const [taxRates, setTaxRates] = useState<TaxRate[]>([]);
+  const [taxObjects, setTaxObjects] = useState<SatCatalogEntry[]>([]);
+  const [fiscalErrors, setFiscalErrors] = useState<Partial<Record<ProductFiscalField, string>>>({});
+  const [savedFiscalIssues, setSavedFiscalIssues] = useState<FiscalIssue[]>([]);
   const [productIVARet, setProductIVARet] = useState("");
   const [iepsType, setIepsType] = useState<"tasa" | "cuota">("tasa");
   const [iepsTasaValue, setIepsTasaValue] = useState("");
@@ -1151,6 +1182,22 @@ export default function CatalogoProductos() {
     loadProducts();
   }, []);
 
+  // Fase 6.26: tasas de IVA (traslados activos) y objetos de impuesto del SAT.
+  useEffect(() => {
+    getTaxRates()
+      .then(setTaxRates)
+      .catch(() => setToast({ message: "No fue posible cargar las tasas de IVA.", type: "error" }));
+    getSatCatalogs()
+      .then((catalogs) => setTaxObjects(catalogs.tax_objects))
+      .catch(() => setToast({ message: "No fue posible cargar los catálogos del SAT.", type: "error" }));
+  }, []);
+
+  /** IVA 16 % del catálogo, para un producto nuevo con objeto 02. */
+  const defaultTaxRateId = (): string => {
+    const sixteen = taxRates.find((taxRate) => taxRate.factor_type === "tasa" && Math.abs(Number(taxRate.rate) - 0.16) < 0.000001);
+    return sixteen ? String(sixteen.id) : "";
+  };
+
   // Filtrar productos cuando cambia el término de búsqueda
   useEffect(() => {
     const searchLower = search.toLowerCase();
@@ -1185,8 +1232,10 @@ export default function CatalogoProductos() {
     setProductUnitPrice(producto.precio_unitario?.toString() || "");
     setProductClaveSat(producto.clave_producto || "");
     setProductUnidadSat(producto.clave_unidad || "");
-    setProductObjetoImpuesto(producto.objeto_imp || "01");
-    setProductIVA(producto.iva?.toString() || "16");
+    setProductObjetoImpuesto(producto.objeto_imp || "");
+    setProductTaxRateId(producto.tax_rate_id ? String(producto.tax_rate_id) : "");
+    setSavedFiscalIssues(producto.fiscal_issues ?? []);
+    setFiscalErrors({});
     setProductIVARet(producto.iva_retenido?.toString() || "");
     setProductISR(producto.isr?.toString() || "");
     
@@ -1250,10 +1299,12 @@ export default function CatalogoProductos() {
     setProductUnitPrice("");
     setProductClaveSat("");
     setProductUnidadSat("");
-    setProductObjetoImpuesto("01");
+    setProductObjetoImpuesto(TAX_OBJECT_TAXED);
     setCuentasPrediales([]);
     setShowCuentasPrediales(false);
-    setProductIVA("16");
+    setProductTaxRateId(defaultTaxRateId());
+    setFiscalErrors({});
+    setSavedFiscalIssues([]);
     setProductIVARet("");
     setIepsType("tasa");
     setIepsTasaValue("");
@@ -1284,18 +1335,34 @@ export default function CatalogoProductos() {
       return;
     }
 
+    // Fase 6.26: formato y coherencia antes de enviar; que la clave y la
+    // unidad existan en el catálogo lo confirma el backend.
+    const taxRateId = productTaxRateId === "" ? null : Number(productTaxRateId);
+    const errors: Partial<Record<ProductFiscalField, string>> = {};
+    if (!/^\d{8}$/.test(productClaveSat.trim())) errors.clave_producto = "La clave de producto SAT debe tener 8 dígitos.";
+    if (productUnidadSat.trim() === "") errors.clave_unidad = "La clave de unidad SAT es obligatoria.";
+    if (productObjetoImpuesto === "") errors.objeto_imp = "El objeto de impuesto es obligatorio.";
+    const coherence = productObjetoImpuesto === "" ? null : taxObjectError(productObjetoImpuesto, taxRateId);
+    if (coherence) errors.tax_rate_id = coherence;
+    setFiscalErrors(errors);
+    const firstError = Object.values(errors)[0];
+    if (firstError) {
+      setToast({ message: firstError, type: "error" });
+      return;
+    }
+
     const productData: Product = {
   name: productInternalName,
   no_identificacion: productNoIdentificacion || undefined,
   descripcion: productDescription,
   precio_unitario: parseFloat(productUnitPrice) || 0,
       cuenta_predial: cuentasPrediales.length > 0 ? cuentasPrediales[0] : undefined,
-      clave_producto: productClaveSat,
-      clave_unidad: productUnidadSat || undefined,
+      clave_producto: productClaveSat.trim(),
+      clave_unidad: productUnidadSat.trim(),
       objeto_imp: productObjetoImpuesto,
       no_pedimento: pedimentos.length > 0 ? pedimentos[0] : undefined,
       impuesto_local: impuestosLocales.length > 0 ? JSON.stringify(impuestosLocales) : "",
-      iva: productIVA ? parseFloat(productIVA) : undefined,
+      tax_rate_id: taxRateId,
       iva_retenido: productIVARet ? parseFloat(productIVARet) : undefined,
       ieps: iepsType === "tasa" ? (iepsTasaValue ? parseFloat(iepsTasaValue) : undefined) : (iepsCuotaValue ? parseFloat(iepsCuotaValue) : undefined),
       isr: productISR ? parseFloat(productISR) : undefined,
@@ -1535,7 +1602,20 @@ export default function CatalogoProductos() {
                             {producto.clave_producto}
                           </span>
                         </td>
-                        <td className="px-4 py-4 font-semibold text-[#0F172A]">{producto.name}</td>
+                        <td className="px-4 py-4 font-semibold text-[#0F172A]">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {producto.name}
+                            {(producto.fiscal_issues?.length ?? 0) > 0 && (
+                              <span
+                                className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800"
+                                title={producto.fiscal_issues?.map((issue) => issue.message).join("\n")}
+                              >
+                                <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+                                Revisar datos SAT
+                              </span>
+                            )}
+                          </div>
+                        </td>
                         <td className="px-4 py-4 text-[#64748B]">{producto.descripcion}</td>
                         <td className="px-4 py-4 text-[#64748B]">{producto.clave_unidad || "-"}</td>
                         <td className="px-4 py-4 text-right text-sm font-semibold text-blue-600">
@@ -1649,8 +1729,12 @@ export default function CatalogoProductos() {
         removeCuentaPredial={removeCuentaPredial}
         updateCuentaPredial={updateCuentaPredial}
         showCuentasPrediales={showCuentasPrediales}
-        productIVA={productIVA}
-        setProductIVA={setProductIVA}
+        productTaxRateId={productTaxRateId}
+        setProductTaxRateId={setProductTaxRateId}
+        taxRates={taxRates}
+        taxObjects={taxObjects}
+        fiscalErrors={fiscalErrors}
+        savedFiscalIssues={savedFiscalIssues}
         productIVARet={productIVARet}
         setProductIVARet={setProductIVARet}
         iepsType={iepsType}

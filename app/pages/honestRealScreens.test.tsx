@@ -21,6 +21,7 @@ vi.mock("@/src/services/client.services", async (importOriginal) => ({
 }));
 // Fase 6.26: las pantallas de catálogo piden los catálogos del SAT.
 vi.mock("@/src/services/sat.services", () => ({ getSatCatalogs: vi.fn(() => new Promise(() => {})) }));
+vi.mock("@/src/services/sale.services", () => ({ getTaxRates: vi.fn(() => new Promise(() => {})) }));
 vi.mock("@/src/services/product.services", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/src/services/product.services")>()),
   getProducts: vi.fn(),
