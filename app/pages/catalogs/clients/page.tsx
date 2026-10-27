@@ -2,9 +2,9 @@
 
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import { 
+import {
   SquarePen, Trash, Eye, Plus, X, ChevronDown, ChevronUp, Info, Loader2,
-  Download, Upload, Activity, FileText as FileTextIcon 
+  Download, Upload, Activity, FileText as FileTextIcon, AlertTriangle
 } from "lucide-react";
 import AppLayout from "@/app/components/layout/AppLayout";
 import Toast, { type ToastData } from "@/app/components/ui/Toast";
@@ -13,8 +13,11 @@ import {
   createClient, 
   updateClient, 
   deleteClient, 
-  Client as ClientType 
+  Client as ClientType
 } from "@/src/services/client.services";
+import { getSatCatalogs } from "@/src/services/sat.services";
+import { clientFiscalErrors, regimesFor, usesFor, type ClientFiscalInput } from "@/src/lib/sat";
+import type { FiscalIssue, SatCatalogs } from "@/src/types/sat";
 
 const selectStyle = "box box-input";
 const inputStyle = "box box-input";
@@ -51,56 +54,37 @@ function Label({ children, withInfo = false, infoText = "" }: LabelProps) {
   );
 }
 
-// Opciones para Uso de la factura (CFDI)
-const invoiceUsageOptions = [
-  { label: "Seleccione un uso", value: "" },
-  { label: "G01 - Adquisición de mercancías", value: "G01" },
-  { label: "G02 - Devoluciones, descuentos o bonificaciones", value: "G02" },
-  { label: "G03 - Gastos en general", value: "G03" },
-  { label: "I01 - Construcciones", value: "I01" },
-  { label: "I02 - Mobiliario y equipo de oficina", value: "I02" },
-  { label: "I03 - Equipo de transporte", value: "I03" },
-  { label: "I04 - Equipo de computo", value: "I04" },
-  { label: "I05 - Dados, troqueles, moldes, matrices y herramental", value: "I05" },
-  { label: "I06 - Comunicaciones telefónicas", value: "I06" },
-  { label: "I07 - Comunicaciones satelitales", value: "I07" },
-  { label: "I08 - Otra maquinaria y equipo", value: "I08" },
-  { label: "D01 - Honorarios médicos, dentales y gastos hospitalarios", value: "D01" },
-  { label: "D02 - Gastos médicos por incapacidad o discapacidad", value: "D02" },
-  { label: "D03 - Gastos funerarios", value: "D03" },
-  { label: "D04 - Donativos", value: "D04" },
-  { label: "D05 - Intereses reales efectivamente pagados por créditos hipotecarios", value: "D05" },
-  { label: "D06 - Aportaciones voluntarias al SAR", value: "D06" },
-  { label: "D07 - Primas por seguros de gastos médicos", value: "D07" },
-  { label: "D08 - Gastos de transportación escolar obligatoria", value: "D08" },
-  { label: "D09 - Depósitos en cuentas para el ahorro", value: "D09" },
-  { label: "D10 - Pagos por servicios educativos", value: "D10" },
-  { label: "P01 - Por definir", value: "P01" },
-];
+// Fase 6.26: régimen fiscal y uso de CFDI vienen del catálogo oficial del SAT
+// (GET /api/sat/catalogs), filtrados por tipo de persona y régimen.
 
-// Opciones para Régimen fiscal
-const taxRegimeOptions = [
-  { label: "Seleccione un régimen", value: "" },
-  { label: "601 - General de Ley Personas Morales", value: "601" },
-  { label: "603 - Personas Morales con Fines no Lucrativos", value: "603" },
-  { label: "605 - Sueldos y Salarios e Ingresos Asimilados a Salarios", value: "605" },
-  { label: "606 - Arrendamiento", value: "606" },
-  { label: "607 - Régimen de Enajenación o Adquisición de Bienes", value: "607" },
-  { label: "608 - Demás ingresos", value: "608" },
-  { label: "610 - Residentes en el Extranjero sin Establecimiento Permanente en México", value: "610" },
-  { label: "611 - Ingresos por Dividendos", value: "611" },
-  { label: "612 - Personas Físicas con Actividades Empresariales y Profesionales", value: "612" },
-  { label: "614 - Ingresos por intereses", value: "614" },
-  { label: "615 - Régimen de los ingresos por obtención de premios", value: "615" },
-  { label: "616 - Sin obligaciones fiscales", value: "616" },
-  { label: "620 - Sociedades Cooperativas de Producción que optan por diferir sus ingresos", value: "620" },
-  { label: "621 - Incorporación Fiscal", value: "621" },
-  { label: "622 - Actividades Agrícolas, Ganaderas, Silvícolas y Pesqueras", value: "622" },
-  { label: "623 - Opcional para Grupos de Sociedades", value: "623" },
-  { label: "624 - Coordinados", value: "624" },
-  { label: "625 - Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas", value: "625" },
-  { label: "626 - Régimen Simplificado de Confianza", value: "626" },
-];
+/** Error de un campo fiscal, bajo el control. */
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return <p className="mt-1 text-xs font-medium text-red-600">{message}</p>;
+}
+
+/** Opciones de un select de catálogo; conserva un valor guardado que ya no aplica. */
+function catalogOptions(entries: { code: string; description: string }[], current: string) {
+  const options = entries.map((entry) => ({ value: entry.code, label: `${entry.code} - ${entry.description}` }));
+  if (current !== "" && !options.some((option) => option.value === current)) {
+    options.unshift({ value: current, label: `${current} (no válido para este cliente)` });
+  }
+  return options;
+}
+
+/** Marca un cliente guardado con datos que el SAT no acepta (fiscal_issues). */
+function FiscalIssuesBadge({ issues }: { issues?: FiscalIssue[] }) {
+  if (!issues || issues.length === 0) return null;
+  return (
+    <span
+      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800"
+      title={issues.map((issue) => issue.message).join("\n")}
+    >
+      <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+      Revisar datos SAT
+    </span>
+  );
+}
 
 // Estados de la República Mexicana
 const mexicanStates = [
@@ -182,6 +166,27 @@ export default function CatalogoClientes() {
   const [clientMunicipality, setClientMunicipality] = useState("");
   const [clientState, setClientState] = useState("");
   const [clientCountry, setClientCountry] = useState("México");
+
+  // Fase 6.26: catálogos SAT, errores por campo y problemas del cliente guardado.
+  const [satCatalogs, setSatCatalogs] = useState<SatCatalogs | null>(null);
+  const [satCatalogsError, setSatCatalogsError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ClientFiscalInput, string>>>({});
+  const [savedFiscalIssues, setSavedFiscalIssues] = useState<FiscalIssue[]>([]);
+
+  useEffect(() => {
+    getSatCatalogs()
+      .then(setSatCatalogs)
+      .catch((error: unknown) => setSatCatalogsError(error instanceof Error ? error.message : "No fue posible cargar los catálogos del SAT."));
+  }, []);
+
+  const fiscalInput: ClientFiscalInput = {
+    rfc: clientRfc,
+    codigo_postal: clientCp,
+    regimen_fiscal: clientTaxRegime,
+    uso_cfdi: clientInvoiceUsage,
+  };
+  const regimeOptions = catalogOptions(satCatalogs ? regimesFor(satCatalogs, clientRfc) : [], clientTaxRegime);
+  const useOptions = catalogOptions(satCatalogs ? usesFor(satCatalogs, clientRfc, clientTaxRegime) : [], clientInvoiceUsage);
 
   // Cargar clientes desde la API
   const fetchClients = useCallback(async () => {
@@ -279,6 +284,7 @@ export default function CatalogoClientes() {
     if (client) {
       setEditingClientId(client.id || null);
       mapClientToForm(client);
+      setSavedFiscalIssues(client.fiscal_issues ?? []);
     } else {
       setEditingClientId(null);
       resetClientForm();
@@ -310,6 +316,8 @@ export default function CatalogoClientes() {
     setClientCountry("México");
     setShowOptionalFields(false);
     setEditingClientId(null);
+    setFieldErrors({});
+    setSavedFiscalIssues([]);
   };
 
   const validateForm = (): boolean => {
@@ -335,6 +343,15 @@ export default function CatalogoClientes() {
     }
     if (!clientCp.trim()) {
       setToast({ message: "El campo C.P. es obligatorio", type: "error" });
+      return false;
+    }
+
+    // Fase 6.26: mismas reglas SAT que el backend (formato, catálogo y matriz).
+    const errors = clientFiscalErrors(fiscalInput, satCatalogs);
+    setFieldErrors(errors);
+    const firstError = Object.values(errors)[0];
+    if (firstError) {
+      setToast({ message: firstError, type: "error" });
       return false;
     }
     return true;
@@ -400,6 +417,32 @@ export default function CatalogoClientes() {
     // Implementar lógica para ver detalles del cliente
     setToast({ message: "Vista de detalles en desarrollo", type: "info" });
   };
+
+  const renderClientActions = (client: ClientType) => (
+    <div className="flex shrink-0 gap-3 md:gap-2">
+      <button
+        onClick={() => openClientModal(client)}
+        className="text-[#94A3B8] hover:text-blue-600 transition-colors"
+        title="Editar cliente"
+      >
+        <SquarePen className="h-4 w-4" />
+      </button>
+      <button
+        onClick={() => client.id && handleDeleteClient(client.id)}
+        className="text-[#94A3B8] hover:text-red-500 transition-colors"
+        title="Eliminar cliente"
+      >
+        <Trash className="h-4 w-4" />
+      </button>
+      <button
+        onClick={() => handleViewClient()}
+        className="text-[#94A3B8] hover:text-emerald-600 transition-colors"
+        title="Ver detalles"
+      >
+        <Eye className="h-4 w-4" />
+      </button>
+    </div>
+  );
 
   // Modal de carga masiva
   const BulkUploadModal = () => {
@@ -482,23 +525,23 @@ export default function CatalogoClientes() {
           </div>
         )}
         
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold text-[#0F172A]">Catálogo de Clientes</h1>
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-extrabold text-[#0F172A] sm:text-3xl">Catálogo de Clientes</h1>
             <p className="text-[#64748B]">
               Gestiona la base de datos de tus socios comerciales, consulta sus datos fiscales y realiza cargas masivas de información.
             </p>
           </div>
-          <div className="flex gap-3">
-            <button 
+          <div className="flex shrink-0 gap-3">
+            <button
               onClick={() => setIsBulkUploadModalOpen(true)}
-              className="w-36 bg-emerald-500 hover:bg-emerald-400 rounded-lg font-semibold shadow text-white shadow-lg shadow-emerald-500/30 transition-colors"
+              className="flex-1 rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white shadow-lg shadow-emerald-500/30 transition-colors hover:bg-emerald-400 sm:w-36 sm:flex-none"
             >
               Carga masiva
             </button>
-            <button 
+            <button
               onClick={() => openClientModal()}
-              className="w-36 bg-blue-500 hover:bg-blue-400 rounded-lg font-semibold shadow text-white shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-colors"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-2 font-semibold text-white shadow-lg shadow-blue-500/30 transition-colors hover:bg-blue-400 sm:w-40 sm:flex-none"
               disabled={isLoading}
             >
               <Plus className="h-4 w-4" />
@@ -507,9 +550,15 @@ export default function CatalogoClientes() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 mb-4">
+        {satCatalogsError && (
+          <div role="alert" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+            {satCatalogsError} El régimen y el uso de CFDI no se podrán elegir hasta recargar la página.
+          </div>
+        )}
+
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <input
-            className={inputStyle + " flex-1"}
+            className={inputStyle + " min-w-0 flex-1"}
             placeholder="Filtrar por nombre, RFC o correo..."
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -532,88 +581,85 @@ export default function CatalogoClientes() {
         </div>
 
         <div className="bg-white rounded-xl overflow-hidden mb-8 border border-[#E2E8F0] shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="bg-[#F1F5F9] text-[#475569]">
-              <tr>
-                <th className="p-3 text-left">ACCIONES</th>
-                <th className="p-3 text-left">NOMBRE / RAZÓN SOCIAL</th>
-                <th className="p-3 text-left">RFC</th>
-                <th className="p-3 text-left">EMAIL</th>
-                <th className="p-3 text-left">CÓDIGO POSTAL</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading && clients.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center">
-                    <div className="flex items-center justify-center gap-3">
-                      <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-                      <span className="text-[#64748B]">Cargando clientes...</span>
+          {isLoading && clients.length === 0 ? (
+            <div className="flex items-center justify-center gap-3 p-8">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+              <span className="text-[#64748B]">Cargando clientes...</span>
+            </div>
+          ) : paginatedClients.length === 0 ? (
+            <p className="p-8 text-center text-[#64748B]">
+              {search ? "No se encontraron clientes que coincidan con tu búsqueda" : "No hay clientes registrados"}
+            </p>
+          ) : (
+            <>
+              {/* Fase 6.26: tarjetas en pantallas angostas; la tabla cortaba columnas. */}
+              <ul className="divide-y divide-[#F1F5F9] md:hidden" aria-label="Clientes">
+                {paginatedClients.map((client) => (
+                  <li key={client.id} className="flex flex-col gap-2 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="break-words font-bold text-[#0F172A]">{client.name}</p>
+                        <p className="font-mono text-xs text-blue-700">{client.rfc}</p>
+                      </div>
+                      {renderClientActions(client)}
                     </div>
-                  </td>
-                </tr>
-              ) : paginatedClients.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-[#64748B]">
-                    {search ? "No se encontraron clientes que coincidan con tu búsqueda" : "No hay clientes registrados"}
-                  </td>
-                </tr>
-              ) : (
-                paginatedClients.map((client) => (
-                  <tr key={client.id} className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC] transition-colors">
-                    <td className="p-3">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => openClientModal(client)}
-                          className="text-[#94A3B8] hover:text-blue-600 transition-colors"
-                          title="Editar cliente"
-                        >
-                          <SquarePen className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => client.id && handleDeleteClient(client.id)}
-                          className="text-[#94A3B8] hover:text-red-500 transition-colors"
-                          title="Eliminar cliente"
-                        >
-                          <Trash className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleViewClient()}
-                          className="text-[#94A3B8] hover:text-emerald-600 transition-colors"
-                          title="Ver detalles"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                    <td className="p-3 font-bold">
-                      <div className="flex items-center gap-3">
-                        <span className="bg-blue-50 text-blue-700 rounded-lg px-2 py-1 text-xs font-bold">
-                          {(client.name || '').substring(0, 2).toUpperCase()}
-                        </span>
-                        {client.name}
-                      </div>
-                    </td>
-                    <td className="p-3">
-                      <span className="bg-[#EFF6FF] text-blue-700 px-2 py-1 rounded text-xs font-mono cursor-pointer hover:underline">
-                        {client.rfc}
-                      </span>
-                    </td>
-                    <td className="p-3 text-[#475569]">{client.email}</td>
-                    <td className="p-3">{client.codigo_postal}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-          
+                    <p className="break-all text-sm text-[#475569]">{client.email}</p>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-[#64748B]">
+                      <span>C.P. {client.codigo_postal}</span>
+                      <FiscalIssuesBadge issues={client.fiscal_issues} />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="hidden overflow-x-auto md:block">
+                <table className="w-full text-sm">
+                  <thead className="bg-[#F1F5F9] text-[#475569]">
+                    <tr>
+                      <th className="p-3 text-left">ACCIONES</th>
+                      <th className="p-3 text-left">NOMBRE / RAZÓN SOCIAL</th>
+                      <th className="p-3 text-left">RFC</th>
+                      <th className="p-3 text-left">EMAIL</th>
+                      <th className="p-3 text-left">CÓDIGO POSTAL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedClients.map((client) => (
+                      <tr key={client.id} className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC] transition-colors">
+                        <td className="p-3">
+                          {renderClientActions(client)}
+                        </td>
+                        <td className="p-3 font-bold">
+                          <div className="flex items-center gap-3">
+                            <span className="bg-blue-50 text-blue-700 rounded-lg px-2 py-1 text-xs font-bold">
+                              {(client.name || '').substring(0, 2).toUpperCase()}
+                            </span>
+                            <span className="min-w-0 break-words">{client.name}</span>
+                            <FiscalIssuesBadge issues={client.fiscal_issues} />
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <span className="bg-[#EFF6FF] text-blue-700 px-2 py-1 rounded text-xs font-mono">
+                            {client.rfc}
+                          </span>
+                        </td>
+                        <td className="p-3 break-all text-[#475569]">{client.email}</td>
+                        <td className="p-3">{client.codigo_postal}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
           {/* Paginación */}
           {filteredClients.length > 0 && (
-            <div className="flex justify-between items-center p-4 border-t border-[#E2E8F0] text-[#64748B] text-sm">
+            <div className="flex flex-col gap-3 p-4 border-t border-[#E2E8F0] text-[#64748B] text-sm sm:flex-row sm:items-center sm:justify-between">
               <span>
                 Mostrando {paginatedClients.length} de {filteredClients.length} registros
               </span>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
@@ -712,6 +758,20 @@ export default function CatalogoClientes() {
             </div>
 
             <div className="p-6">
+              {savedFiscalIssues.length > 0 && (
+                <div role="alert" className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                  <p className="flex items-center gap-2 font-semibold">
+                    <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+                    Este cliente se guardó con datos que el SAT no acepta
+                  </p>
+                  <p className="mt-1">Corrígelos para poder facturarle; al guardar se validan de nuevo.</p>
+                  <ul className="mt-2 list-disc space-y-1 pl-5">
+                    {savedFiscalIssues.map((issue) => (
+                      <li key={`${issue.code}-${issue.field}`}>{issue.message}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="md:col-span-2">
                   <Label>Nombre / Razón Social:</Label>
@@ -735,40 +795,26 @@ export default function CatalogoClientes() {
                     maxLength={13}
                     className={inputStyle}
                     disabled={isSaving}
+                    aria-invalid={Boolean(fieldErrors.rfc)}
                   />
+                  <FieldError message={fieldErrors.rfc} />
                 </div>
 
                 <div>
-                  <Label>Uso de la factura:</Label>
-                  <div className="relative">
-                    <select
-                      value={clientInvoiceUsage}
-                      onChange={(e) => setClientInvoiceUsage(e.target.value)}
-                      className={`${selectStyle} appearance-none`}
-                      disabled={isSaving}
-                    >
-                      {invoiceUsageOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  </div>
-                </div>
-
-                <div>
-                  <Label withInfo infoText="El campo Regimen Fiscal será obligatorio para los receptores a partir de julio 2022">
+                  <Label withInfo infoText="Catálogo c_RegimenFiscal del SAT; sólo se muestran los regímenes que aplican al tipo de persona del RFC (moral 12 caracteres, física 13).">
                     Régimen fiscal:
                   </Label>
                   <div className="relative">
                     <select
+                      aria-label="Régimen fiscal"
                       value={clientTaxRegime}
                       onChange={(e) => setClientTaxRegime(e.target.value)}
                       className={`${selectStyle} appearance-none`}
-                      disabled={isSaving}
+                      disabled={isSaving || !satCatalogs}
+                      aria-invalid={Boolean(fieldErrors.regimen_fiscal)}
                     >
-                      {taxRegimeOptions.map((option) => (
+                      <option value="">{satCatalogs ? "Seleccione un régimen" : "Cargando catálogo del SAT..."}</option>
+                      {regimeOptions.map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
@@ -776,6 +822,32 @@ export default function CatalogoClientes() {
                     </select>
                     <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   </div>
+                  <FieldError message={fieldErrors.regimen_fiscal} />
+                </div>
+
+                <div>
+                  <Label withInfo infoText="Catálogo c_UsoCFDI del SAT; sólo se muestran los usos compatibles con el régimen y el tipo de persona.">
+                    Uso de la factura:
+                  </Label>
+                  <div className="relative">
+                    <select
+                      aria-label="Uso de la factura"
+                      value={clientInvoiceUsage}
+                      onChange={(e) => setClientInvoiceUsage(e.target.value)}
+                      className={`${selectStyle} appearance-none`}
+                      disabled={isSaving || !satCatalogs}
+                      aria-invalid={Boolean(fieldErrors.uso_cfdi)}
+                    >
+                      <option value="">{satCatalogs ? "Seleccione un uso" : "Cargando catálogo del SAT..."}</option>
+                      {useOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  </div>
+                  <FieldError message={fieldErrors.uso_cfdi} />
                 </div>
 
                 <div>
@@ -824,9 +896,12 @@ export default function CatalogoClientes() {
                     onChange={(e) => setClientCp(e.target.value)}
                     placeholder="Código postal"
                     maxLength={5}
+                    inputMode="numeric"
                     className={inputStyle}
                     disabled={isSaving}
+                    aria-invalid={Boolean(fieldErrors.codigo_postal)}
                   />
+                  <FieldError message={fieldErrors.codigo_postal} />
                 </div>
 
                 <div className="md:col-span-2">

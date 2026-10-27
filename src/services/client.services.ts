@@ -1,4 +1,5 @@
 import { API_URL } from "@/src/config/api";
+import type { FiscalIssue } from "@/src/types/sat";
 
 
 export interface ApiError {
@@ -28,6 +29,8 @@ export interface Client {
   municipio?: string;
   estado?: string;
   pais?: string;
+  /** Fase 6.26: problemas SAT del cliente guardado (sólo lectura). */
+  fiscal_issues?: FiscalIssue[];
 }
 
 export interface ClientListResponse {

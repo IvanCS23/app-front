@@ -19,6 +19,8 @@ vi.mock("@/src/services/client.services", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/src/services/client.services")>()),
   getClients: vi.fn(),
 }));
+// Fase 6.26: las pantallas de catálogo piden los catálogos del SAT.
+vi.mock("@/src/services/sat.services", () => ({ getSatCatalogs: vi.fn(() => new Promise(() => {})) }));
 vi.mock("@/src/services/product.services", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/src/services/product.services")>()),
   getProducts: vi.fn(),
@@ -59,7 +61,8 @@ describe("datos honestos en pantallas reales", () => {
     ]);
     render(<ClientsPage />);
 
-    fireEvent.click(await screen.findByTitle("Ver detalles"));
+    // Fase 6.26: el botón aparece en la tarjeta (pantallas angostas) y en la tabla.
+    fireEvent.click((await screen.findAllByTitle("Ver detalles"))[0]);
 
     const toast = screen.getByRole("status");
     expect(toast).toHaveTextContent("Vista de detalles en desarrollo");
