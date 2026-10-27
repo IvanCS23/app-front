@@ -5,6 +5,8 @@ import SaleEditor from "./SaleEditor";
 import * as sales from "@/src/services/sale.services";
 import * as clients from "@/src/services/client.services";
 import * as products from "@/src/services/product.services";
+import * as sat from "@/src/services/sat.services";
+import { satCatalogsFixture } from "@/src/test-fixtures/sat";
 import { readinessFixture, saleFixture, saleItemFixture, taxRatesFixture } from "@/src/test-fixtures/sale";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
@@ -13,6 +15,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => navigation, usePathname: ()
 vi.mock("@/app/components/layout/AppLayout", () => ({ default: ({ children }: { children: ReactNode }) => <div>{children}</div> }));
 vi.mock("@/src/services/client.services", () => ({ getClients: vi.fn() }));
 vi.mock("@/src/services/product.services", () => ({ getProducts: vi.fn() }));
+vi.mock("@/src/services/sat.services", () => ({ getSatCatalogs: vi.fn() }));
 vi.mock("@/src/services/sale.services", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/src/services/sale.services")>();
   return {
@@ -38,6 +41,7 @@ beforeEach(() => {
     { id: 14, name: "Producto prueba Facturapi", descripcion: "Producto", precio_unitario: 100, clave_producto: "60131324", clave_unidad: "H87", impuesto_local: "", iva: "16.00" as unknown as number },
   ]);
   vi.mocked(sales.getTaxRates).mockResolvedValue(taxRatesFixture);
+  vi.mocked(sat.getSatCatalogs).mockResolvedValue(satCatalogsFixture());
   vi.mocked(sales.getSale).mockResolvedValue(saleFixture());
   vi.mocked(sales.getSaleBillingReadiness).mockResolvedValue(readinessFixture());
 });
@@ -161,6 +165,43 @@ describe("venta existente", () => {
     expect(screen.getByLabelText("Cliente")).toBeDisabled();
   });
 
+  it("la forma de pago sale del catálogo c_FormaPago completo y conserva un valor guardado fuera de él (Fase 6.26)", async () => {
+    vi.mocked(sales.getSale).mockResolvedValue(saleFixture({ payment_form: "07", payment_method: "PUE" }));
+    render(<SaleEditor saleId={7} />);
+
+    const select = await screen.findByLabelText("Forma de pago");
+    await waitFor(() => expect(within(select).getByRole("option", { name: "31 - Intermediario pagos" })).toBeInTheDocument());
+    expect(within(select).getByRole("option", { name: "07 (no está en el catálogo del SAT)" })).toBeInTheDocument();
+    expect(select).toHaveValue("07");
+  });
+
+  it("preselecciona la tasa propia del producto, también exento (Fase 6.26)", async () => {
+    vi.mocked(products.getProducts).mockResolvedValue([
+      { id: 15, name: "Libro", descripcion: "Libro", precio_unitario: 80, clave_producto: "55101500", clave_unidad: "H87", impuesto_local: "", iva: 0, tax_rate_id: 3 },
+    ]);
+    render(<SaleEditor saleId={7} />);
+
+    fireEvent.change(await screen.findByLabelText("Producto"), { target: { value: "15" } });
+    expect(screen.getByLabelText("Impuesto")).toHaveValue("3");
+  });
+
+  it("explica los códigos nuevos de datos SAT inválidos con dónde corregirlos (Fase 6.26)", async () => {
+    vi.mocked(sales.getSaleBillingReadiness).mockResolvedValue(readinessFixture({
+      ready: false,
+      errors: [
+        { code: "CLIENT_REGIME_USE_INCOMPATIBLE", field: "client.uso_cfdi", message: "raw" },
+        { code: "ITEM_PRODUCT_UNIT_KEY_INVALID", field: "items.1.product.clave_unidad", message: "raw" },
+        { code: "ITEM_TAX_OBJECT_MISMATCH", field: "items.1.tax_rate_id", message: "raw" },
+      ],
+    }));
+    render(<SaleEditor saleId={7} />);
+
+    const panel = within(await screen.findByRole("list", { name: "Problemas para facturar" }));
+    expect(panel.getByText(/no es compatible con su régimen fiscal/)).toBeInTheDocument();
+    expect(panel.getByText("La clave de unidad no existe en el catálogo del SAT.")).toBeInTheDocument();
+    expect(panel.getByText(/no coincide con el IVA del concepto/)).toBeInTheDocument();
+    expect(panel.getByRole("link", { name: "Corregir en Productos" })).toHaveAttribute("href", "/pages/catalogs/products");
+  });
   it("una venta cancelada no se puede facturar ni editar", async () => {
     vi.mocked(sales.getSale).mockResolvedValue(saleFixture({ status: "cancelled" }));
     render(<SaleEditor saleId={7} />);

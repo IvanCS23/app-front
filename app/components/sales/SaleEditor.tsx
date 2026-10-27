@@ -32,7 +32,9 @@ import {
   updateSale,
   updateSaleItem,
 } from "@/src/services/sale.services";
+import { getSatCatalogs } from "@/src/services/sat.services";
 import type { PaymentMethod, ReadinessIssue, Sale, SaleItem, TaxRate } from "@/src/types/sale";
+import type { SatCatalogEntry } from "@/src/types/sat";
 
 type HeaderForm = { clientId: string; paymentForm: string; paymentMethod: "" | PaymentMethod; notes: string };
 type LineForm = { productId: string; quantity: string; unitPrice: string; taxRateId: string };
@@ -74,6 +76,15 @@ export default function SaleEditor({ saleId }: { saleId?: number }) {
   const [busy, setBusy] = useState<"header" | "line" | "invoice" | null>(null);
   const [busyItemId, setBusyItemId] = useState<number | null>(null);
   const [toast, setToast] = useState<ToastData | null>(null);
+  const [paymentForms, setPaymentForms] = useState<SatCatalogEntry[]>([]);
+
+  // Fase 6.26: catálogo c_FormaPago completo. Aparte de la carga principal:
+  // si falla, la venta se puede seguir editando con el pago de la empresa.
+  useEffect(() => {
+    getSatCatalogs()
+      .then((catalogs) => setPaymentForms(catalogs.payment_forms))
+      .catch(() => setToast({ type: "error", message: "No fue posible cargar las formas de pago del SAT." }));
+  }, []);
 
   const refreshReadiness = useCallback(async (id: number) => {
     setReadinessLoading(true);
@@ -155,7 +166,7 @@ export default function SaleEditor({ saleId }: { saleId?: number }) {
 
   const chooseProduct = (productId: string) => {
     const product = products.find((candidate) => String(candidate.id) === productId);
-    const taxRateId = product ? defaultTaxRateId(product.iva, taxRates) : null;
+    const taxRateId = product ? defaultTaxRateId(product, taxRates) : null;
     setLine({
       productId,
       quantity: line.quantity || "1",
@@ -262,7 +273,7 @@ export default function SaleEditor({ saleId }: { saleId?: number }) {
               <label htmlFor="sale-payment-form" className="mb-2 block text-sm font-semibold text-[#0F172A]">Forma de pago</label>
               <select id="sale-payment-form" value={header.paymentForm} onChange={(event) => setHeader({ ...header, paymentForm: event.target.value })} disabled={!editable} className="box box-input">
                 <option value="">Predeterminada de la empresa</option>
-                {paymentFormOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                {paymentFormOptions(paymentForms, header.paymentForm).map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
               </select>
             </div>
             <div>

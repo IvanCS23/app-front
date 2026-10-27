@@ -26,17 +26,17 @@ export function getSaleStatusClass(status: SaleStatus): string {
 export const isSaleEditable = (status: SaleStatus): boolean => status === "draft" || status === "pending";
 
 /**
- * Formas de pago más usadas (c_FormaPago). El catálogo completo y su
- * validación llegan en la Fase 6.26; el backend sólo exige 2 dígitos.
+ * Fase 6.26: opciones de forma de pago desde el catálogo c_FormaPago completo
+ * (GET /api/sat/catalogs). Un valor guardado que ya no está en el catálogo se
+ * conserva visible para que se pueda corregir.
  */
-export const paymentFormOptions = [
-  { value: "01", label: "01 - Efectivo" },
-  { value: "02", label: "02 - Cheque nominativo" },
-  { value: "03", label: "03 - Transferencia electrónica" },
-  { value: "04", label: "04 - Tarjeta de crédito" },
-  { value: "28", label: "28 - Tarjeta de débito" },
-  { value: "99", label: "99 - Por definir" },
-] as const;
+export function paymentFormOptions(forms: { code: string; description: string }[], current: string): { value: string; label: string }[] {
+  const options = forms.map((form) => ({ value: form.code, label: `${form.code} - ${form.description}` }));
+  if (current !== "" && !options.some((option) => option.value === current)) {
+    options.unshift({ value: current, label: `${current} (no está en el catálogo del SAT)` });
+  }
+  return options;
+}
 
 export const paymentMethodOptions: { value: PaymentMethod; label: string }[] = [
   { value: "PUE", label: "PUE - Pago en una sola exhibición" },
@@ -88,6 +88,17 @@ const READINESS_VIEWS: Record<string, ReadinessIssueView> = {
   ITEM_PRODUCT_TYPE_INVALID: { message: "El producto no tiene un tipo válido.", ...PRODUCTS_FIX },
   ITEM_TAX_RATE_INVALID: { message: "Un concepto usa una tasa de impuesto inexistente o inactiva.", ...ITEMS_FIX },
   ITEM_TAX_WITHHOLDING_UNSUPPORTED: { message: "Un concepto usa una retención, que todavía no se puede facturar.", ...ITEMS_FIX },
+  // Fase 6.26: valores presentes pero inválidos según el SAT.
+  SALE_PAYMENT_FORM_INVALID: { message: "La forma de pago no existe en el catálogo del SAT.", ...PAYMENT_FIX },
+  CLIENT_RFC_INVALID: { message: "El RFC del cliente no tiene un formato válido (12 caracteres para persona moral, 13 para física).", ...CLIENTS_FIX },
+  CLIENT_POSTAL_CODE_INVALID: { message: "El código postal del cliente debe tener 5 dígitos.", ...CLIENTS_FIX },
+  CLIENT_FISCAL_REGIME_INVALID: { message: "El régimen fiscal del cliente no existe en el catálogo del SAT o no aplica a su tipo de persona.", ...CLIENTS_FIX },
+  CLIENT_CFDI_USE_INVALID: { message: "El uso de CFDI del cliente no existe en el catálogo del SAT o no aplica a su tipo de persona.", ...CLIENTS_FIX },
+  CLIENT_REGIME_USE_INCOMPATIBLE: { message: "El uso de CFDI del cliente no es compatible con su régimen fiscal (con RFC genérico deben ser 616 y S01).", ...CLIENTS_FIX },
+  ITEM_PRODUCT_SAT_KEY_INVALID: { message: "La clave de producto o servicio no existe en el catálogo del SAT.", ...PRODUCTS_FIX },
+  ITEM_PRODUCT_UNIT_KEY_INVALID: { message: "La clave de unidad no existe en el catálogo del SAT.", ...PRODUCTS_FIX },
+  ITEM_PRODUCT_OBJETO_IMP_INVALID: { message: "El objeto de impuesto del producto no existe en el catálogo del SAT.", ...PRODUCTS_FIX },
+  ITEM_TAX_OBJECT_MISMATCH: { message: "El objeto de impuesto del producto no coincide con el IVA del concepto (02 necesita IVA; 01, 03 y 04 no lo llevan).", ...ITEMS_FIX },
 };
 
 /** Mensaje claro y, si aplica, dónde corregirlo; si el código es nuevo, usa el del backend. */
@@ -102,10 +113,19 @@ export function readinessIssueItemId(field: string): number | null {
 }
 
 /**
- * Tasa preseleccionada a partir del IVA del producto. El catálogo guarda el
- * IVA como "16.00" o "0.16" según quién lo capturó; ambos equivalen a 16 %.
+ * Tasa preseleccionada para la línea. Fase 6.26: primero la tasa del producto
+ * (`tax_rate_id`, la única que distingue exento de 0 %). Si no la tiene,
+ * respaldo con el `iva` heredado, que se guardó como "16.00" o "0.16" según
+ * quién lo capturó; ambos equivalen a 16 %.
  */
-export function defaultTaxRateId(productIva: number | string | null | undefined, taxRates: { id: number; rate: string; factor_type: string }[]): number | null {
+export function defaultTaxRateId(
+  product: { tax_rate_id?: number | null; iva?: number | string | null },
+  taxRates: { id: number; rate: string; factor_type: string }[],
+): number | null {
+  if (product.tax_rate_id != null) {
+    return taxRates.some((taxRate) => taxRate.id === product.tax_rate_id) ? product.tax_rate_id : null;
+  }
+  const productIva = product.iva;
   if (productIva === null || productIva === undefined || productIva === "") return null;
   const raw = Number(productIva);
   if (!Number.isFinite(raw)) return null;
