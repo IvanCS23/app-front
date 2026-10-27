@@ -108,3 +108,24 @@ describe("Catálogo de clientes con validación SAT", () => {
     expect(screen.getByLabelText("Uso de la factura")).toBeDisabled();
   });
 });
+
+/** Fase 6.26.1: funciones que todavía no existen se marcan, no se simulan. */
+describe("Clientes sin funciones simuladas", () => {
+  beforeEach(() => {
+    vi.mocked(satServices.getSatCatalogs).mockResolvedValue(satCatalogsFixture());
+    vi.mocked(clientServices.getClients).mockResolvedValue([validClient]);
+  });
+
+  it("Carga masiva se muestra deshabilitada como Próximamente y no abre la maqueta", async () => {
+    render(<ClientsPage />);
+
+    const bulk = await screen.findByRole("button", { name: /carga masiva/i });
+    expect(bulk).toBeDisabled();
+    expect(bulk).toHaveAttribute("aria-disabled", "true");
+    expect(within(bulk).getByText("Próximamente")).toBeInTheDocument();
+
+    fireEvent.click(bulk);
+    expect(screen.queryByText(/Carga Masiva de Clientes/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /procesar archivos|eliminar todos/i })).not.toBeInTheDocument();
+  });
+});

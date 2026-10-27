@@ -3,10 +3,10 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  SquarePen, Trash, Eye, Plus, X, ChevronDown, ChevronUp, Info, Loader2,
-  Download, Upload, Activity, FileText as FileTextIcon, AlertTriangle
+  SquarePen, Trash, Eye, Plus, X, ChevronDown, ChevronUp, Info, Loader2, AlertTriangle
 } from "lucide-react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import { COMING_SOON_ACTION_CLASS, ComingSoonBadge, comingSoonActionProps } from "@/app/components/ui/ComingSoon";
 import Toast, { type ToastData } from "@/app/components/ui/Toast";
 import { 
   getClients, 
@@ -133,7 +133,6 @@ const countries = [
 export default function CatalogoClientes() {
   const [search, setSearch] = useState("");
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
-  const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
   const [showOptionalFields, setShowOptionalFields] = useState(false);
   const [toast, setToast] = useState<ToastData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -444,75 +443,6 @@ export default function CatalogoClientes() {
     </div>
   );
 
-  // Modal de carga masiva
-  const BulkUploadModal = () => {
-    if (!isBulkUploadModalOpen) return null;
-
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div
-          className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-          onClick={() => setIsBulkUploadModalOpen(false)}
-        />
-        
-        <div className="relative max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-[#F8FAFC] px-6 py-4">
-            <h2 className="text-xl font-bold text-[#0F172A]">Carga Masiva de Clientes</h2>
-            <button
-              onClick={() => setIsBulkUploadModalOpen(false)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-700"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="p-6">
-            <div className="mb-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-              <p className="text-[#475569] text-sm leading-relaxed">
-                Aquí podrás subir tu catálogo de clientes de forma masiva, a través de un archivo .csv. 
-                En <span className="text-blue-600 font-medium">Ejemplo de carga masiva</span> se descargará la plantilla base 
-                y un documento con los detalles para el llenado del archivo.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-              <button className="flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E2E8F0] px-4 py-3 text-[#0F172A] hover:bg-[#F8FAFC] transition-colors hover:border-[#CBD5E1] shadow-sm">
-                <FileTextIcon className="h-5 w-5 text-blue-600" />
-                <span className="text-sm font-medium">Ejemplo de carga masiva</span>
-              </button>
-              
-              <button className="flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E2E8F0] px-4 py-3 text-[#0F172A] hover:bg-[#F8FAFC] transition-colors hover:border-[#CBD5E1] shadow-sm">
-                <Download className="h-5 w-5 text-blue-600" />
-                <span className="text-sm font-medium">Descarga .csv</span>
-              </button>
-              
-              <button className="flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E2E8F0] px-4 py-3 text-[#0F172A] hover:bg-[#F8FAFC] transition-colors hover:border-[#CBD5E1] shadow-sm">
-                <Upload className="h-5 w-5 text-blue-600" />
-                <span className="text-sm font-medium">Subir archivo .csv</span>
-              </button>
-              
-              <button className="flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E2E8F0] px-4 py-3 text-[#0F172A] hover:bg-[#F8FAFC] transition-colors hover:border-[#CBD5E1] shadow-sm">
-                <Activity className="h-5 w-5 text-blue-600" />
-                <span className="text-sm font-medium">Ver estado de los procesos</span>
-              </button>
-            </div>
-
-            <div className="border-t border-[#E2E8F0] my-6"></div>
-
-            <div className="flex gap-4">
-              <button className="flex-1 rounded-xl bg-blue-500 px-4 py-2.5 font-medium text-white shadow-[0_10px_30px_rgba(37,99,235,0.25)] transition-colors duration-200 hover:bg-blue-400">
-                Procesar archivos
-              </button>
-              <button className="flex-1 rounded-xl bg-red-500 px-4 py-2.5 font-medium text-white shadow-[0_10px_30px_rgba(255,0,0,0.25)] transition-colors duration-200 hover:bg-red-400">
-                Eliminar todos
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <AppLayout>
       <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] p-3 rounded-lg">
@@ -529,15 +459,17 @@ export default function CatalogoClientes() {
           <div className="min-w-0">
             <h1 className="text-2xl font-extrabold text-[#0F172A] sm:text-3xl">Catálogo de Clientes</h1>
             <p className="text-[#64748B]">
-              Gestiona la base de datos de tus socios comerciales, consulta sus datos fiscales y realiza cargas masivas de información.
+              Gestiona la base de datos de tus socios comerciales y consulta sus datos fiscales.
             </p>
           </div>
           <div className="flex shrink-0 gap-3">
+            {/* Fase 6.26.1: la importación masiva todavía no existe (no hay endpoint). */}
             <button
-              onClick={() => setIsBulkUploadModalOpen(true)}
-              className="flex-1 rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white shadow-lg shadow-emerald-500/30 transition-colors hover:bg-emerald-400 sm:w-36 sm:flex-none"
+              {...comingSoonActionProps}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white sm:flex-none ${COMING_SOON_ACTION_CLASS}`}
             >
               Carga masiva
+              <ComingSoonBadge />
             </button>
             <button
               onClick={() => openClientModal()}
@@ -1125,8 +1057,6 @@ export default function CatalogoClientes() {
         </div>
       )}
 
-      {/* Modal de carga masiva */}
-      <BulkUploadModal />
 
       {/* Toast */}
       {toast && (

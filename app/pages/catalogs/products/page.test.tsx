@@ -114,3 +114,25 @@ describe("Catálogo de productos con validación SAT", () => {
     expect(screen.getByLabelText("IVA")).toHaveValue("1");
   });
 });
+
+/** Fase 6.26.1: funciones que todavía no existen se marcan, no se simulan. */
+describe("Productos sin funciones simuladas", () => {
+  beforeEach(() => {
+    vi.mocked(productServices.getProducts).mockResolvedValue([savedInvalid]);
+    vi.mocked(saleServices.getTaxRates).mockResolvedValue(taxRates as never);
+    vi.mocked(satServices.getSatCatalogs).mockResolvedValue(satCatalogsFixture());
+  });
+
+  it("Carga masiva se muestra deshabilitada como Próximamente y no abre la maqueta", async () => {
+    render(<ProductsPage />);
+
+    const bulk = await screen.findByRole("button", { name: /carga masiva/i });
+    expect(bulk).toBeDisabled();
+    expect(bulk).toHaveAttribute("aria-disabled", "true");
+    expect(within(bulk).getByText("Próximamente")).toBeInTheDocument();
+
+    fireEvent.click(bulk);
+    expect(screen.queryByText(/Carga Masiva de Productos/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /procesar archivos|eliminar todos/i })).not.toBeInTheDocument();
+  });
+});

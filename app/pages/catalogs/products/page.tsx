@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from "react";
 import {
   SquarePen, Trash, Plus, Minus, X, ChevronDown, Info, CheckCircle2, Loader2, Search,
-  Download, Upload, Activity, FileText as FileTextIcon, AlertTriangle
+  Activity, FileText as FileTextIcon, AlertTriangle
 } from "lucide-react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import { COMING_SOON_ACTION_CLASS, ComingSoonBadge, comingSoonActionProps } from "@/app/components/ui/ComingSoon";
 import SatKeySearch, { type SatKeyOption } from "@/app/components/sat/SatKeySearch";
 import {
   getProducts,
@@ -1039,86 +1040,10 @@ const ProductModal = ({
   );
 };
 
-// Props para el modal de carga masiva
-type BulkUploadModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-};
-
-// Componente BulkUploadModal
-const BulkUploadModal = ({ isOpen, onClose }: BulkUploadModalProps) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      
-      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] bg-white px-6 py-4">
-          <h2 className="text-xl font-bold text-[#0F172A]">Carga Masiva de Productos</h2>
-          <button
-            onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-transparent text-slate-500 transition hover:border-[#E2E8F0] hover:bg-blue-50 hover:text-blue-600"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="bg-slate-50 p-6">
-          <div className="mb-6 rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-            <p className="text-sm leading-relaxed text-[#64748B]">
-              Aquí podrás subir tu catálogo de productos de forma masiva, a través de un archivo .csv. 
-              En <span className="font-medium text-blue-600">Ejemplo de carga masiva</span> se descargará la plantilla base 
-              y un documento con los detalles para el llenado del archivo.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 mb-6 sm:grid-cols-2">
-            <button className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] shadow-sm transition hover:bg-blue-50 hover:shadow-md">
-              <FileTextIcon className="h-5 w-5 text-blue-600" />
-              <span className="text-sm font-semibold">Ejemplo de carga masiva</span>
-            </button>
-            
-            <button className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] shadow-sm transition hover:bg-blue-50 hover:shadow-md">
-              <Download className="h-5 w-5 text-blue-600" />
-              <span className="text-sm font-semibold">Descarga .csv</span>
-            </button>
-            
-            <button className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] shadow-sm transition hover:bg-blue-50 hover:shadow-md">
-              <Upload className="h-5 w-5 text-blue-600" />
-              <span className="text-sm font-semibold">Subir archivo .csv</span>
-            </button>
-            
-            <button className="flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[#0F172A] shadow-sm transition hover:bg-blue-50 hover:shadow-md">
-              <Activity className="h-5 w-5 text-blue-600" />
-              <span className="text-sm font-semibold">Ver estado de los procesos</span>
-            </button>
-          </div>
-
-          <div className="my-6 border-t border-[#E2E8F0]"></div>
-
-          <div className="flex gap-4">
-            <button className="flex-1 rounded-xl bg-blue-600 px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md">
-              Procesar archivos
-            </button>
-            <button className="flex-1 rounded-xl bg-red-500 px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-red-600 hover:shadow-md">
-              Eliminar todos
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // Componente principal
 export default function CatalogoProductos() {
   const [search, setSearch] = useState("");
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   
   // Estados para productos desde API
@@ -1468,15 +1393,6 @@ export default function CatalogoProductos() {
     setImpuestosLocales(newImpuestos);
   };
 
-  // Funciones para el modal de carga masiva
-  const openBulkUploadModal = () => {
-    setIsBulkUploadModalOpen(true);
-  };
-
-  const closeBulkUploadModal = () => {
-    setIsBulkUploadModalOpen(false);
-  };
-
   // Funciones para paginación
   const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setItemsPerPage(Number(e.target.value));
@@ -1516,11 +1432,13 @@ export default function CatalogoProductos() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
+                {/* Fase 6.26.1: la importación masiva todavía no existe (no hay endpoint). */}
                 <button
-                  onClick={openBulkUploadModal}
-                  className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 hover:shadow-md"
+                  {...comingSoonActionProps}
+                  className={`flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm ${COMING_SOON_ACTION_CLASS}`}
                 >
                   Carga masiva
+                  <ComingSoonBadge />
                 </button>
                 <button
                   onClick={openProductModal}
@@ -1756,12 +1674,6 @@ export default function CatalogoProductos() {
         updateImpuestoLocal={updateImpuestoLocal}
         showImpuestosLocales={showImpuestosLocales}
         isLoading={isSaving}
-      />
-
-      {/* Modal de carga masiva */}
-      <BulkUploadModal
-        isOpen={isBulkUploadModalOpen}
-        onClose={closeBulkUploadModal}
       />
 
       {/* Toast */}
