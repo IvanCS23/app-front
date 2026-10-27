@@ -115,6 +115,30 @@ describe("Catálogo de productos con validación SAT", () => {
   });
 });
 
+const PENDING_WARNING =
+  "Este producto tiene impuestos capturados que el sistema todavía no aplica a las ventas ni a las facturas. Solo se aplica el IVA seleccionado.";
+const PENDING_FIELDS = ["IVA RET (%)", "IEPS", "ISR (%)", "Cuenta predial", "Número de pedimento", "Impuestos locales"];
+const PENDING_KEYS = ["iva_retenido", "ieps", "isr", "cuenta_predial", "no_pedimento", "impuesto_local"];
+
+// Como lo entrega la API: decimales como texto e impuestos locales como JSON.
+const withPendingTaxes = {
+  id: 12,
+  name: "Hospedaje",
+  descripcion: "Noche de hotel",
+  precio_unitario: 1200,
+  clave_producto: "43232408",
+  clave_unidad: "E48",
+  objeto_imp: "02",
+  tax_rate_id: 1,
+  iva_retenido: "8.00",
+  ieps: "50.00",
+  isr: "5.40",
+  cuenta_predial: "CP-001",
+  no_pedimento: "23 47 3807 3000123",
+  impuesto_local: JSON.stringify([{ id: "1", nombre: "ISH", tasa: "0.03", monto: "", tipo: "retencion" }]),
+  fiscal_issues: [],
+};
+
 /** Fase 6.26.1: funciones que todavía no existen se marcan, no se simulan. */
 describe("Productos sin funciones simuladas", () => {
   beforeEach(() => {
@@ -134,5 +158,51 @@ describe("Productos sin funciones simuladas", () => {
     fireEvent.click(bulk);
     expect(screen.queryByText(/Carga Masiva de Productos/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /procesar archivos|eliminar todos/i })).not.toBeInTheDocument();
+  });
+
+  it("sin impuestos guardados: campos deshabilitados, nota de solo IVA, sin aviso y fuera del payload", async () => {
+    await openNewProduct();
+
+    const section = screen.getByRole("region", { name: "Otros impuestos y datos aduaneros" });
+    expect(within(section).getByText("Próximamente")).toBeInTheDocument();
+    expect(section).toHaveTextContent("Por ahora el sistema solo aplica IVA (16 %, 0 % o Exento).");
+    for (const label of PENDING_FIELDS) {
+      expect(within(section).getByLabelText(label)).toBeDisabled();
+      expect(within(section).getByLabelText(label)).toHaveValue("");
+    }
+    expect(screen.queryByText(PENDING_WARNING)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /agregar (cuenta predial|numero de pedimento|impuestos locales)/i })).not.toBeInTheDocument();
+
+    fillRequired();
+    fireEvent.click(screen.getByRole("button", { name: /guardar/i }));
+
+    await waitFor(() => expect(productServices.createProduct).toHaveBeenCalledTimes(1));
+    const payload = vi.mocked(productServices.createProduct).mock.calls[0][0];
+    for (const field of PENDING_KEYS) expect(payload).not.toHaveProperty(field);
+  });
+
+  it("con impuestos guardados: los muestra deshabilitados con el aviso y al actualizar no los envía", async () => {
+    vi.mocked(productServices.getProducts).mockResolvedValue([withPendingTaxes] as never);
+    vi.mocked(productServices.updateProduct).mockResolvedValue(withPendingTaxes as never);
+    render(<ProductsPage />);
+    fireEvent.click(await screen.findByTitle("Editar producto"));
+
+    const section = await screen.findByRole("region", { name: "Otros impuestos y datos aduaneros" });
+    expect(within(section).getByRole("note", { name: "Impuestos sin aplicar" })).toHaveTextContent(PENDING_WARNING);
+    expect(within(section).getByLabelText("IVA RET (%)")).toHaveValue("8.00");
+    expect(within(section).getByLabelText("IEPS")).toHaveValue("50.00");
+    expect(within(section).getByLabelText("ISR (%)")).toHaveValue("5.40");
+    expect(within(section).getByLabelText("Cuenta predial")).toHaveValue("CP-001");
+    expect(within(section).getByLabelText("Número de pedimento")).toHaveValue("23 47 3807 3000123");
+    expect(within(section).getByLabelText("Impuestos locales")).toHaveValue("ISH · tasa 0.03 · retencion");
+    for (const label of PENDING_FIELDS) expect(within(section).getByLabelText(label)).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /actualizar/i }));
+
+    await waitFor(() => expect(productServices.updateProduct).toHaveBeenCalledTimes(1));
+    const [id, payload] = vi.mocked(productServices.updateProduct).mock.calls[0];
+    expect(id).toBe(12);
+    expect(payload).toMatchObject({ clave_producto: "43232408", tax_rate_id: 1 });
+    for (const field of PENDING_KEYS) expect(payload).not.toHaveProperty(field);
   });
 });

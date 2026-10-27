@@ -22,7 +22,7 @@ export interface Product {
     clave_unidad?:string;
     objeto_imp?:string;
     no_pedimento?:string;
-    impuesto_local:string;
+    impuesto_local?:string;
     iva?:number;
     iva_retenido?:number;
     ieps?:number;

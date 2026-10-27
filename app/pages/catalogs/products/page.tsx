@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import {
-  SquarePen, Trash, Plus, Minus, X, ChevronDown, Info, CheckCircle2, Loader2, Search,
+  SquarePen, Trash, X, ChevronDown, Info, CheckCircle2, Loader2, Search,
   Activity, FileText as FileTextIcon, AlertTriangle
 } from "lucide-react";
 import AppLayout from "@/app/components/layout/AppLayout";
-import { COMING_SOON_ACTION_CLASS, ComingSoonBadge, comingSoonActionProps } from "@/app/components/ui/ComingSoon";
+import ComingSoon, { COMING_SOON_ACTION_CLASS, ComingSoonBadge, comingSoonActionProps } from "@/app/components/ui/ComingSoon";
 import SatKeySearch, { type SatKeyOption } from "@/app/components/sat/SatKeySearch";
 import {
   getProducts,
@@ -144,84 +144,66 @@ const taxRegimeOptions = [
 // IVA es una tasa de tax_rates (16 %, 0 % o exento): un número no distinguía
 // "exento" de la tasa 0 % y "Exento" llegaba al backend como null.
 
-// Opciones para IVA RET
-const ivaRetOptions = [
-  { label: " - ", value: "" },
-  { label: "IVA RET 0%", value: "0" },
-  { label: "IVA RET 0.2%", value: "0.2" },
-  { label: "IVA RET 0.5%", value: "0.5" },
-  { label: "IVA RET 0.5333%", value: "0.5333" },
-  { label: "IVA RET 0.7%", value: "0.7" },
-  { label: "IVA RET 2%", value: "2" },
-  { label: "IVA RET 2.5%", value: "2.5" },
-  { label: "IVA RET 3%", value: "3" },
-  { label: "IVA RET 4%", value: "4" },
-  { label: "IVA RET 5%", value: "5" },
-  { label: "IVA RET 5.3333%", value: "5.3333" },
-  { label: "IVA RET 5.4%", value: "5.4" },
-  { label: "IVA RET 6%", value: "6" },
-  { label: "IVA RET 8%", value: "8" },
-  { label: "IVA RET 9.19%", value: "9.19" },
-  { label: "IVA RET 10%", value: "10" },
-  { label: "IVA RET 10.6%", value: "10.6" },
-  { label: "IVA RET 10.66%", value: "10.66" },
-  { label: "IVA RET 10.67%", value: "10.67" },
-  { label: "IVA RET 10.666%", value: "10.666" },
-  { label: "IVA RET 10.667%", value: "10.667" },
-  { label: "IVA RET 10.6666%", value: "10.6666" },
-  { label: "IVA RET 10.6667%", value: "10.6667" },
-  { label: "IVA RET 10.6668%", value: "10.6668" },
-  { label: "IVA RET 16%", value: "16" },
-];
+// Fase 6.26.1: IVA RET, IEPS, ISR, cuenta predial, pedimento e impuestos
+// locales se guardan en el producto pero ninguno llega a las ventas, las
+// facturas ni al PAC. Se muestran deshabilitados con su valor y no se envían,
+// así el backend conserva lo capturado hasta que tengan soporte real.
+type PendingTaxes = {
+  ivaRetenido: string;
+  ieps: string;
+  isr: string;
+  cuentaPredial: string;
+  noPedimento: string;
+  impuestosLocales: string[];
+};
 
-// Opciones para IEPS TASA
-const iepsTasaOptions = [
-  { label: " - ", value: "" },
-  { label: "IEPS 0%", value: "0" },
-  { label: "IEPS 3%", value: "3" },
-  { label: "IEPS 6%", value: "6" },
-  { label: "IEPS 7%", value: "7" },
-  { label: "IEPS 8%", value: "8" },
-  { label: "IEPS 9%", value: "9" },
-  { label: "IEPS 25%", value: "25" },
-  { label: "IEPS 26.5%", value: "26.5" },
-  { label: "IEPS 30%", value: "30" },
-  { label: "IEPS 30.4%", value: "30.4" },
-  { label: "IEPS 50%", value: "50" },
-  { label: "IEPS 53%", value: "53" },
-  { label: "IEPS 160%", value: "160" },
-];
+const NO_PENDING_TAXES: PendingTaxes = { ivaRetenido: "", ieps: "", isr: "", cuentaPredial: "", noPedimento: "", impuestosLocales: [] };
 
-// Opciones para ISR
-const isrOptions = [
-  { label: " - ", value: "" },
-  { label: "ISR 0%", value: "0" },
-  { label: "ISR 0.1%", value: "0.1" },
-  { label: "ISR 0.4%", value: "0.4" },
-  { label: "ISR 0.5%", value: "0.5" },
-  { label: "ISR 0.9%", value: "0.9" },
-  { label: "ISR 1%", value: "1" },
-  { label: "ISR 1.1%", value: "1.1" },
-  { label: "ISR 1.25%", value: "1.25" },
-  { label: "ISR 2%", value: "2" },
-  { label: "ISR 2.10%", value: "2.10" },
-  { label: "ISR 2.5%", value: "2.5" },
-  { label: "ISR 3%", value: "3" },
-  { label: "ISR 4%", value: "4" },
-  { label: "ISR 5.4%", value: "5.4" },
-  { label: "ISR 10%", value: "10" },
-  { label: "ISR 10.666%", value: "10.666" },
-  { label: "ISR 20%", value: "20" },
-  { label: "ISR 25%", value: "25" },
-  { label: "ISR 30%", value: "30" },
-  { label: "ISR 30.5%", value: "30.5" },
-];
+const PENDING_TAXES_WARNING =
+  "Este producto tiene impuestos capturados que el sistema todavía no aplica a las ventas ni a las facturas. Solo se aplica el IVA seleccionado.";
 
-// Opciones para Impuestos Locales Tipo
-const impuestoLocalTipoOptions = [
-  { label: "Retencion", value: "retencion" },
-  { label: "Translado", value: "translado" },
-];
+const stored = (value: unknown): string => (value === null || value === undefined ? "" : String(value).trim());
+
+/** Impuestos locales guardados como JSON (o texto suelto) en una línea legible por impuesto. */
+function localTaxLabels(raw: unknown): string[] {
+  const text = stored(raw);
+  if (text === "") return [];
+  try {
+    const parsed: unknown = JSON.parse(text);
+    if (!Array.isArray(parsed)) return [text];
+    return parsed
+      .map((tax: Partial<ImpuestoLocal>) =>
+        [tax.nombre, tax.tasa && `tasa ${tax.tasa}`, tax.monto && `monto ${tax.monto}`, tax.tipo].filter(Boolean).join(" · "),
+      )
+      .filter((label) => label !== "");
+  } catch {
+    return [text];
+  }
+}
+
+function pendingTaxesOf(product: Product): PendingTaxes {
+  return {
+    ivaRetenido: stored(product.iva_retenido),
+    ieps: stored(product.ieps),
+    isr: stored(product.isr),
+    cuentaPredial: stored(product.cuenta_predial),
+    noPedimento: stored(product.no_pedimento),
+    impuestosLocales: localTaxLabels(product.impuesto_local),
+  };
+}
+
+const hasPendingTaxes = (taxes: PendingTaxes): boolean =>
+  [taxes.ivaRetenido, taxes.ieps, taxes.isr, taxes.cuentaPredial, taxes.noPedimento].some((value) => value !== "") ||
+  taxes.impuestosLocales.length > 0;
+
+function PendingTaxField({ label, value }: { label: string; value: string }) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-sm font-semibold uppercase tracking-wide text-[#0F172A]">{label}</span>
+      <input type="text" value={value} readOnly placeholder="Sin capturar" className={`${inputStyle} disabled:bg-slate-100 disabled:text-slate-500`} />
+    </label>
+  );
+}
 
 // Estados de la República Mexicana
 const mexicanStates = [
@@ -487,37 +469,13 @@ type ProductModalProps = {
   setProductUnidadSat: (value: string) => void;
   productObjetoImpuesto: string;
   setProductObjetoImpuesto: (value: string) => void;
-  cuentasPrediales: string[];
-  addCuentaPredial: () => void;
-  removeCuentaPredial: (index: number) => void;
-  updateCuentaPredial: (index: number, value: string) => void;
-  showCuentasPrediales: boolean;
   productTaxRateId: string;
   setProductTaxRateId: (value: string) => void;
   taxRates: TaxRate[];
   taxObjects: SatCatalogEntry[];
   fiscalErrors: Partial<Record<ProductFiscalField, string>>;
   savedFiscalIssues: FiscalIssue[];
-  productIVARet: string;
-  setProductIVARet: (value: string) => void;
-  iepsType: "tasa" | "cuota";
-  setIepsType: (value: "tasa" | "cuota") => void;
-  iepsTasaValue: string;
-  setIepsTasaValue: (value: string) => void;
-  iepsCuotaValue: string;
-  setIepsCuotaValue: (value: string) => void;
-  productISR: string;
-  setProductISR: (value: string) => void;
-  pedimentos: string[];
-  addPedimento: () => void;
-  removePedimento: (index: number) => void;
-  updatePedimento: (index: number, value: string) => void;
-  showPedimentos: boolean;
-  impuestosLocales: ImpuestoLocal[];
-  addImpuestoLocal: () => void;
-  removeImpuestoLocal: (id: string) => void;
-  updateImpuestoLocal: (id: string, field: keyof ImpuestoLocal, value: string) => void;
-  showImpuestosLocales: boolean;
+  pendingTaxes: PendingTaxes;
   isLoading?: boolean;
 };
 
@@ -541,37 +499,13 @@ const ProductModal = ({
   setProductUnidadSat,
   productObjetoImpuesto,
   setProductObjetoImpuesto,
-  cuentasPrediales,
-  addCuentaPredial,
-  removeCuentaPredial,
-  updateCuentaPredial,
-  showCuentasPrediales,
   productTaxRateId,
   setProductTaxRateId,
   taxRates,
   taxObjects,
   fiscalErrors,
   savedFiscalIssues,
-  productIVARet,
-  setProductIVARet,
-  iepsType,
-  setIepsType,
-  iepsTasaValue,
-  setIepsTasaValue,
-  iepsCuotaValue,
-  setIepsCuotaValue,
-  productISR,
-  setProductISR,
-  pedimentos,
-  addPedimento,
-  removePedimento,
-  updatePedimento,
-  showPedimentos,
-  impuestosLocales,
-  addImpuestoLocal,
-  removeImpuestoLocal,
-  updateImpuestoLocal,
-  showImpuestosLocales,
+  pendingTaxes,
   isLoading = false,
 }: ProductModalProps) => {
   if (!isOpen) return null;
@@ -723,49 +657,9 @@ const ProductModal = ({
             </div>
           </div>
 
-          <div className="mt-8">
-            <h3 className="mb-4 border-b border-[#E2E8F0] pb-2 text-lg font-bold text-[#0F172A]">Opcionales</h3>
-            
-            <div className="mb-6">
-              <button
-                onClick={addCuentaPredial}
-                className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 transition hover:text-blue-700"
-              >
-                <Plus className="h-4 w-4" />
-                Agregar Cuenta Predial
-              </button>
-              
-              {showCuentasPrediales && cuentasPrediales.map((cuenta, index) => (
-                <div key={index} className="flex gap-2 mt-3">
-                  <input
-                    type="text"
-                    value={cuenta}
-                    onChange={(e) => updateCuentaPredial(index, e.target.value)}
-                    placeholder="Cuenta Predial"
-                    className={`${inputStyle} flex-1`}
-                  />
-                  <button
-                    onClick={() => removeCuentaPredial(index)}
-                    className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-red-600 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:shadow-md"
-                  >
-                    <Minus className="h-5 w-5" />
-                  </button>
-                  {index === cuentasPrediales.length - 1 && (
-                    <button
-                      onClick={addCuentaPredial}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-blue-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:shadow-md"
-                    >
-                      <Plus className="h-5 w-5" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div className="mt-6">
             <h3 className="text-md font-bold text-[#0F172A]">Impuestos Federales</h3>
-            <p className="mb-4 text-sm text-[#64748B]">Selecciona únicamente los impuestos que necesite tu producto</p>
+            <p className="mb-4 text-sm text-[#64748B]">IVA que lleva el producto: 16 %, 0 %, Exento o Sin IVA.</p>
             
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
               <div>
@@ -791,224 +685,29 @@ const ProductModal = ({
                 </div>
                 {fiscalErrors.tax_rate_id && <p className="mt-1 text-xs font-medium text-red-600">{fiscalErrors.tax_rate_id}</p>}
               </div>
-
-              <div>
-                <Label>IVA RET</Label>
-                <div className="relative">
-                  <select
-                    value={productIVARet}
-                    onChange={(e) => setProductIVARet(e.target.value)}
-                    className={`${selectStyle} appearance-none`}
-                  >
-                    {ivaRetOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between">
-                  <Label>IEPS</Label>
-                  <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-1 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="iepsType"
-                        checked={iepsType === "tasa"}
-                        onChange={() => setIepsType("tasa")}
-                        className="mb-2 h-4 w-4 rounded-full border-slate-300 bg-white text-blue-600 focus:ring-blue-500 focus:ring-offset-0 checked:border-blue-600 checked:bg-blue-600"
-                      />
-                      <span className="text-sm text-slate-300 mb-2">TASA</span>
-                    </label>
-                    <label className="flex items-center gap-1 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="iepsType"
-                        checked={iepsType === "cuota"}
-                        onChange={() => setIepsType("cuota")}
-                        className="mb-2 h-4 w-4 rounded-full border-slate-300 bg-white text-blue-600 focus:ring-blue-500 focus:ring-offset-0 checked:border-blue-600 checked:bg-blue-600"
-                      />
-                      <span className="text-sm text-slate-300 mb-2">CUOTA</span>
-                    </label>
-                  </div>
-                </div>
-                {iepsType === "tasa" ? (
-                  <div className="relative">
-                    <select
-                      value={iepsTasaValue}
-                      onChange={(e) => setIepsTasaValue(e.target.value)}
-                      className={`${selectStyle} appearance-none`}
-                    >
-                      {iepsTasaOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  </div>
-                ) : (
-                  <input
-                    type="text"
-                    value={iepsCuotaValue}
-                    onChange={(e) => setIepsCuotaValue(e.target.value)}
-                    placeholder="Ej. 0.005, 0.003"
-                    className={inputStyle}
-                  />
-                )}
-              </div>
-
-              <div>
-                <Label>ISR</Label>
-                <div className="relative">
-                  <select
-                    value={productISR}
-                    onChange={(e) => setProductISR(e.target.value)}
-                    className={`${selectStyle} appearance-none`}
-                  >
-                    {isrOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                </div>
-              </div>
             </div>
           </div>
 
           <div className="mt-8">
-            <h3 className="mb-2 text-md font-bold text-[#0F172A]">Información Aduanera</h3>
-            <p className="mb-3 text-sm text-[#64748B]">Numero de Pedimento</p>
-            
-            <button
-              onClick={addPedimento}
-              className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 transition hover:text-blue-700"
+            <ComingSoon
+              title="Otros impuestos y datos aduaneros"
+              note="Por ahora el sistema solo aplica IVA (16 %, 0 % o Exento). IVA RET, IEPS, ISR, cuenta predial, pedimento e impuestos locales todavía no se pueden capturar."
             >
-              <Plus className="h-4 w-4" />
-              Agregar Numero de Pedimento
-            </button>
-            
-            {showPedimentos && pedimentos.map((pedimento, index) => (
-              <div key={index} className="flex gap-2 mt-3">
-                <input
-                  type="text"
-                  value={pedimento}
-                  onChange={(e) => updatePedimento(index, e.target.value)}
-                  placeholder="Ej. 99 99 9999 9999999"
-                  className={`${inputStyle} flex-1`}
-                />
-                <button
-                  onClick={() => removePedimento(index)}
-                  className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-red-600 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:shadow-md"
-                  title="Quitar">
-                  <Minus className="h-5 w-5" />
-                </button>
-                {index === pedimentos.length - 1 && (
-                  <button
-                    onClick={addPedimento}
-                    className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-blue-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:shadow-md"
-                    title="Agregar">
-                    <Plus className="h-5 w-5" />
-                  </button>
-                )}
+              {hasPendingTaxes(pendingTaxes) && (
+                <p role="note" aria-label="Impuestos sin aplicar" className="mb-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  {PENDING_TAXES_WARNING}
+                </p>
+              )}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <PendingTaxField label="IVA RET (%)" value={pendingTaxes.ivaRetenido} />
+                <PendingTaxField label="IEPS" value={pendingTaxes.ieps} />
+                <PendingTaxField label="ISR (%)" value={pendingTaxes.isr} />
+                <PendingTaxField label="Cuenta predial" value={pendingTaxes.cuentaPredial} />
+                <PendingTaxField label="Número de pedimento" value={pendingTaxes.noPedimento} />
+                <PendingTaxField label="Impuestos locales" value={pendingTaxes.impuestosLocales.join("; ")} />
               </div>
-            ))}
-          </div>
-
-          <div className="mt-8">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-md font-bold text-[#0F172A]">Impuestos Locales</h3>
-              <div className="relative">
-                <Info 
-                  className="h-4 w-4 cursor-help text-amber-500" 
-                  onMouseEnter={(e) => {
-                    const tooltip = e.currentTarget.nextElementSibling;
-                    if (tooltip) tooltip.classList.remove('hidden');
-                  }}
-                  onMouseLeave={(e) => {
-                    const tooltip = e.currentTarget.nextElementSibling;
-                    if (tooltip) tooltip.classList.add('hidden');
-                  }}
-                />
-                <div className="hidden absolute bottom-full left-0 z-50 mb-2 w-80 rounded-xl border border-[#E2E8F0] bg-white p-3 text-xs text-[#64748B] shadow-sm">
-                  En el nombre no se permiten caracteres especiales salvo el signo %.
-                  <br /><br />
-                  Si escribes la <b>Tasa</b>, el monto será calculado con base al subtotal.
-                  <br />
-                  Si escribes el <b>Monto</b>, se le asignará una tasa de 0.
-                  <br />
-                  Si escribes tanto <b>Tasa como Monto</b>, estos se tomarán tal cual.
-                </div>
-              </div>
-            </div>
-                          
-            <button
-              onClick={addImpuestoLocal}
-              className="flex items-center gap-2 text-[15px] font-semibold text-blue-600 transition hover:text-blue-700"
-            >
-              <Plus className="h-4 w-4" />
-              Agregar Impuestos Locales
-            </button>
-            
-            {showImpuestosLocales && impuestosLocales.map((impuesto) => (
-              <div key={impuesto.id} className="flex flex-wrap gap-2 mt-3 items-end">
-                <div className="flex-1 min-w-40">
-                  <input
-                    type="text"
-                    value={impuesto.nombre}
-                    onChange={(e) => updateImpuestoLocal(impuesto.id, "nombre", e.target.value)}
-                    placeholder="Nombre"
-                    className={inputStyle}
-                  />
-                </div>
-                <div className="flex-1 min-w-32">
-                  <input
-                    type="text"
-                    value={impuesto.tasa}
-                    onChange={(e) => updateImpuestoLocal(impuesto.id, "tasa", e.target.value)}
-                    placeholder="Ej. 0.005, 0.03"
-                    className={inputStyle}
-                  />
-                </div>
-                <div className="flex-1 min-w-32">
-                  <input
-                    type="text"
-                    value={impuesto.monto}
-                    onChange={(e) => updateImpuestoLocal(impuesto.id, "monto", e.target.value)}
-                    placeholder="Ej. 10.00"
-                    className={inputStyle}
-                  />
-                </div>
-                <div className="w-32">
-                  <div className="relative">
-                    <select
-                      value={impuesto.tipo}
-                      onChange={(e) => updateImpuestoLocal(impuesto.id, "tipo", e.target.value)}
-                      className={`${selectStyle} appearance-none`}
-                    >
-                      {impuestoLocalTipoOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  </div>
-                </div>
-                <button
-                  onClick={() => removeImpuestoLocal(impuesto.id)}
-                  className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-red-600 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:shadow-md"
-                  title="Quitar">
-                  <Minus className="h-5 w-5" />
-                </button>
-              </div>
-            ))}
+            </ComingSoon>
           </div>
         </div>
 
@@ -1063,22 +762,12 @@ export default function CatalogoProductos() {
   // Fase 6.26: por omisión "02" con IVA 16 % (antes "01", que dejaba
   // productos con IVA marcados como "no objeto de impuesto").
   const [productObjetoImpuesto, setProductObjetoImpuesto] = useState(TAX_OBJECT_TAXED);
-  const [cuentasPrediales, setCuentasPrediales] = useState<string[]>([]);
-  const [showCuentasPrediales, setShowCuentasPrediales] = useState(false);
   const [productTaxRateId, setProductTaxRateId] = useState("");
   const [taxRates, setTaxRates] = useState<TaxRate[]>([]);
   const [taxObjects, setTaxObjects] = useState<SatCatalogEntry[]>([]);
   const [fiscalErrors, setFiscalErrors] = useState<Partial<Record<ProductFiscalField, string>>>({});
   const [savedFiscalIssues, setSavedFiscalIssues] = useState<FiscalIssue[]>([]);
-  const [productIVARet, setProductIVARet] = useState("");
-  const [iepsType, setIepsType] = useState<"tasa" | "cuota">("tasa");
-  const [iepsTasaValue, setIepsTasaValue] = useState("");
-  const [iepsCuotaValue, setIepsCuotaValue] = useState("");
-  const [productISR, setProductISR] = useState("");
-  const [pedimentos, setPedimentos] = useState<string[]>([]);
-  const [showPedimentos, setShowPedimentos] = useState(false);
-  const [impuestosLocales, setImpuestosLocales] = useState<ImpuestoLocal[]>([]);
-  const [showImpuestosLocales, setShowImpuestosLocales] = useState(false);
+  const [pendingTaxes, setPendingTaxes] = useState<PendingTaxes>(NO_PENDING_TAXES);
 
   // Paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -1161,54 +850,8 @@ export default function CatalogoProductos() {
     setProductTaxRateId(producto.tax_rate_id ? String(producto.tax_rate_id) : "");
     setSavedFiscalIssues(producto.fiscal_issues ?? []);
     setFiscalErrors({});
-    setProductIVARet(producto.iva_retenido?.toString() || "");
-    setProductISR(producto.isr?.toString() || "");
-    
-    // Manejar IEPS
-    if (producto.ieps) {
-      setIepsType("tasa");
-      setIepsTasaValue(producto.ieps.toString());
-    } else {
-      setIepsType("tasa");
-      setIepsTasaValue("");
-      setIepsCuotaValue("");
-    }
-    
-    // Manejar cuenta predial
-    if (producto.cuenta_predial) {
-      setCuentasPrediales([producto.cuenta_predial]);
-      setShowCuentasPrediales(true);
-    } else {
-      setCuentasPrediales([]);
-      setShowCuentasPrediales(false);
-    }
-    
-    // Manejar pedimento
-    if (producto.no_pedimento) {
-      setPedimentos([producto.no_pedimento]);
-      setShowPedimentos(true);
-    } else {
-      setPedimentos([]);
-      setShowPedimentos(false);
-    }
-    
-    // Manejar impuestos locales
-    if (producto.impuesto_local) {
-      try {
-        const parsedImpuestos = JSON.parse(producto.impuesto_local);
-        if (Array.isArray(parsedImpuestos)) {
-          setImpuestosLocales(parsedImpuestos);
-          setShowImpuestosLocales(true);
-        }
-      } catch {
-        setImpuestosLocales([]);
-        setShowImpuestosLocales(false);
-      }
-    } else {
-      setImpuestosLocales([]);
-      setShowImpuestosLocales(false);
-    }
-    
+    setPendingTaxes(pendingTaxesOf(producto));
+
     setIsProductModalOpen(true);
   };
 
@@ -1225,20 +868,10 @@ export default function CatalogoProductos() {
     setProductClaveSat("");
     setProductUnidadSat("");
     setProductObjetoImpuesto(TAX_OBJECT_TAXED);
-    setCuentasPrediales([]);
-    setShowCuentasPrediales(false);
     setProductTaxRateId(defaultTaxRateId());
     setFiscalErrors({});
     setSavedFiscalIssues([]);
-    setProductIVARet("");
-    setIepsType("tasa");
-    setIepsTasaValue("");
-    setIepsCuotaValue("");
-    setProductISR("");
-    setPedimentos([]);
-    setShowPedimentos(false);
-    setImpuestosLocales([]);
-    setShowImpuestosLocales(false);
+    setPendingTaxes(NO_PENDING_TAXES);
   };
 
   const handleSaveProduct = async () => {
@@ -1281,16 +914,12 @@ export default function CatalogoProductos() {
   no_identificacion: productNoIdentificacion || undefined,
   descripcion: productDescription,
   precio_unitario: parseFloat(productUnitPrice) || 0,
-      cuenta_predial: cuentasPrediales.length > 0 ? cuentasPrediales[0] : undefined,
       clave_producto: productClaveSat.trim(),
       clave_unidad: productUnidadSat.trim(),
       objeto_imp: productObjetoImpuesto,
-      no_pedimento: pedimentos.length > 0 ? pedimentos[0] : undefined,
-      impuesto_local: impuestosLocales.length > 0 ? JSON.stringify(impuestosLocales) : "",
       tax_rate_id: taxRateId,
-      iva_retenido: productIVARet ? parseFloat(productIVARet) : undefined,
-      ieps: iepsType === "tasa" ? (iepsTasaValue ? parseFloat(iepsTasaValue) : undefined) : (iepsCuotaValue ? parseFloat(iepsCuotaValue) : undefined),
-      isr: productISR ? parseFloat(productISR) : undefined,
+      // Fase 6.26.1: IVA RET, IEPS, ISR, cuenta predial, pedimento e impuestos
+      // locales no se envían; el backend conserva lo que el producto tenga.
     };
 
     setIsSaving(true);
@@ -1323,74 +952,6 @@ export default function CatalogoProductos() {
     } catch (error: any) {
       setToast({ message: error.message || "Error al eliminar producto", type: "error" });
     }
-  };
-
-  // Funciones para Cuenta Predial
-  const addCuentaPredial = () => {
-    setCuentasPrediales([...cuentasPrediales, ""]);
-    setShowCuentasPrediales(true);
-  };
-
-  const removeCuentaPredial = (index: number) => {
-    const newCuentas = cuentasPrediales.filter((_, i) => i !== index);
-    setCuentasPrediales(newCuentas);
-    if (newCuentas.length === 0) {
-      setShowCuentasPrediales(false);
-    }
-  };
-
-  const updateCuentaPredial = (index: number, value: string) => {
-    const newCuentas = [...cuentasPrediales];
-    newCuentas[index] = value;
-    setCuentasPrediales(newCuentas);
-  };
-
-  // Funciones para Pedimentos
-  const addPedimento = () => {
-    setPedimentos([...pedimentos, ""]);
-    setShowPedimentos(true);
-  };
-
-  const removePedimento = (index: number) => {
-    const newPedimentos = pedimentos.filter((_, i) => i !== index);
-    setPedimentos(newPedimentos);
-    if (newPedimentos.length === 0) {
-      setShowPedimentos(false);
-    }
-  };
-
-  const updatePedimento = (index: number, value: string) => {
-    const newPedimentos = [...pedimentos];
-    newPedimentos[index] = value;
-    setPedimentos(newPedimentos);
-  };
-
-  // Funciones para Impuestos Locales
-  const addImpuestoLocal = () => {
-    const newImpuesto: ImpuestoLocal = {
-      id: Date.now().toString(),
-      nombre: "",
-      tasa: "",
-      monto: "",
-      tipo: "retencion",
-    };
-    setImpuestosLocales([...impuestosLocales, newImpuesto]);
-    setShowImpuestosLocales(true);
-  };
-
-  const removeImpuestoLocal = (id: string) => {
-    const newImpuestos = impuestosLocales.filter((imp) => imp.id !== id);
-    setImpuestosLocales(newImpuestos);
-    if (newImpuestos.length === 0) {
-      setShowImpuestosLocales(false);
-    }
-  };
-
-  const updateImpuestoLocal = (id: string, field: keyof ImpuestoLocal, value: string) => {
-    const newImpuestos = impuestosLocales.map((imp) =>
-      imp.id === id ? { ...imp, [field]: value } : imp
-    );
-    setImpuestosLocales(newImpuestos);
   };
 
   // Funciones para paginación
@@ -1642,37 +1203,13 @@ export default function CatalogoProductos() {
         setProductUnidadSat={setProductUnidadSat}
         productObjetoImpuesto={productObjetoImpuesto}
         setProductObjetoImpuesto={setProductObjetoImpuesto}
-        cuentasPrediales={cuentasPrediales}
-        addCuentaPredial={addCuentaPredial}
-        removeCuentaPredial={removeCuentaPredial}
-        updateCuentaPredial={updateCuentaPredial}
-        showCuentasPrediales={showCuentasPrediales}
         productTaxRateId={productTaxRateId}
         setProductTaxRateId={setProductTaxRateId}
         taxRates={taxRates}
         taxObjects={taxObjects}
         fiscalErrors={fiscalErrors}
         savedFiscalIssues={savedFiscalIssues}
-        productIVARet={productIVARet}
-        setProductIVARet={setProductIVARet}
-        iepsType={iepsType}
-        setIepsType={setIepsType}
-        iepsTasaValue={iepsTasaValue}
-        setIepsTasaValue={setIepsTasaValue}
-        iepsCuotaValue={iepsCuotaValue}
-        setIepsCuotaValue={setIepsCuotaValue}
-        productISR={productISR}
-        setProductISR={setProductISR}
-        pedimentos={pedimentos}
-        addPedimento={addPedimento}
-        removePedimento={removePedimento}
-        updatePedimento={updatePedimento}
-        showPedimentos={showPedimentos}
-        impuestosLocales={impuestosLocales}
-        addImpuestoLocal={addImpuestoLocal}
-        removeImpuestoLocal={removeImpuestoLocal}
-        updateImpuestoLocal={updateImpuestoLocal}
-        showImpuestosLocales={showImpuestosLocales}
+        pendingTaxes={pendingTaxes}
         isLoading={isSaving}
       />
 
