@@ -69,7 +69,29 @@ const timelineLabels: Record<string, string> = {
   cancellation_receipt_stored: "Acuse almacenado",
   cancellation_receipt_unavailable: "Acuse aún no disponible",
   cancellation_receipt_identity_mismatch: "Problema de identidad del acuse",
+  organization_archived: "Factura archivada: organización fiscal inaccesible",
 };
+
+/**
+ * Fase 6.27: una factura emitida en otra organización de Facturapi (o
+ * archivada por eso) no admite acciones fiscales; Laravel ya las apaga y
+ * aquí sólo se explica por qué.
+ */
+export function getOrganizationNotice(billing: InvoiceBilling): { title: string; description: string } | null {
+  if (billing.pac.organization_status === "archived") {
+    return {
+      title: "Factura archivada",
+      description: "Se emitió en una organización de Facturapi a la que esta empresa ya no tiene acceso. Se conserva como registro; no admite acciones fiscales.",
+    };
+  }
+  if (billing.pac.organization_status === "other") {
+    return {
+      title: "Factura de otra organización fiscal",
+      description: "Se emitió en una organización de Facturapi distinta de la de esta empresa, así que no se puede consultar, cancelar ni descargar con la configuración actual. Un administrador debe revisarla.",
+    };
+  }
+  return null;
+}
 
 export function getTimelineLabel(event: InvoicePacTimelineEvent): string {
   return timelineLabels[event.type] ?? "Actividad fiscal actualizada";

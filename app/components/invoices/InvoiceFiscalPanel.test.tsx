@@ -25,7 +25,7 @@ function fixture(kind: "valid" | "unstamped" | "canceled" | "reconcile" = "valid
   const base: InvoiceBilling = {
     id: 3, folio: "FAC-00000003", status: "issued",
     actions: { can_issue: false, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "pac" },
-    pac: { mode: "test", provider: "facturapi", status: "valid", cancellation_status: null, issue_status: "succeeded", reconciliation_required: false, last_sync_at: "2026-08-13T12:00:00Z" },
+    pac: { mode: "test", provider: "facturapi", status: "valid", cancellation_status: null, issue_status: "succeeded", reconciliation_required: false, last_sync_at: "2026-08-13T12:00:00Z", organization_status: "current", organization_archived_at: null },
     cfdi: { uuid: "96013e83-154b-4153-8e61-c38b8966e560", stamped_at: "2026-08-13T12:00:00Z", artifacts: { status: "stored", xml_available: true, pdf_available: true, downloaded_at: "2026-08-13T12:01:00Z" } },
     cancellation_receipt: { status: null, available: false, downloaded_at: null, error_code: null },
     timeline: [
@@ -115,6 +115,7 @@ describe("panel fiscal de factura", () => {
     ["PAC_CONFIGURATION_INVALID", 503, "La conexión con el proveedor fiscal no está configurada para operar. Pide a un administrador que revise la configuración."],
     ["PAC_OPERATION_IN_PROGRESS", 409, "El proveedor fiscal todavía procesa otra operación sobre este comprobante. Actualiza el estado antes de volver a intentar."],
     ["PAC_INVOICE_NOT_FOUND", 409, "El comprobante no existe en el proveedor fiscal con la configuración actual."],
+    ["PAC_ORGANIZATION_MISMATCH", 409, "La factura pertenece a otra organización de Facturapi y esta empresa no tiene acceso a ella. No se contactó al proveedor fiscal."],
   ])("muestra un mensaje específico para %s, sin texto crudo ni 'temporalmente'", async (code, status, message) => {
     const user = userEvent.setup();
     vi.mocked(api.issueInvoiceBusiness).mockRejectedValue(new api.InvoiceApiError("raw omitido temporalmente", status, code));
@@ -263,6 +264,26 @@ describe("panel fiscal de factura", () => {
     expect(screen.getByText(/En el entorno de pruebas, Facturapi entrega un acuse/)).toBeInTheDocument();
     expect(screen.queryByText("Acuse bloqueado por seguridad")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /acuse/i })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["other", "Factura de otra organización fiscal", /no se puede consultar, cancelar ni descargar/],
+    ["archived", "Factura archivada", /Se conserva como registro/],
+  ] as const)("Fase 6.27: una factura de organización %s explica por qué no hay acciones fiscales", async (organization_status, title, description) => {
+    const blocked = fixture("valid");
+    blocked.pac = { ...blocked.pac, organization_status };
+    blocked.actions = { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null };
+    arrange(blocked);
+    const alert = await screen.findByRole("alert");
+    expect(within(alert).getByText(title)).toBeInTheDocument();
+    expect(within(alert).getByText(description)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Cancelar factura|Reconciliar|Obtener XML/i })).not.toBeInTheDocument();
+  });
+
+  it("Fase 6.27: con la organización de la empresa no muestra aviso de organización", async () => {
+    arrange(fixture("valid"));
+    expect(await screen.findByText("CFDI válido")).toBeInTheDocument();
+    expect(screen.queryByText(/organización fiscal/)).not.toBeInTheDocument();
   });
 
   it("sin can_fetch_cancellation_receipt no ofrece obtener el acuse aunque falte", async () => {

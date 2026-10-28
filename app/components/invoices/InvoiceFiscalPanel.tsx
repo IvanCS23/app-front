@@ -20,6 +20,7 @@ import { useAuth } from "@/src/hooks/useAuth";
 import {
   cancellationMotives,
   formatInvoiceTotal,
+  getOrganizationNotice,
   isUuid,
 } from "@/src/lib/invoice-billing";
 import {
@@ -61,6 +62,7 @@ function publicErrorMessage(error: unknown): string {
     PAC_CONFIGURATION_INVALID: "La conexión con el proveedor fiscal no está configurada para operar. Pide a un administrador que revise la configuración.",
     PAC_OPERATION_IN_PROGRESS: "El proveedor fiscal todavía procesa otra operación sobre este comprobante. Actualiza el estado antes de volver a intentar.",
     PAC_INVOICE_NOT_FOUND: "El comprobante no existe en el proveedor fiscal con la configuración actual.",
+    PAC_ORGANIZATION_MISMATCH: "La factura pertenece a otra organización de Facturapi y esta empresa no tiene acceso a ella. No se contactó al proveedor fiscal.",
     PAC_ISSUANCE_IN_PROGRESS: "La emisión ya está en proceso. Actualiza el estado antes de volver a intentar.",
     PAC_CANCELLATION_IN_PROGRESS: "La cancelación ya está en proceso. Actualiza el estado antes de volver a intentar.",
     PAC_RECONCILIATION_REQUIRED: "El estado fiscal requiere reconciliación antes de continuar.",
@@ -191,6 +193,7 @@ export default function InvoiceFiscalPanel({
   const canFetchArtifacts = billing.actions.can_fetch_artifacts;
   const receiptMismatch = billing.cancellation_receipt.error_code === "CANCELLATION_RECEIPT_UUID_MISMATCH";
   const testReceiptMismatch = receiptMismatch && billing.pac.mode === "test";
+  const organizationNotice = getOrganizationNotice(billing);
   // Fase 6.22: Laravel decide si el acuse puede pedirse (permiso, descarga
   // en curso y límite de bloqueos de identidad).
   const canRequestReceipt = billing.actions.can_fetch_cancellation_receipt;
@@ -219,6 +222,12 @@ export default function InvoiceFiscalPanel({
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,.75fr)]">
           <div className="space-y-6">
             <FiscalStatusCard billing={billing} copied={copied} onCopyUuid={() => void copyUuid()} />
+
+            {organizationNotice && (
+              <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900" role="alert">
+                <div className="flex items-start gap-3"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" /><div><p className="font-bold">{organizationNotice.title}</p><p className="mt-1">{organizationNotice.description}</p></div></div>
+              </div>
+            )}
 
             {receiptMismatch && (
               <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900" role="alert">

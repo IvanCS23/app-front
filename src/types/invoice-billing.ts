@@ -11,7 +11,15 @@ export interface InvoicePacState {
   issue_status: InvoiceIssueStatus;
   reconciliation_required: boolean;
   last_sync_at: string | null;
+  /**
+   * Fase 6.27: organización de Facturapi de la factura frente a la de la
+   * empresa (null si nunca llegó al PAC). Nunca incluye el ID.
+   */
+  organization_status: InvoiceOrganizationStatus;
+  organization_archived_at: string | null;
 }
+
+export type InvoiceOrganizationStatus = "current" | "other" | "archived" | "unknown" | null;
 
 export interface InvoiceArtifactState {
   status: string | null;

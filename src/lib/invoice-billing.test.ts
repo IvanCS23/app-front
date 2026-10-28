@@ -5,6 +5,7 @@ import {
   formatFiscalDate,
   getCancellationStatus,
   getFiscalStatus,
+  getOrganizationNotice,
   getTimelineLabel,
   isUuid,
 } from "./invoice-billing";
@@ -16,7 +17,7 @@ function billing(overrides: Partial<InvoiceBilling> = {}): InvoiceBilling {
     folio: "FAC-00000003",
     status: "issued",
     actions: { can_issue: true, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null },
-    pac: { mode: "test", provider: "facturapi", status: null, cancellation_status: null, issue_status: null, reconciliation_required: false, last_sync_at: null },
+    pac: { mode: "test", provider: "facturapi", status: null, cancellation_status: null, issue_status: null, reconciliation_required: false, last_sync_at: null, organization_status: "current", organization_archived_at: null },
     cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } },
     cancellation_receipt: { status: null, available: false, downloaded_at: null, error_code: null },
     timeline: [],
@@ -61,5 +62,17 @@ describe("mapeo fiscal", () => {
     expect(formatFiscalDate("2026-08-13T12:00:00Z")).not.toContain("T12:00");
     expect(isUuid("96013e83-154b-4153-8e61-c38b8966e560")).toBe(true);
     expect(isUuid("no-es-uuid")).toBe(false);
+  });
+
+  it("Fase 6.27: explica sólo las facturas de otra organización o archivadas", () => {
+    const withOrganization = (organization_status: InvoiceBilling["pac"]["organization_status"]) =>
+      getOrganizationNotice(billing({ pac: { ...billing().pac, organization_status } }));
+
+    expect(withOrganization("other")?.title).toBe("Factura de otra organización fiscal");
+    expect(withOrganization("archived")?.title).toBe("Factura archivada");
+    expect(withOrganization("current")).toBeNull();
+    expect(withOrganization("unknown")).toBeNull();
+    expect(withOrganization(null)).toBeNull();
+    expect(getTimelineLabel({ type: "organization_archived" } as InvoicePacTimelineEvent)).toBe("Factura archivada: organización fiscal inaccesible");
   });
 });
