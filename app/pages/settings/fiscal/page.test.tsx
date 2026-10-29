@@ -137,9 +137,9 @@ describe("Datos fiscales (Fase 6.27b)", () => {
   });
 
   it("explica en español cuando el usuario no tiene permiso", async () => {
-    vi.mocked(companyServices.getCompanyFiscal).mockRejectedValue(new CompanyApiError("No tienes permiso para esta acción. Pide a un administrador que la realice.", 403));
+    vi.mocked(companyServices.getCompanyFiscal).mockRejectedValue(new CompanyApiError("No tienes permiso para realizar esta acción. Pide a un administrador que la realice.", 403));
     render(<CompanyFiscalPage />);
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("No tienes permiso para esta acción");
+    expect(await screen.findByRole("alert")).toHaveTextContent("No tienes permiso para realizar esta acción");
   });
 });

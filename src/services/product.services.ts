@@ -1,4 +1,5 @@
 import { API_URL } from "@/src/config/api";
+import { translateApiMessage } from "@/src/services/http";
 import type { FiscalIssue } from "@/src/types/sat";
 
 export interface ApiError {
@@ -59,7 +60,7 @@ export async function getProducts(): Promise<Product[]> {
         {
             const data = await res.json().catch(() => null);
                 const message = (data as ApiError)?.message ?? "Error al obtener clientes";
-                throw new Error(message);
+                throw new Error(translateApiMessage(message, res.status));
         }
 
         const response = await res.json().catch(() => null);
@@ -90,7 +91,7 @@ export async function getProducts(): Promise<Product[]> {
             const data = await res.json().catch(() => null);
             const err = data as ApiError;
             const firstError = err.errors ? Object.values(err.errors).flat()[0] : err.message ?? "Error al crear cliente";
-            throw new Error(firstError);
+            throw new Error(translateApiMessage(firstError, res.status));
         }
             return res.json();
     }
@@ -121,7 +122,7 @@ export async function getProducts(): Promise<Product[]> {
             const data = await res.json().catch(() => null);
             const err = data as ApiError;
             const firstError = err.errors ? Object.values(err.errors).flat()[0] : err.message ?? "Error al actualuizar Producto";
-            throw new Error(firstError);
+            throw new Error(translateApiMessage(firstError, res.status));
         }
         return res.json();
     }
@@ -148,6 +149,6 @@ export async function getProducts(): Promise<Product[]> {
         if(!res.ok){
             const data = await res.json().catch(() => null);
             const message = (data as ApiError)?.message ?? "Error al eliminar producto";
-            throw new Error(message);
+            throw new Error(translateApiMessage(message, res.status));
         }
     }

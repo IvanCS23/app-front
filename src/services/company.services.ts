@@ -1,5 +1,5 @@
 import { API_URL } from "@/src/config/api";
-import { getAuthHeaders } from "@/src/services/http";
+import { FORBIDDEN_MESSAGE, getAuthHeaders, translateApiMessage } from "@/src/services/http";
 import type { CompanyFiscal, CompanyFiscalInput } from "@/src/types/company";
 import type { FiscalIssue } from "@/src/types/sat";
 
@@ -20,8 +20,6 @@ export class CompanyApiError extends Error {
   }
 }
 
-const FORBIDDEN_MESSAGE = "No tienes permiso para esta acción. Pide a un administrador que la realice.";
-
 async function toError(response: Response, fallback: string): Promise<CompanyApiError> {
   const body = (await response.json().catch(() => null)) as
     | { code?: string; message?: string; issues?: FiscalIssue[]; errors?: Record<string, string[]> }
@@ -41,7 +39,7 @@ async function toError(response: Response, fallback: string): Promise<CompanyApi
     message: messages[0] ?? fallback,
   }));
 
-  return new CompanyApiError(body?.message ?? fallback, response.status, body?.code ?? null, body?.issues ?? validationIssues);
+  return new CompanyApiError(translateApiMessage(body?.message, response.status, fallback), response.status, body?.code ?? null, body?.issues ?? validationIssues);
 }
 
 export async function getCompanyFiscal(): Promise<CompanyFiscal> {

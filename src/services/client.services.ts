@@ -1,4 +1,5 @@
 import { API_URL } from "@/src/config/api";
+import { translateApiMessage } from "@/src/services/http";
 import type { FiscalIssue } from "@/src/types/sat";
 
 
@@ -58,7 +59,7 @@ export async function getClients(): Promise<Client[]> {
   if (!res.ok) {
     const data = await res.json().catch(() => null);
     const message = (data as ApiError)?.message ?? "Error al obtener clientes";
-    throw new Error(message);
+    throw new Error(translateApiMessage(message, res.status));
   }
 
   const response = await res.json();
@@ -92,7 +93,7 @@ export async function createClient(clientData: Client): Promise<Client> {
     const firstError = err.errors 
       ? Object.values(err.errors).flat()[0] 
       : err.message ?? "Error al crear cliente";
-    throw new Error(firstError);
+    throw new Error(translateApiMessage(firstError, res.status));
   }
 
   return res.json();
@@ -124,7 +125,7 @@ export async function updateClient(id: number, clientData: Partial<Client>): Pro
     const firstError = err.errors 
       ? Object.values(err.errors).flat()[0] 
       : err.message ?? "Error al actualizar cliente";
-    throw new Error(firstError);
+    throw new Error(translateApiMessage(firstError, res.status));
   }
 
   return res.json();
@@ -151,6 +152,6 @@ export async function deleteClient(id: number): Promise<void> {
   if (!res.ok) {
     const data = await res.json().catch(() => null);
     const message = (data as ApiError)?.message ?? "Error al eliminar cliente";
-    throw new Error(message);
+    throw new Error(translateApiMessage(message, res.status));
   }
 }

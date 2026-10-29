@@ -1,6 +1,6 @@
 import { API_URL } from "@/src/config/api";
 import { clearSession } from "@/src/services/auth.services";
-import { getAuthHeaders } from "@/src/services/http";
+import { getAuthHeaders, translateApiMessage } from "@/src/services/http";
 import type {
   CancelInvoiceBusinessPayload,
   CancelInvoicePacPayload,
@@ -25,7 +25,7 @@ async function parseError(response: Response): Promise<InvoiceApiError> {
   const fallback = response.status === 403
     ? "No tienes permisos para realizar esta acción."
     : "No fue posible completar la operación fiscal.";
-  return new InvoiceApiError(body?.message || fallback, response.status, body?.code ?? null);
+  return new InvoiceApiError(translateApiMessage(body?.message, response.status, fallback), response.status, body?.code ?? null);
 }
 
 function handleUnauthorized(response: Response): void {

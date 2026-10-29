@@ -61,7 +61,7 @@ describe("servicio de datos fiscales de la empresa (Fase 6.27b)", () => {
       .mockImplementationOnce(async () => jsonResponse({ message: "This action is unauthorized." }, 403))
       .mockImplementationOnce(async () => jsonResponse({ message: "Too Many Attempts." }, 429));
 
-    await expect(getCompanyFiscal()).rejects.toThrow("No tienes permiso para esta acción");
+    await expect(getCompanyFiscal()).rejects.toThrow("No tienes permiso para realizar esta acción");
     await expect(updateCompanyFiscal(input)).rejects.toThrow("Demasiados intentos");
   });
 

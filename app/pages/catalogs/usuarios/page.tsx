@@ -9,6 +9,7 @@ import EditUserModal from "@/app/components/users/EditUserModal";
 import DeleteUserModal from "@/app/components/users/DeleteUserModal";
 import UserSecurityModal from "@/app/components/users/UserSecurityModal";
 import UsersTable from "@/app/components/users/UsersTable";
+import { useAuth } from "@/src/hooks/useAuth";
 import { useUsers } from "@/src/hooks/useUsers";
 import { ROLE_LABELS, STATUS_LABELS, type User } from "@/src/types/user";
 
@@ -36,6 +37,10 @@ export default function UsuariosPage() {
     remove,
     patchUser,
   } = useUsers();
+  // Fase 6.27b: sólo un administrador crea, edita, desactiva o administra la
+  // seguridad de usuarios; el backend responde 403 a los demás.
+  const { user: currentUser } = useAuth();
+  const canManage = currentUser?.role === "admin";
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -55,14 +60,24 @@ export default function UsuariosPage() {
         </div>
 
         <div className="app-card p-5">
+          {!canManage && (
+            <p role="note" className="mb-4 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
+              Solo un administrador puede crear, editar o desactivar usuarios.
+            </p>
+          )}
+
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <button
-              onClick={() => setIsCreateOpen(true)}
-              className="app-button-primary sm:w-auto w-full"
-            >
-              <Plus className="h-4 w-4" />
-              Nuevo usuario
-            </button>
+            {canManage ? (
+              <button
+                onClick={() => setIsCreateOpen(true)}
+                className="app-button-primary sm:w-auto w-full"
+              >
+                <Plus className="h-4 w-4" />
+                Nuevo usuario
+              </button>
+            ) : (
+              <span />
+            )}
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="relative sm:w-64">
@@ -111,6 +126,7 @@ export default function UsuariosPage() {
             onDelete={setDeletingUser}
             onSecurity={setSecurityUser}
             onCreateClick={() => setIsCreateOpen(true)}
+            canManage={canManage}
           />
 
           {!isLoading && meta.total > 0 && (
@@ -142,6 +158,8 @@ export default function UsuariosPage() {
         </div>
       </div>
 
+      {canManage && (
+      <>
       <CreateUserModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -174,6 +192,8 @@ export default function UsuariosPage() {
         onSuccess={showSuccess}
         onError={showError}
       />
+      </>
+      )}
 
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />

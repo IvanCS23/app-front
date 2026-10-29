@@ -17,6 +17,8 @@ type UsersTableProps = {
   onDelete: (user: User) => void;
   onSecurity: (user: User) => void;
   onCreateClick: () => void;
+  /** Fase 6.27b: sólo un administrador ve las acciones (el backend responde 403 a los demás). */
+  canManage: boolean;
 };
 
 function formatDate(value: string): string {
@@ -54,6 +56,7 @@ export default function UsersTable({
   onDelete,
   onSecurity,
   onCreateClick,
+  canManage,
 }: UsersTableProps) {
   return (
     <div className="app-table-wrap">
@@ -66,7 +69,7 @@ export default function UsersTable({
             <th>Sucursal</th>
             <th>Estado</th>
             <th>Fecha de creación</th>
-            <th>Acciones</th>
+            {canManage && <th>Acciones</th>}
           </tr>
         </thead>
         <tbody>
@@ -74,7 +77,7 @@ export default function UsersTable({
             Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
           ) : users.length === 0 ? (
             <tr>
-              <td colSpan={7} className="p-12">
+              <td colSpan={canManage ? 7 : 6} className="p-12">
                 <div className="flex flex-col items-center justify-center gap-3 text-center">
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
                     <UserRoundX className="h-8 w-8 text-blue-400" />
@@ -84,7 +87,7 @@ export default function UsersTable({
                       ? "No se encontraron usuarios con esos filtros"
                       : "No hay usuarios registrados"}
                   </p>
-                  {!hasFilters && (
+                  {!hasFilters && canManage && (
                     <button onClick={onCreateClick} className="app-button-primary mt-2">
                       Crear usuario
                     </button>
@@ -110,6 +113,7 @@ export default function UsersTable({
                   </span>
                 </td>
                 <td className="text-[#475569]">{formatDate(user.created_at)}</td>
+                {canManage && (
                 <td>
                   <div className="flex gap-3">
                     <button
@@ -135,6 +139,7 @@ export default function UsersTable({
                     </button>
                   </div>
                 </td>
+                )}
               </tr>
             ))
           )}

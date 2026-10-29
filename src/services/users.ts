@@ -1,5 +1,6 @@
 import { API_URL } from "@/src/config/api";
 import { getToken } from "@/src/services/auth.services";
+import { translateApiMessage } from "@/src/services/http";
 import type {
   PaginatedUsers,
   User,
@@ -26,10 +27,10 @@ async function parseErrorResponse(res: Response, fallback: string): Promise<neve
   const err = data as ApiError | null;
 
   if (res.status === 422 && err?.errors) {
-    throw new ValidationError(err.message ?? fallback, err.errors);
+    throw new ValidationError(translateApiMessage(err.message, res.status, fallback), err.errors);
   }
 
-  throw new Error(err?.message ?? fallback);
+  throw new Error(translateApiMessage(err?.message, res.status, fallback));
 }
 
 function authHeaders(): HeadersInit {
