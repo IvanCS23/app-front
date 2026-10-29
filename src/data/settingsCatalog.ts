@@ -31,8 +31,8 @@ export const settingsCatalog: SettingCategory[] = [
         title: "Datos fiscales",
         description: "Razón social, régimen fiscal y datos generales de tu empresa.",
         icon: Building2,
-        href: "/pages/settings/generalSettings",
-        status: "coming-soon",
+        href: "/pages/settings/fiscal",
+        status: "available",
       },
       {
         id: "sellos-digitales",

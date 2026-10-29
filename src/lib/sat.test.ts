@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clientFiscalErrors, isGenericRfc, personType, regimesFor, taxObjectError, usesFor } from "./sat";
+import { clientFiscalErrors, isGenericRfc, issuerFiscalErrors, personType, regimesFor, taxObjectError, usesFor } from "./sat";
 import { satCatalogsFixture } from "@/src/test-fixtures/sat";
 
 const codes = (entries: { code: string }[]) => entries.map((entry) => entry.code);
@@ -70,5 +70,31 @@ describe("validación SAT en el frontend (Fase 6.26)", () => {
     expect(taxObjectError("06", 1)).toBeNull();
     expect(taxObjectError("02", null)).toContain("debe tener IVA");
     expect(taxObjectError("03", 3)).toContain("no lleva IVA");
+  });
+});
+
+describe("datos fiscales del emisor (Fase 6.27b)", () => {
+  const valid = { rfc: "XIA190128J61", legal_name: "XENON INDUSTRIAL ARTICLES", fiscal_regime: "601", postal_code: "06010" };
+
+  it("acepta un emisor válido", () => {
+    expect(issuerFiscalErrors(valid, satCatalogsFixture())).toEqual({});
+  });
+
+  it("exige todos los campos con los mensajes del backend", () => {
+    expect(issuerFiscalErrors({ rfc: "", legal_name: "", fiscal_regime: "", postal_code: "" }, satCatalogsFixture())).toEqual({
+      rfc: "Falta el RFC de la empresa.",
+      legal_name: "Falta la razón social de la empresa.",
+      fiscal_regime: "Falta el régimen fiscal de la empresa.",
+      postal_code: "Falta el código postal del domicilio fiscal (lugar de expedición).",
+    });
+  });
+
+  it("rechaza RFC genérico, régimen que no aplica, C.P. inválido y razón social con régimen societario", () => {
+    expect(issuerFiscalErrors({ ...valid, rfc: "XAXX010101000" }, null).rfc).toContain("no puede emitir");
+    expect(issuerFiscalErrors({ ...valid, fiscal_regime: "605" }, satCatalogsFixture()).fiscal_regime).toBe("El régimen fiscal 605 no aplica a una persona moral.");
+    expect(issuerFiscalErrors({ ...valid, postal_code: "0601" }, null).postal_code).toBe("El código postal debe tener 5 dígitos.");
+    expect(issuerFiscalErrors({ ...valid, legal_name: "TECNOLOGIAS S.A" }, null).legal_name).toContain("sin el régimen societario");
+    expect(issuerFiscalErrors({ ...valid, legal_name: "Comercial, S. de R.L. de C.V." }, null).legal_name).toContain("sin el régimen societario");
+    expect(issuerFiscalErrors({ ...valid, legal_name: "GRUPO MASA" }, null).legal_name).toBeUndefined();
   });
 });

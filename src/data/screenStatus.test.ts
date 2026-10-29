@@ -115,7 +115,8 @@ describe("Configuración según el registro", () => {
 
     expect(items["Sellos Digitales"]).toBeUndefined();
     expect(items["Usuarios"]).toBe("available");
-    expect(items["Datos fiscales"]).toBe("coming-soon");
+    // Fase 6.27b: Datos fiscales es una pantalla real.
+    expect(items["Datos fiscales"]).toBe("available");
   });
 
   it("con demos: las maquetas aparecen como demo", () => {

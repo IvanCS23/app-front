@@ -102,6 +102,61 @@ export function clientFiscalErrors(input: ClientFiscalInput, catalogs: SatCatalo
   return errors;
 }
 
+export interface IssuerFiscalInput {
+  rfc: string;
+  legal_name: string;
+  fiscal_regime: string;
+  postal_code: string;
+}
+
+/** Régimen societario al final de la razón social (mismo patrón que el backend). */
+const CORPORATE_REGIME_SUFFIX = /(?:^|[\s,])(?:S\.?\s*A\.?\s*P\.?\s*I\.?|S\.?\s*A\.?\s*S\.?|S\.?\s*A\.?|S\.?\s*DE\s+R\.?\s*L\.?|S\.?\s*C\.?|A\.?\s*C\.?)(?:\s*DE\s+C\.?\s*V\.?)?\s*$/iu;
+
+/**
+ * Fase 6.27b — espejo de SatFiscalValidator::issuerIssues: datos fiscales de
+ * la empresa emisora, con los mismos mensajes que el backend.
+ */
+export function issuerFiscalErrors(input: IssuerFiscalInput, catalogs: SatCatalogs | null): Partial<Record<keyof IssuerFiscalInput, string>> {
+  const errors: Partial<Record<keyof IssuerFiscalInput, string>> = {};
+  const rfc = normalizeRfc(input.rfc);
+  const legalName = input.legal_name.trim();
+  const regimeCode = input.fiscal_regime.trim();
+  const postalCode = input.postal_code.trim();
+  let person: PersonType | null = null;
+
+  if (rfc === "") {
+    errors.rfc = "Falta el RFC de la empresa.";
+  } else if (isGenericRfc(rfc)) {
+    errors.rfc = "Un RFC genérico (XAXX010101000 o XEXX010101000) no puede emitir facturas.";
+  } else if ((person = personType(rfc)) === null) {
+    errors.rfc = "El RFC no tiene un formato válido: 12 caracteres para persona moral o 13 para persona física (letras, fecha AAMMDD y homoclave).";
+  }
+
+  if (legalName === "") {
+    errors.legal_name = "Falta la razón social de la empresa.";
+  } else if (CORPORATE_REGIME_SUFFIX.test(legalName)) {
+    errors.legal_name = 'Escribe la razón social sin el régimen societario (por ejemplo, sin "S.A. de C.V."), como aparece en la constancia de situación fiscal.';
+  }
+
+  const regime = catalogs?.tax_regimes.find((entry) => entry.code === regimeCode);
+
+  if (regimeCode === "") {
+    errors.fiscal_regime = "Falta el régimen fiscal de la empresa.";
+  } else if (catalogs !== null && !regime) {
+    errors.fiscal_regime = `El régimen fiscal ${regimeCode} no existe en el catálogo del SAT.`;
+  } else if (regime && person !== null && !appliesTo(regime, person)) {
+    errors.fiscal_regime = `El régimen fiscal ${regimeCode} no aplica a una persona ${person === "moral" ? "moral" : "física"}.`;
+  }
+
+  if (postalCode === "") {
+    errors.postal_code = "Falta el código postal del domicilio fiscal (lugar de expedición).";
+  } else if (!/^\d{5}$/.test(postalCode)) {
+    errors.postal_code = "El código postal debe tener 5 dígitos.";
+  }
+
+  return errors;
+}
+
 /** Objeto de impuesto que exige IVA y los que no lo admiten (05–08 no se validan). */
 export const TAX_OBJECT_TAXED = "02";
 export const TAX_OBJECTS_WITHOUT_TAX = ["01", "03", "04"];

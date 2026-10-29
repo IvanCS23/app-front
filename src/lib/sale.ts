@@ -95,6 +95,8 @@ const READINESS_VIEWS: Record<string, ReadinessIssueView> = {
   CLIENT_FISCAL_REGIME_INVALID: { message: "El régimen fiscal del cliente no existe en el catálogo del SAT o no aplica a su tipo de persona.", ...CLIENTS_FIX },
   CLIENT_CFDI_USE_INVALID: { message: "El uso de CFDI del cliente no existe en el catálogo del SAT o no aplica a su tipo de persona.", ...CLIENTS_FIX },
   CLIENT_REGIME_USE_INCOMPATIBLE: { message: "El uso de CFDI del cliente no es compatible con su régimen fiscal (con RFC genérico deben ser 616 y S01).", ...CLIENTS_FIX },
+  // Fase 6.27b: con RFC genérico el C.P. del cliente es el lugar de expedición.
+  CLIENT_GENERIC_POSTAL_CODE_MISMATCH: { message: "Con un RFC genérico, el código postal del cliente debe ser el de la empresa (lugar de expedición).", ...CLIENTS_FIX },
   ITEM_PRODUCT_SAT_KEY_INVALID: { message: "La clave de producto o servicio no existe en el catálogo del SAT.", ...PRODUCTS_FIX },
   ITEM_PRODUCT_UNIT_KEY_INVALID: { message: "La clave de unidad no existe en el catálogo del SAT.", ...PRODUCTS_FIX },
   ITEM_PRODUCT_OBJETO_IMP_INVALID: { message: "El objeto de impuesto del producto no existe en el catálogo del SAT.", ...PRODUCTS_FIX },
