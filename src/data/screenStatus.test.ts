@@ -113,14 +113,17 @@ describe("Configuración según el registro", () => {
   it("sin demos: oculta las maquetas y conserva lo real y lo próximo", () => {
     const items = byTitle(false);
 
-    expect(items["Sellos Digitales"]).toBeUndefined();
+    // Fase 6.27b: Sellos Digitales es real.
+    expect(items["Sellos Digitales"]).toBe("available");
     expect(items["Usuarios"]).toBe("available");
     // Fase 6.27b: Datos fiscales es una pantalla real.
     expect(items["Datos fiscales"]).toBe("available");
   });
 
   it("con demos: las maquetas aparecen como demo", () => {
-    expect(byTitle(true)["Sellos Digitales"]).toBe("demo");
+    expect(byTitle(true)["Cuentas de Banco"]).toBe("demo");
+    expect(byTitle(false)["Cuentas de Banco"]).toBeUndefined();
+    expect(byTitle(true)["Sellos Digitales"]).toBe("available");
   });
 
   it.each([false, true])("con demos=%s un enlace sin página nunca queda disponible", (showDemo) => {

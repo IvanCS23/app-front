@@ -63,3 +63,20 @@ export async function updateCompanyFiscal(values: CompanyFiscalInput): Promise<C
 
   return (await response.json()) as CompanyFiscal;
 }
+
+/**
+ * Fase 6.27b: sube el CSD a la organización de Facturapi de la empresa. Los
+ * archivos y la contraseña se envían una sola vez y no se guardan.
+ */
+export async function uploadCompanyCsd(cer: File, key: File, password: string): Promise<CompanyFiscal> {
+  const body = new FormData();
+  body.append("cer", cer);
+  body.append("key", key);
+  body.append("csd_password", password);
+
+  const response = await fetch(`${API_URL}/api/company/csd`, { method: "POST", headers: getAuthHeaders(), body });
+
+  if (!response.ok) throw await toError(response, "No fue posible subir el CSD.");
+
+  return (await response.json()) as CompanyFiscal;
+}

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CompanyApiError, getCompanyFiscal, updateCompanyFiscal } from "./company.services";
+import { CompanyApiError, getCompanyFiscal, updateCompanyFiscal, uploadCompanyCsd } from "./company.services";
 import type { CompanyFiscalInput } from "@/src/types/company";
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -73,5 +73,23 @@ describe("servicio de datos fiscales de la empresa (Fase 6.27b)", () => {
     const error = (await updateCompanyFiscal(input).catch((e: unknown) => e)) as CompanyApiError;
 
     expect(error.issues).toEqual([{ code: "VALIDATION_ERROR", field: "postal_code", message: "El código postal es demasiado largo." }]);
+  });
+
+  it("sube el CSD como FormData con los archivos y la contraseña, sin ids", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ rfc: "XIA190128J61" }));
+    const cer = new File(["cer"], "csd.cer");
+    const key = new File(["key"], "csd.key");
+
+    await uploadCompanyCsd(cer, key, "secreto-csd");
+
+    const [url, init] = fetchMock.mock.calls[0];
+    const body = init?.body as FormData;
+    expect(String(url)).toMatch(/\/api\/company\/csd$/);
+    expect(init?.method).toBe("POST");
+    expect(body.get("cer")).toBeInstanceOf(File);
+    expect(body.get("key")).toBeInstanceOf(File);
+    expect(body.get("csd_password")).toBe("secreto-csd");
+    expect([...body.keys()].sort()).toEqual(["cer", "csd_password", "key"]);
+    expect((init?.headers as Record<string, string>)["Content-Type"]).toBeUndefined();
   });
 });

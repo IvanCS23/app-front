@@ -6,7 +6,6 @@ import XmlPage from "./invoices/xml/page";
 import DownloadPage from "./invoices/DownloadInvoices/page";
 import RecoveryPage from "./invoices/recovery/page";
 import ReportsPage from "./statistics/reports/page";
-import SellosPage from "./settings/sellos/page";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/" }));
 vi.mock("@/app/components/layout/AppLayout", () => ({ default: ({ children }: { children: ReactNode }) => <div>{children}</div> }));
@@ -23,7 +22,6 @@ const cases: [string, ComponentType, RegExp][] = [
   ["invoices/DownloadInvoices", DownloadPage, /Generar/i],
   ["invoices/recovery", RecoveryPage, /Recuperar facturas/],
   ["statistics/reports", ReportsPage, /Descargar/i],
-  ["settings/sellos", SellosPage, /Guardar Certificados/],
 ];
 
 describe("maquetas fiscales", () => {

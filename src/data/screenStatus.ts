@@ -47,7 +47,7 @@ export const SCREEN_STATUS: Readonly<Record<string, ScreenStatus>> = {
   "/pages/settings/fiscal": "real",
   "/pages/settings/generalSettings": "demo",
   "/pages/settings/observations": "demo",
-  "/pages/settings/sellos": "demo",
+  "/pages/settings/sellos": "real",
   "/pages/statistics/charts": "demo",
   "/pages/statistics/reports": "demo",
 
