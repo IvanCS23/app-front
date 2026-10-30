@@ -57,6 +57,29 @@ describe("consulta paginada de facturas", () => {
     expect(invoiceApi.getInvoices).toHaveBeenLastCalledWith(expect.objectContaining({ search: "BOR010101", status: "draft", payment_method: "PPD", date_from: "2026-07-01", date_to: "2026-07-31", page: 1 }), expect.any(AbortSignal));
   });
 
+  it.each(["19", "FAC-19", "FAC 19", "FAC19"])("Fase 6.28: busca por folio CFDI escrito como %s en el servidor", async (search) => {
+    const user = userEvent.setup();
+    const stamped = invoiceFixture({ id: 20, folio: "FAC-00000019", cfdi_series: "FAC", cfdi_folio_number: 19, cfdi_folio: "FAC-19", cfdi_folio_matches_erp: true });
+    arrange();
+    await screen.findByRole("button", { name: /FAC-00000003/ });
+    vi.mocked(invoiceApi.getInvoices).mockResolvedValueOnce(invoiceCollectionFixture([stamped]));
+
+    await user.type(screen.getByLabelText("Búsqueda general"), search);
+    await user.click(screen.getByRole("button", { name: "Buscar" }));
+
+    expect(await screen.findByRole("button", { name: /FAC-00000019.*CFDI FAC-19/ })).toBeInTheDocument();
+    expect(invoiceApi.getInvoices).toHaveBeenLastCalledWith(expect.objectContaining({ search, page: 1 }), expect.any(AbortSignal));
+  });
+
+  it("Fase 6.28: el detalle muestra el folio CFDI y la nota de las facturas anteriores a la 6.28", async () => {
+    arrange([invoiceFixture({ folio: "FAC-00000019", cfdi_series: "F", cfdi_folio_number: 10, cfdi_folio: "F-10", cfdi_folio_matches_erp: false })]);
+
+    const detail = await screen.findByRole("region", { name: "Detalle de factura" });
+    expect(within(detail).getByText("Folio CFDI:")).toHaveTextContent("Folio CFDI: F-10");
+    expect(within(detail).getByText("Asignado por Facturapi antes de la 6.28; no coincide con el folio ERP.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Búsqueda general")).toHaveAttribute("placeholder", "Folio, folio CFDI (FAC-19), RFC o razón social");
+  });
+
   it("usa meta Laravel para página siguiente y per_page", async () => {
     const user = userEvent.setup();
     vi.mocked(invoiceApi.getInvoices).mockImplementation(async (query = {}) => invoiceCollectionFixture(

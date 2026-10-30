@@ -4,6 +4,12 @@ export interface InvoiceListItem {
   id: number;
   client_id: number;
   folio: string;
+  /** Fase 6.28: serie y folio con que quedó timbrado el CFDI (null sin timbrar). */
+  cfdi_series: string | null;
+  cfdi_folio_number: number | null;
+  cfdi_folio: string | null;
+  /** false en las facturas anteriores a la 6.28 (serie "F" de Facturapi). */
+  cfdi_folio_matches_erp: boolean | null;
   status: InvoiceStatus;
   client_name: string | null;
   client_rfc: string | null;

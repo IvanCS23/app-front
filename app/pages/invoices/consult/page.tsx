@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CalendarDays, ChevronLeft, ChevronRight, FileText, FilterX, Loader2, RefreshCw, Search } from "lucide-react";
 import AppLayout from "@/app/components/layout/AppLayout";
 import {
+  cfdiFolioView,
   emptyInvoiceFilters,
   formatInvoiceDate,
   formatInvoiceMoney,
@@ -29,6 +30,12 @@ const documentTypes = [
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <div><label className="mb-2 block text-xs font-bold uppercase tracking-wide text-[#475569]">{label}</label>{children}</div>;
+}
+
+/** Fase 6.28: el folio que muestran el XML y el PDF, bajo el folio interno. */
+function CfdiFolioLine({ invoice }: { invoice: InvoiceListItem }) {
+  const view = cfdiFolioView(invoice);
+  return <><p className="mt-1 text-sm text-[#475569]">Folio CFDI: <span className="font-semibold">{view.value}</span></p>{view.note && <p className="mt-1 text-xs text-amber-700">{view.note}</p>}</>;
 }
 
 function statusFilterValue(value: string): "all" | InvoiceStatus {
@@ -135,7 +142,7 @@ export default function ConsultaFacturas() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Field label="Búsqueda general"><input aria-label="Búsqueda general" value={filters.search} onChange={(event) => updateFilter("search", event.target.value)} className="app-input" placeholder="Folio, RFC o razón social" /></Field>
+            <Field label="Búsqueda general"><input aria-label="Búsqueda general" value={filters.search} onChange={(event) => updateFilter("search", event.target.value)} className="app-input" placeholder="Folio, folio CFDI (FAC-19), RFC o razón social" /></Field>
             <Field label="Estado"><select aria-label="Estado" value={filters.status} onChange={(event) => updateFilter("status", statusFilterValue(event.target.value))} className="box box-input">{invoiceStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></Field>
             <Field label="Método de pago"><select aria-label="Método de pago" value={filters.paymentMethod} onChange={(event) => updateFilter("paymentMethod", event.target.value === "PUE" || event.target.value === "PPD" ? event.target.value : "all")} className="box box-input"><option value="all">Todos</option><option value="PUE">PUE</option><option value="PPD">PPD</option></select></Field>
             <Field label="Orden"><select aria-label="Orden" value={`${query.sort}:${query.direction}`} onChange={(event) => { const [sort, direction] = event.target.value.split(":") as [InvoiceQuery["sort"], InvoiceQuery["direction"]]; setIsLoading(true); setLoadError(null); setQuery((current) => ({ ...current, sort, direction, page: 1 })); }} className="box box-input"><option value="created_at:desc">Más recientes</option><option value="created_at:asc">Más antiguas</option><option value="folio:asc">Folio ascendente</option><option value="total:desc">Mayor total</option><option value="total:asc">Menor total</option></select></Field>
@@ -165,7 +172,7 @@ export default function ConsultaFacturas() {
                 : invoices.length === 0 ? <div className="flex min-h-64 flex-col items-center justify-center px-6 text-center text-[#64748B]"><FileText className="mb-3 h-10 w-10 text-slate-300" /><p>No se encontraron facturas.</p></div>
                 : <ul className="divide-y divide-[#E2E8F0]">{invoices.map((invoice) => (
                   <li key={invoice.id}><button type="button" onClick={() => setSelectedInvoice(invoice)} aria-pressed={selectedInvoice?.id === invoice.id} className={`w-full border-l-4 p-4 text-left transition-colors ${selectedInvoice?.id === invoice.id ? "border-blue-600 bg-blue-50/60" : "border-transparent hover:bg-[#F8FAFC]"}`}>
-                    <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="font-bold text-[#0F172A]">{invoice.folio}</span><span className={getInvoiceStatusClass(invoice.status)}>{getInvoiceStatusText(invoice.status)}</span></div><p className="mt-2 truncate text-sm font-medium text-[#475569]">{invoice.client_name ?? "Cliente sin nombre"}</p><p className="mt-1 text-xs text-[#64748B]">{invoice.client_rfc ?? "RFC no disponible"} · {formatInvoiceDate(invoiceDateValue(invoice))}</p></div><p className="shrink-0 font-bold text-emerald-600">{formatInvoiceMoney(invoice.total, invoice.currency)}</p></div>
+                    <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="font-bold text-[#0F172A]">{invoice.folio}</span>{invoice.cfdi_folio && <span className="text-xs font-medium text-[#64748B]">CFDI {invoice.cfdi_folio}</span>}<span className={getInvoiceStatusClass(invoice.status)}>{getInvoiceStatusText(invoice.status)}</span></div><p className="mt-2 truncate text-sm font-medium text-[#475569]">{invoice.client_name ?? "Cliente sin nombre"}</p><p className="mt-1 text-xs text-[#64748B]">{invoice.client_rfc ?? "RFC no disponible"} · {formatInvoiceDate(invoiceDateValue(invoice))}</p></div><p className="shrink-0 font-bold text-emerald-600">{formatInvoiceMoney(invoice.total, invoice.currency)}</p></div>
                   </button></li>
                 ))}</ul>}
             </div>
@@ -178,7 +185,7 @@ export default function ConsultaFacturas() {
           <section className="app-card overflow-hidden" aria-labelledby="invoice-detail-title">
             <div className="border-b border-[#E2E8F0] bg-[#F8FAFC] px-5 py-4"><h2 id="invoice-detail-title" className="font-bold text-[#0F172A]">Detalle de factura</h2><p className="mt-1 text-xs text-[#64748B]">Resumen comercial; el estado CFDI está en el panel fiscal.</p></div>
             {selectedInvoice ? <div className="p-5 sm:p-6">
-              <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Folio</p><p className="mt-1 text-xl font-bold text-[#0F172A]">{selectedInvoice.folio}</p></div><Link href={`/pages/invoices/${selectedInvoice.id}`} className="app-button-primary">Ver factura</Link></div>
+              <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Folio</p><p className="mt-1 text-xl font-bold text-[#0F172A]">{selectedInvoice.folio}</p><CfdiFolioLine invoice={selectedInvoice} /></div><Link href={`/pages/invoices/${selectedInvoice.id}`} className="app-button-primary">Ver factura</Link></div>
               <dl className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
                 <div><dt className="text-xs font-semibold uppercase text-[#64748B]">Fecha</dt><dd className="mt-1 flex items-center gap-2 font-medium text-[#0F172A]"><CalendarDays className="h-4 w-4 text-blue-600" />{formatInvoiceDate(invoiceDateValue(selectedInvoice))}</dd></div>
                 <div><dt className="text-xs font-semibold uppercase text-[#64748B]">Estado ERP</dt><dd className="mt-1"><span className={getInvoiceStatusClass(selectedInvoice.status)}>{getInvoiceStatusText(selectedInvoice.status)}</span></dd></div>

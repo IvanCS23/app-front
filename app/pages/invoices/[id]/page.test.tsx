@@ -70,6 +70,33 @@ describe("detalle comercial de factura", () => {
     expect(screen.queryByRole("button", { name: /^Cancelar factura$/ })).not.toBeInTheDocument();
   });
 
+  it("Fase 6.28: muestra el folio CFDI junto al folio interno", async () => {
+    vi.mocked(invoices.getInvoiceDetail).mockResolvedValue(invoiceDetailFixture({ folio: "FAC-00000019", cfdi_series: "FAC", cfdi_folio_number: 19, cfdi_folio: "FAC-19", cfdi_folio_matches_erp: true }));
+    render(<InvoiceDetailPage />);
+
+    const summary = await screen.findByRole("region", { name: "Resumen ERP" });
+    expect(within(summary).getByText("Folio CFDI").nextSibling).toHaveTextContent("FAC-19");
+    expect(within(summary).getByText("FAC-00000019")).toBeInTheDocument();
+    expect(within(summary).queryByText(/antes de la 6.28/)).not.toBeInTheDocument();
+  });
+
+  it("Fase 6.28: una factura anterior a la 6.28 muestra su folio de Facturapi con una nota", async () => {
+    vi.mocked(invoices.getInvoiceDetail).mockResolvedValue(invoiceDetailFixture({ folio: "FAC-00000019", cfdi_series: "F", cfdi_folio_number: 10, cfdi_folio: "F-10", cfdi_folio_matches_erp: false }));
+    render(<InvoiceDetailPage />);
+
+    const summary = await screen.findByRole("region", { name: "Resumen ERP" });
+    expect(within(summary).getByText("F-10")).toBeInTheDocument();
+    expect(within(summary).getByText("Asignado por Facturapi antes de la 6.28; no coincide con el folio ERP.")).toBeInTheDocument();
+  });
+
+  it("Fase 6.28: sin timbrar, el folio CFDI lo indica", async () => {
+    vi.mocked(invoices.getInvoiceDetail).mockResolvedValue(invoiceDetailFixture({ status: "ready", cfdi_series: null, cfdi_folio_number: null, cfdi_folio: null, cfdi_folio_matches_erp: null }));
+    render(<InvoiceDetailPage />);
+
+    const summary = await screen.findByRole("region", { name: "Resumen ERP" });
+    expect(within(summary).getByText("Folio CFDI").nextSibling).toHaveTextContent("Sin timbrar");
+  });
+
   it("mantiene visibles e independientes ERP emitida y CFDI no timbrado", async () => {
     render(<InvoiceDetailPage />);
     expect(await screen.findByText("Emitida")).toBeInTheDocument();

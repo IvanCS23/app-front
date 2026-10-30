@@ -27,6 +27,8 @@ export class InvoiceApiError extends Error {
  */
 const NOT_READY_MESSAGES: Record<string, string> = {
   INVOICE_PPD_NOT_AVAILABLE: PPD_NOT_AVAILABLE_MESSAGE,
+  // Fase 6.28: el CFDI toma su serie y folio del folio interno.
+  INVOICE_FOLIO_INVALID: "El folio de la factura no tiene el formato FAC-######## del que se toman la serie y el folio del CFDI.",
 };
 
 function notReadyMessage(body: InvoiceApiErrorBody | null): string | null {

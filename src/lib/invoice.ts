@@ -24,6 +24,26 @@ export const invoiceStatusOptions = [
   { value: "cancelled", label: "Cancelada" },
 ] as const;
 
+export interface CfdiFolioView {
+  value: string;
+  note: string | null;
+}
+
+/**
+ * Fase 6.28: folio con que quedó timbrado el CFDI (el que muestran el XML y
+ * el PDF). Las facturas anteriores a la 6.28 tienen el que asignó Facturapi.
+ */
+export function cfdiFolioView(invoice: Pick<InvoiceListItem, "cfdi_series" | "cfdi_folio" | "cfdi_folio_matches_erp">): CfdiFolioView {
+  if (!invoice.cfdi_folio) return { value: "Sin timbrar", note: null };
+  if (invoice.cfdi_folio_matches_erp !== false) return { value: invoice.cfdi_folio, note: null };
+  return {
+    value: invoice.cfdi_folio,
+    note: invoice.cfdi_series === "FAC"
+      ? "No coincide con el folio ERP; revisa el historial fiscal."
+      : "Asignado por Facturapi antes de la 6.28; no coincide con el folio ERP.",
+  };
+}
+
 export function getInvoiceStatusText(status: InvoiceStatus): string {
   return {
     draft: "Borrador",

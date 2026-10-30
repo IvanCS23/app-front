@@ -8,7 +8,7 @@ import AppLayout from "@/app/components/layout/AppLayout";
 import FiscalActionModal from "@/app/components/invoices/FiscalActionModal";
 import InvoiceFiscalPanel from "@/app/components/invoices/InvoiceFiscalPanel";
 import Toast, { type ToastData } from "@/app/components/ui/Toast";
-import { canDeleteInvoice, canMarkInvoiceReady, formatInvoiceDate, formatInvoiceMoney, getInvoiceStatusClass, getInvoiceStatusText, isInvoiceEditable } from "@/src/lib/invoice";
+import { canDeleteInvoice, canMarkInvoiceReady, cfdiFolioView, formatInvoiceDate, formatInvoiceMoney, getInvoiceStatusClass, getInvoiceStatusText, isInvoiceEditable } from "@/src/lib/invoice";
 import { deleteInvoice, getInvoiceDetail, markInvoiceReady, updateInvoiceNotes } from "@/src/services/invoice.services";
 import type { InvoiceDetail } from "@/src/types/invoice";
 
@@ -16,6 +16,12 @@ type CommercialAction = "edit" | "ready" | "delete";
 
 function Fact({ label, value }: { label: string; value: React.ReactNode }) {
   return <div><dt className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">{label}</dt><dd className="mt-1 font-medium text-[#0F172A]">{value || "—"}</dd></div>;
+}
+
+/** Fase 6.28: el folio que muestran el XML y el PDF, junto al folio interno. */
+function CfdiFolioFact({ invoice }: { invoice: InvoiceDetail }) {
+  const view = cfdiFolioView(invoice);
+  return <Fact label="Folio CFDI" value={<><span>{view.value}</span>{view.note && <span className="mt-1 block text-xs font-normal text-amber-700">{view.note}</span>}</>} />;
 }
 
 export default function InvoiceDetailPage() {
@@ -162,7 +168,7 @@ export default function InvoiceDetailPage() {
           </div>
         </header>
 
-        <section className="app-card overflow-hidden" aria-labelledby="general-title"><div className="border-b border-[#E2E8F0] bg-[#F8FAFC] px-5 py-4 sm:px-6"><h2 id="general-title" className="font-bold text-[#0F172A]">Resumen ERP</h2><p className="mt-1 text-xs text-[#64748B]">Información comercial almacenada en la factura</p></div><dl className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:grid-cols-4 sm:p-6"><Fact label="Folio" value={invoice.folio} /><Fact label="Moneda" value={invoice.currency} /><Fact label="Forma de pago" value={invoice.payment_form} /><Fact label="Método de pago" value={invoice.payment_method} /><Fact label="Creación" value={<span className="inline-flex items-center gap-2"><CalendarDays className="h-4 w-4 text-blue-600" />{formatInvoiceDate(invoice.created_at)}</span>} /><Fact label="Emisión ERP" value={formatInvoiceDate(invoice.issued_at)} /><Fact label="Cancelación ERP" value={formatInvoiceDate(invoice.cancelled_at)} /></dl><div className="border-t border-[#E2E8F0] px-5 py-4 sm:px-6"><p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Notas</p><p className="mt-2 whitespace-pre-wrap text-sm text-[#475569]">{invoice.notes || "Sin notas comerciales."}</p></div></section>
+        <section className="app-card overflow-hidden" aria-labelledby="general-title"><div className="border-b border-[#E2E8F0] bg-[#F8FAFC] px-5 py-4 sm:px-6"><h2 id="general-title" className="font-bold text-[#0F172A]">Resumen ERP</h2><p className="mt-1 text-xs text-[#64748B]">Información comercial almacenada en la factura</p></div><dl className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:grid-cols-4 sm:p-6"><Fact label="Folio" value={invoice.folio} /><CfdiFolioFact invoice={invoice} /><Fact label="Moneda" value={invoice.currency} /><Fact label="Forma de pago" value={invoice.payment_form} /><Fact label="Método de pago" value={invoice.payment_method} /><Fact label="Creación" value={<span className="inline-flex items-center gap-2"><CalendarDays className="h-4 w-4 text-blue-600" />{formatInvoiceDate(invoice.created_at)}</span>} /><Fact label="Emisión ERP" value={formatInvoiceDate(invoice.issued_at)} /><Fact label="Cancelación ERP" value={formatInvoiceDate(invoice.cancelled_at)} /></dl><div className="border-t border-[#E2E8F0] px-5 py-4 sm:px-6"><p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Notas</p><p className="mt-2 whitespace-pre-wrap text-sm text-[#475569]">{invoice.notes || "Sin notas comerciales."}</p></div></section>
 
         <section className="app-card overflow-hidden" aria-labelledby="customer-title"><div className="border-b border-[#E2E8F0] bg-[#F8FAFC] px-5 py-4 sm:px-6"><h2 id="customer-title" className="font-bold text-[#0F172A]">Cliente fiscal</h2><p className="mt-1 text-xs text-[#64748B]">Snapshot conservado al crear la factura</p></div><dl className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:grid-cols-3 sm:p-6"><Fact label="Razón social" value={invoice.client_name} /><Fact label="RFC" value={<span className="font-mono">{invoice.client_rfc}</span>} /><Fact label="Régimen fiscal" value={invoice.client_regimen_fiscal} /><Fact label="Uso CFDI" value={invoice.client_uso_cfdi} /><Fact label="Código postal" value={invoice.client_codigo_postal} />{address.length > 0 && <Fact label="Domicilio fiscal" value={<span>{address.map((line) => <span className="block" key={line}>{line}</span>)}</span>} />}</dl></section>
 

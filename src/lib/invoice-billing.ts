@@ -70,6 +70,7 @@ const timelineLabels: Record<string, string> = {
   cancellation_receipt_unavailable: "Acuse aún no disponible",
   cancellation_receipt_identity_mismatch: "Problema de identidad del acuse",
   organization_archived: "Factura archivada: organización fiscal inaccesible",
+  cfdi_folio_mismatch: "El CFDI se timbró con un folio distinto al del ERP",
 };
 
 /**
@@ -94,7 +95,14 @@ export function getOrganizationNotice(billing: InvoiceBilling): { title: string;
 }
 
 export function getTimelineLabel(event: InvoicePacTimelineEvent): string {
-  return timelineLabels[event.type] ?? "Actividad fiscal actualizada";
+  const label = timelineLabels[event.type] ?? "Actividad fiscal actualizada";
+  // Fase 6.28: el folio esperado y el timbrado explican la diferencia.
+  const expected = event.context?.expected_folio;
+  const received = event.context?.received_folio;
+  if (event.type === "cfdi_folio_mismatch" && typeof expected === "string" && typeof received === "string") {
+    return `${label} (esperado ${expected}, timbrado ${received})`;
+  }
+  return label;
 }
 
 export function formatFiscalDate(value: string | null): string {
