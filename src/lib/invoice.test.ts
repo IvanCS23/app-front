@@ -26,9 +26,9 @@ describe("helpers comerciales de Invoice", () => {
   });
 
   it("Fase 6.28: folio CFDI visible, sin timbrar y con nota para facturas anteriores a la 6.28", () => {
-    expect(cfdiFolioView({ cfdi_series: "FAC", cfdi_folio: "FAC-19", cfdi_folio_matches_erp: true })).toEqual({ value: "FAC-19", note: null });
+    expect(cfdiFolioView({ cfdi_series: "FAC", cfdi_folio: "FAC19", cfdi_folio_matches_erp: true })).toEqual({ value: "FAC19", note: null });
     expect(cfdiFolioView({ cfdi_series: null, cfdi_folio: null, cfdi_folio_matches_erp: null })).toEqual({ value: "Sin timbrar", note: null });
-    expect(cfdiFolioView({ cfdi_series: "F", cfdi_folio: "F-10", cfdi_folio_matches_erp: false }).note).toBe("Asignado por Facturapi antes de la 6.28; no coincide con el folio ERP.");
-    expect(cfdiFolioView({ cfdi_series: "FAC", cfdi_folio: "FAC-99", cfdi_folio_matches_erp: false }).note).toBe("No coincide con el folio ERP; revisa el historial fiscal.");
+    expect(cfdiFolioView({ cfdi_series: "F", cfdi_folio: "F10", cfdi_folio_matches_erp: false }).note).toBe("Asignado por Facturapi antes de la 6.28; no coincide con el folio ERP.");
+    expect(cfdiFolioView({ cfdi_series: "FAC", cfdi_folio: "FAC99", cfdi_folio_matches_erp: false }).note).toBe("No coincide con el folio ERP; revisa el historial fiscal.");
   });
 });

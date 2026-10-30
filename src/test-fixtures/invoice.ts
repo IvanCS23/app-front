@@ -7,7 +7,7 @@ export function invoiceFixture(overrides: Partial<InvoiceListItem> = {}): Invoic
     folio: "FAC-00000003",
     cfdi_series: "FAC",
     cfdi_folio_number: 3,
-    cfdi_folio: "FAC-3",
+    cfdi_folio: "FAC3",
     cfdi_folio_matches_erp: true,
     status: "issued",
     client_name: "Comercializadora del Centro",

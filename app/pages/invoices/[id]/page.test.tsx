@@ -71,21 +71,21 @@ describe("detalle comercial de factura", () => {
   });
 
   it("Fase 6.28: muestra el folio CFDI junto al folio interno", async () => {
-    vi.mocked(invoices.getInvoiceDetail).mockResolvedValue(invoiceDetailFixture({ folio: "FAC-00000019", cfdi_series: "FAC", cfdi_folio_number: 19, cfdi_folio: "FAC-19", cfdi_folio_matches_erp: true }));
+    vi.mocked(invoices.getInvoiceDetail).mockResolvedValue(invoiceDetailFixture({ folio: "FAC-00000019", cfdi_series: "FAC", cfdi_folio_number: 19, cfdi_folio: "FAC19", cfdi_folio_matches_erp: true }));
     render(<InvoiceDetailPage />);
 
     const summary = await screen.findByRole("region", { name: "Resumen ERP" });
-    expect(within(summary).getByText("Folio CFDI").nextSibling).toHaveTextContent("FAC-19");
+    expect(within(summary).getByText("Folio CFDI").nextSibling).toHaveTextContent("FAC19");
     expect(within(summary).getByText("FAC-00000019")).toBeInTheDocument();
     expect(within(summary).queryByText(/antes de la 6.28/)).not.toBeInTheDocument();
   });
 
   it("Fase 6.28: una factura anterior a la 6.28 muestra su folio de Facturapi con una nota", async () => {
-    vi.mocked(invoices.getInvoiceDetail).mockResolvedValue(invoiceDetailFixture({ folio: "FAC-00000019", cfdi_series: "F", cfdi_folio_number: 10, cfdi_folio: "F-10", cfdi_folio_matches_erp: false }));
+    vi.mocked(invoices.getInvoiceDetail).mockResolvedValue(invoiceDetailFixture({ folio: "FAC-00000019", cfdi_series: "F", cfdi_folio_number: 10, cfdi_folio: "F10", cfdi_folio_matches_erp: false }));
     render(<InvoiceDetailPage />);
 
     const summary = await screen.findByRole("region", { name: "Resumen ERP" });
-    expect(within(summary).getByText("F-10")).toBeInTheDocument();
+    expect(within(summary).getByText("F10")).toBeInTheDocument();
     expect(within(summary).getByText("Asignado por Facturapi antes de la 6.28; no coincide con el folio ERP.")).toBeInTheDocument();
   });
 

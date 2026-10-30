@@ -58,8 +58,8 @@ describe("mapeo fiscal", () => {
   });
 
   it("Fase 6.28: el aviso de folio distinto muestra el esperado y el timbrado", () => {
-    const mismatch: InvoicePacTimelineEvent = { id: 2, type: "cfdi_folio_mismatch", occurred_at: null, pac_status: null, cancellation_status: null, issue_status: null, pac_code: null, context: { expected_folio: "FAC-19", received_folio: "FAC-99" } };
-    expect(getTimelineLabel(mismatch)).toBe("El CFDI se timbró con un folio distinto al del ERP (esperado FAC-19, timbrado FAC-99)");
+    const mismatch: InvoicePacTimelineEvent = { id: 2, type: "cfdi_folio_mismatch", occurred_at: null, pac_status: null, cancellation_status: null, issue_status: null, pac_code: null, context: { expected_folio: "FAC19", received_folio: "FAC99" } };
+    expect(getTimelineLabel(mismatch)).toBe("El CFDI se timbró con un folio distinto al del ERP (esperado FAC19, timbrado FAC99)");
     expect(getTimelineLabel({ ...mismatch, context: {} })).toBe("El CFDI se timbró con un folio distinto al del ERP");
   });
 
