@@ -1,4 +1,5 @@
 import { API_URL } from "@/src/config/api";
+import { PPD_NOT_AVAILABLE_MESSAGE } from "@/src/lib/sale";
 import { clearSession } from "@/src/services/auth.services";
 import { getAuthHeaders, translateApiMessage } from "@/src/services/http";
 import type {
@@ -20,12 +21,27 @@ export class InvoiceApiError extends Error {
   }
 }
 
+/**
+ * El 422 INVOICE_NOT_READY_FOR_PAC sólo trae {code, field} por motivo; estos
+ * motivos tienen una explicación propia para el usuario.
+ */
+const NOT_READY_MESSAGES: Record<string, string> = {
+  INVOICE_PPD_NOT_AVAILABLE: PPD_NOT_AVAILABLE_MESSAGE,
+};
+
+function notReadyMessage(body: InvoiceApiErrorBody | null): string | null {
+  if (body?.code !== "INVOICE_NOT_READY_FOR_PAC" || !Array.isArray(body.errors)) return null;
+  const messages = body.errors.map((error) => NOT_READY_MESSAGES[error.code]).filter((message): message is string => Boolean(message));
+  return messages.length > 0 ? `${body.message ?? "La factura no está lista para emisión fiscal."} ${messages.join(" ")}` : null;
+}
+
 async function parseError(response: Response): Promise<InvoiceApiError> {
   const body = (await response.json().catch(() => null)) as InvoiceApiErrorBody | null;
   const fallback = response.status === 403
     ? "No tienes permisos para realizar esta acción."
     : "No fue posible completar la operación fiscal.";
-  return new InvoiceApiError(translateApiMessage(body?.message, response.status, fallback), response.status, body?.code ?? null);
+  const message = notReadyMessage(body) ?? translateApiMessage(body?.message, response.status, fallback);
+  return new InvoiceApiError(message, response.status, body?.code ?? null);
 }
 
 function handleUnauthorized(response: Response): void {

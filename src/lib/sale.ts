@@ -38,15 +38,21 @@ export function paymentFormOptions(forms: { code: string; description: string }[
   return options;
 }
 
-export const paymentMethodOptions: { value: PaymentMethod; label: string }[] = [
+/** Fase 6.28: mismo texto que el backend (SalePaymentRules::PPD_NOT_AVAILABLE_MESSAGE). */
+export const PPD_NOT_AVAILABLE_MESSAGE = "El método de pago PPD (parcialidades o diferido) aún no está disponible: requiere el complemento de pago, que se habilitará en una fase posterior. Usa PUE.";
+
+/** Fase 6.28: PPD se muestra deshabilitado hasta que exista el complemento de pago. */
+export const paymentMethodOptions: { value: PaymentMethod; label: string; disabled?: boolean }[] = [
   { value: "PUE", label: "PUE - Pago en una sola exhibición" },
-  { value: "PPD", label: "PPD - Pago en parcialidades o diferido" },
+  { value: "PPD", label: "PPD - Pago en parcialidades o diferido (próximamente)", disabled: true },
 ];
 
-/** Misma regla que el backend (SalePaymentRules): PPD exige 99 y PUE no la admite. */
+/** Misma regla que el backend (SalePaymentRules): PUE no admite la forma 99; PPD no se admite (Fase 6.28). */
 export function paymentCombinationError(form: string | null, method: PaymentMethod | null): string | null {
+  // Fase 6.28: una venta guardada antes del bloqueo puede traer PPD.
+  if (method === "PPD") return PPD_NOT_AVAILABLE_MESSAGE;
   if (!form || !method) return null;
-  if (method === "PPD" && form !== "99") return "Con método de pago PPD la forma de pago debe ser 99 (Por definir).";
+  // La regla PPD → 99 vuelve cuando se habilite PPD (sigue en SalePaymentRules).
   if (method === "PUE" && form === "99") return "Con método de pago PUE la forma de pago no puede ser 99 (Por definir).";
   return null;
 }
@@ -72,6 +78,7 @@ const READINESS_VIEWS: Record<string, ReadinessIssueView> = {
   SALE_PAYMENT_METHOD_MISSING: { message: "Falta el método de pago (ni la empresa tiene uno predeterminado).", ...PAYMENT_FIX },
   SALE_PPD_REQUIRES_FORM_99: { message: "Con método de pago PPD la forma de pago debe ser 99 (Por definir).", ...PAYMENT_FIX },
   SALE_PUE_FORBIDS_FORM_99: { message: "Con método de pago PUE la forma de pago no puede ser 99 (Por definir).", ...PAYMENT_FIX },
+  SALE_PPD_NOT_AVAILABLE: { message: PPD_NOT_AVAILABLE_MESSAGE, ...PAYMENT_FIX },
   CLIENT_NAME_MISSING: { message: "El cliente no tiene nombre o razón social.", ...CLIENTS_FIX },
   CLIENT_RFC_MISSING: { message: "El cliente no tiene RFC.", ...CLIENTS_FIX },
   CLIENT_POSTAL_CODE_MISSING: { message: "El cliente no tiene código postal.", ...CLIENTS_FIX },

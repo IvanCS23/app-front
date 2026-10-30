@@ -27,6 +27,30 @@ describe("cliente API fiscal", () => {
     expect(init?.body).toBe(JSON.stringify({ confirm: true }));
   });
 
+  it("Fase 6.28: el 422 por PPD explica que falta el complemento de pago", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({
+      message: "La factura no está lista para emisión fiscal.",
+      code: "INVOICE_NOT_READY_FOR_PAC",
+      errors: [{ code: "INVOICE_PPD_NOT_AVAILABLE", field: "payment_method" }],
+    }), { status: 422, headers: { "Content-Type": "application/json" } }));
+
+    await expect(issueInvoiceBusiness(3)).rejects.toMatchObject({
+      status: 422,
+      code: "INVOICE_NOT_READY_FOR_PAC",
+      message: expect.stringMatching(/^La factura no está lista para emisión fiscal\. El método de pago PPD .*complemento de pago/),
+    });
+  });
+
+  it("un 422 por otros motivos conserva el mensaje del backend", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({
+      message: "La factura no está lista para emisión fiscal.",
+      code: "INVOICE_NOT_READY_FOR_PAC",
+      errors: [{ code: "INVOICE_CLIENT_RFC_MISSING", field: "client_rfc" }],
+    }), { status: 422, headers: { "Content-Type": "application/json" } }));
+
+    await expect(issueInvoiceBusiness(3)).rejects.toMatchObject({ message: "La factura no está lista para emisión fiscal." });
+  });
+
   it("usa endpoints empresariales con payload mínimo y conserva los PAC legacy", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ id: 3 }), { status: 200, headers: { "Content-Type": "application/json" } })));
 

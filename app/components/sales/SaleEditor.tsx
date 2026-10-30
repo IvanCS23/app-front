@@ -280,8 +280,9 @@ export default function SaleEditor({ saleId }: { saleId?: number }) {
               <label htmlFor="sale-payment-method" className="mb-2 block text-sm font-semibold text-[#0F172A]">Método de pago</label>
               <select id="sale-payment-method" value={header.paymentMethod} onChange={(event) => setHeader({ ...header, paymentMethod: event.target.value as HeaderForm["paymentMethod"] })} disabled={!editable} className="box box-input">
                 <option value="">Predeterminado de la empresa</option>
-                {paymentMethodOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                {paymentMethodOptions.map((option) => <option key={option.value} value={option.value} disabled={option.disabled}>{option.label}</option>)}
               </select>
+              <p className="mt-1 text-xs text-[#64748B]">PPD estará disponible cuando el sistema emita el complemento de pago.</p>
             </div>
             {paymentError && <p className="text-sm font-medium text-red-600 sm:col-span-2" role="alert">{paymentError}</p>}
             <div className="sm:col-span-2">

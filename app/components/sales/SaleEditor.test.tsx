@@ -52,23 +52,40 @@ describe("nueva venta", () => {
     render(<SaleEditor />);
 
     fireEvent.change(await screen.findByLabelText("Cliente"), { target: { value: "3" } });
-    fireEvent.change(screen.getByLabelText("Forma de pago"), { target: { value: "99" } });
-    fireEvent.change(screen.getByLabelText("Método de pago"), { target: { value: "PPD" } });
+    fireEvent.change(screen.getByLabelText("Forma de pago"), { target: { value: "03" } });
+    fireEvent.change(screen.getByLabelText("Método de pago"), { target: { value: "PUE" } });
     fireEvent.click(screen.getByRole("button", { name: /Crear venta/ }));
 
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/pages/sales/31"));
-    expect(sales.createSale).toHaveBeenCalledWith({ client_id: 3, notes: null, payment_form: "99", payment_method: "PPD" });
+    expect(sales.createSale).toHaveBeenCalledWith({ client_id: 3, notes: null, payment_form: "03", payment_method: "PUE" });
   });
 
   it("avisa antes de enviar si la forma y el método son incompatibles", async () => {
     render(<SaleEditor />);
 
     fireEvent.change(await screen.findByLabelText("Cliente"), { target: { value: "3" } });
-    fireEvent.change(screen.getByLabelText("Forma de pago"), { target: { value: "03" } });
-    fireEvent.change(screen.getByLabelText("Método de pago"), { target: { value: "PPD" } });
+    fireEvent.change(screen.getByLabelText("Forma de pago"), { target: { value: "99" } });
+    fireEvent.change(screen.getByLabelText("Método de pago"), { target: { value: "PUE" } });
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Con método de pago PPD");
+    expect(screen.getByRole("alert")).toHaveTextContent("Con método de pago PUE");
     expect(screen.getByRole("button", { name: /Crear venta/ })).toBeDisabled();
+  });
+
+  it("Fase 6.28: PPD aparece deshabilitado y explica que falta el complemento de pago", async () => {
+    render(<SaleEditor />);
+
+    const ppd = await screen.findByRole("option", { name: /PPD - Pago en parcialidades o diferido \(próximamente\)/ });
+    expect(ppd).toBeDisabled();
+    expect(screen.getByRole("option", { name: /PUE - Pago en una sola exhibición/ })).toBeEnabled();
+    expect(screen.getByText(/PPD estará disponible cuando el sistema emita el complemento de pago/)).toBeInTheDocument();
+  });
+
+  it("Fase 6.28: una venta guardada con PPD muestra el aviso y no deja guardar", async () => {
+    vi.mocked(sales.getSale).mockResolvedValue(saleFixture({ payment_form: "99", payment_method: "PPD" }));
+    render(<SaleEditor saleId={7} />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("requiere el complemento de pago");
+    expect(screen.getByRole("button", { name: /Guardar datos/ })).toBeDisabled();
   });
 });
 
