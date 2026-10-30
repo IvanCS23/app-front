@@ -13,7 +13,7 @@ vi.mock("@/src/services/invoice-billing.services", async (importOriginal) => {
   return {
     ...original,
     getInvoiceBilling: vi.fn(), getInvoiceSummary: vi.fn(), issueInvoicePac: vi.fn(), issueInvoiceBusiness: vi.fn(),
-    reconcileInvoicePac: vi.fn(), fetchInvoiceArtifacts: vi.fn(), cancelInvoicePac: vi.fn(), cancelInvoiceBusiness: vi.fn(),
+    reconcileInvoicePac: vi.fn(), revertInvoiceIssue: vi.fn(), fetchInvoiceArtifacts: vi.fn(), cancelInvoicePac: vi.fn(), cancelInvoiceBusiness: vi.fn(),
     fetchCancellationReceipt: vi.fn(), downloadCfdiXml: vi.fn(), downloadCfdiPdf: vi.fn(),
     downloadCancellationReceiptXml: vi.fn(), downloadCancellationReceiptPdf: vi.fn(),
   };
@@ -21,10 +21,10 @@ vi.mock("@/src/services/invoice-billing.services", async (importOriginal) => {
 
 const summary: InvoiceSummary = { id: 3, folio: "FAC-00000003", total: "1160.00", currency: "MXN", client_name: "Cliente de prueba" };
 
-function fixture(kind: "valid" | "unstamped" | "canceled" | "reconcile" = "valid"): InvoiceBilling {
+function fixture(kind: "valid" | "unstamped" | "canceled" | "reconcile" | "rejected" = "valid"): InvoiceBilling {
   const base: InvoiceBilling = {
     id: 3, folio: "FAC-00000003", status: "issued",
-    actions: { can_issue: false, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "pac" },
+    actions: { can_issue: false, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "pac", can_revert_issue: false },
     pac: { mode: "test", provider: "facturapi", status: "valid", cancellation_status: null, issue_status: "succeeded", reconciliation_required: false, last_sync_at: "2026-08-13T12:00:00Z", organization_status: "current", organization_archived_at: null },
     cfdi: { uuid: "96013e83-154b-4153-8e61-c38b8966e560", stamped_at: "2026-08-13T12:00:00Z", artifacts: { status: "stored", xml_available: true, pdf_available: true, downloaded_at: "2026-08-13T12:01:00Z" } },
     cancellation_receipt: { status: null, available: false, downloaded_at: null, error_code: null },
@@ -34,9 +34,11 @@ function fixture(kind: "valid" | "unstamped" | "canceled" | "reconcile" = "valid
       { id: 3, type: "future_event", occurred_at: "2026-08-13T12:01:00Z", pac_status: "valid", cancellation_status: null, issue_status: "succeeded", pac_code: null, context: {} },
     ],
   };
-  if (kind === "unstamped") return { ...base, status: "ready", actions: { can_issue: true, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "erp_only" }, pac: { ...base.pac, status: null, issue_status: null }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
-  if (kind === "canceled") return { ...base, status: "cancelled", actions: { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null }, pac: { ...base.pac, status: "canceled", cancellation_status: "accepted" }, cancellation_receipt: { status: "stored", available: true, downloaded_at: "2026-08-13T13:00:00Z", error_code: null } };
-  if (kind === "reconcile") return { ...base, actions: { can_issue: false, can_cancel: false, can_reconcile: true, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null }, pac: { ...base.pac, status: "pending", issue_status: "reconciliation_required", reconciliation_required: true }, cfdi: { ...base.cfdi, uuid: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } } };
+  if (kind === "unstamped") return { ...base, status: "ready", actions: { can_issue: true, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "erp_only", can_revert_issue: false }, pac: { ...base.pac, status: null, issue_status: null }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
+  if (kind === "canceled") return { ...base, status: "cancelled", actions: { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false }, pac: { ...base.pac, status: "canceled", cancellation_status: "accepted" }, cancellation_receipt: { status: "stored", available: true, downloaded_at: "2026-08-13T13:00:00Z", error_code: null } };
+  if (kind === "reconcile") return { ...base, actions: { can_issue: false, can_cancel: false, can_reconcile: true, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false }, pac: { ...base.pac, status: "pending", issue_status: "reconciliation_required", reconciliation_required: true }, cfdi: { ...base.cfdi, uuid: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } } };
+  // Fase 6.29: issued sin CFDI, con el timbrado rechazado.
+  if (kind === "rejected") return { ...base, status: "issued", actions: { can_issue: true, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: true }, pac: { ...base.pac, status: null, issue_status: "failed" }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
   return base;
 }
 
@@ -272,7 +274,7 @@ describe("panel fiscal de factura", () => {
   ] as const)("Fase 6.27: una factura de organización %s explica por qué no hay acciones fiscales", async (organization_status, title, description) => {
     const blocked = fixture("valid");
     blocked.pac = { ...blocked.pac, organization_status };
-    blocked.actions = { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null };
+    blocked.actions = { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false };
     arrange(blocked);
     const alert = await screen.findByRole("alert");
     expect(within(alert).getByText(title)).toBeInTheDocument();
@@ -304,6 +306,44 @@ describe("panel fiscal de factura", () => {
     await user.click(await screen.findByRole("button", { name: "Obtener acuse" }));
     expect(api.fetchCancellationReceipt).toHaveBeenCalledWith(3);
     expect(await screen.findByRole("button", { name: "Descargar XML acuse" })).toBeInTheDocument();
+  });
+
+  it("Fase 6.29: una factura con el timbrado rechazado ofrece Regresar a lista con confirmación", async () => {
+    const user = userEvent.setup();
+    const onSettled = vi.fn();
+    vi.mocked(api.revertInvoiceIssue).mockResolvedValue({ ...fixture("unstamped"), status: "ready" });
+    vi.mocked(api.getInvoiceBilling).mockResolvedValue(fixture("rejected"));
+    vi.mocked(api.getInvoiceSummary).mockResolvedValue(summary);
+    render(<InvoiceFiscalPanel invoiceId={3} onFiscalActionSettled={onSettled} />);
+
+    await user.click(await screen.findByRole("button", { name: "Regresar a lista" }));
+    const dialog = screen.getByRole("dialog", { name: "Regresar a lista" });
+    expect(dialog).toHaveTextContent("eliminarla y volver a facturar la venta");
+    expect(dialog).toHaveTextContent("El último intento de timbrado fue rechazado");
+    await user.click(within(dialog).getByRole("button", { name: "Regresar a lista" }));
+
+    await waitFor(() => expect(api.revertInvoiceIssue).toHaveBeenCalledWith(3));
+    expect(await screen.findByText("La factura regresó a Lista para emitir")).toBeInTheDocument();
+    expect(onSettled).toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "Regresar a lista" })).not.toBeInTheDocument();
+  });
+
+  it("Fase 6.29: si ya no puede regresar, explica el motivo y recarga el estado", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.revertInvoiceIssue).mockRejectedValue(new api.InvoiceApiError("409", 409, "INVOICE_CANNOT_BE_REVERTED"));
+    arrange(fixture("rejected"));
+
+    await user.click(await screen.findByRole("button", { name: "Regresar a lista" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Regresar a lista" })).getByRole("button", { name: "Regresar a lista" }));
+
+    expect(await screen.findByText(/ya no puede regresar a Lista para emitir/)).toBeInTheDocument();
+    expect(api.getInvoiceBilling).toHaveBeenCalledTimes(2);
+  });
+
+  it("Fase 6.29: sin can_revert_issue no se ofrece Regresar a lista", async () => {
+    arrange(fixture("unstamped"));
+    expect(await screen.findByRole("button", { name: "Emitir factura" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Regresar a lista" })).not.toBeInTheDocument();
   });
 
   it("markup crítico es responsive y usa botones reales", async () => {

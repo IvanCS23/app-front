@@ -76,6 +76,8 @@ export interface InvoiceBusinessActions {
   /** Fase 6.22: acuse obtenible; en test se apaga tras el primer bloqueo de identidad, en live tras 3. */
   can_fetch_cancellation_receipt: boolean;
   cancellation_mode: InvoiceCancellationMode;
+  /** Fase 6.29: issued sin CFDI, con el timbrado rechazado: puede regresar a ready. */
+  can_revert_issue: boolean;
 }
 
 export interface InvoiceSummary {

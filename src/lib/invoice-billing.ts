@@ -71,6 +71,7 @@ const timelineLabels: Record<string, string> = {
   cancellation_receipt_identity_mismatch: "Problema de identidad del acuse",
   organization_archived: "Factura archivada: organización fiscal inaccesible",
   cfdi_folio_mismatch: "El CFDI se timbró con un folio distinto al del ERP",
+  issue_reverted: "La factura regresó a Lista para emitir",
 };
 
 /**

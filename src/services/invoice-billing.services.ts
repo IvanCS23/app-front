@@ -82,6 +82,11 @@ export function issueInvoiceBusiness(id: number): Promise<InvoiceBilling> {
   return requestJson(`/api/invoices/${id}/operations/issue`, { method: "POST", body: JSON.stringify({ confirm: true }) });
 }
 
+/** Fase 6.29: "Regresar a lista" de una factura issued sin CFDI. */
+export function revertInvoiceIssue(id: number): Promise<InvoiceBilling> {
+  return requestJson(`/api/invoices/${id}/operations/revert-issue`, { method: "POST", body: JSON.stringify({ confirm: true }) });
+}
+
 export function reconcileInvoicePac(id: number): Promise<InvoiceBilling> {
   return requestJson(`/api/invoices/${id}/pac/reconcile`, { method: "POST" });
 }
