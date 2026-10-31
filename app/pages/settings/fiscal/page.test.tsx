@@ -14,6 +14,8 @@ vi.mock("@/src/services/company.services", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/src/services/company.services")>()),
   getCompanyFiscal: vi.fn(),
   updateCompanyFiscal: vi.fn(),
+  getCompanyLogo: vi.fn(),
+  uploadCompanyLogo: vi.fn(),
 }));
 vi.mock("@/src/services/sat.services", () => ({ getSatCatalogs: vi.fn() }));
 
@@ -30,8 +32,11 @@ function fiscal(overrides: Partial<CompanyFiscal> = {}): CompanyFiscal {
       { code: "COMPANY_POSTAL_CODE_MISSING", field: "postal_code", message: "Falta el código postal del domicilio fiscal (lugar de expedición)." },
     ],
     can_edit: true,
+    logo: { available: false, updated_at: null },
     organization: {
       legal_name: "TECNOLOGIAS S.A",
+      trade_name: "Mi Empresa",
+      has_logo: false,
       legal_tax_id: "XIA190128J61",
       legal_tax_system: "601",
       legal_zip: "06010",
@@ -141,5 +146,77 @@ describe("Datos fiscales (Fase 6.27b)", () => {
     render(<CompanyFiscalPage />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent("No tienes permiso para realizar esta acción");
+  });
+});
+
+describe("Logotipo del PDF (Fase 6.29)", () => {
+  beforeEach(() => {
+    vi.mocked(satServices.getSatCatalogs).mockResolvedValue(satCatalogsFixture());
+    vi.mocked(companyServices.getCompanyLogo).mockReset().mockResolvedValue(null);
+    vi.mocked(companyServices.uploadCompanyLogo).mockReset();
+    globalThis.URL.createObjectURL = vi.fn(() => "blob:logo");
+    globalThis.URL.revokeObjectURL = vi.fn();
+  });
+
+  const png = (size = 1024) => new File([new Uint8Array(size)], "logo.png", { type: "image/png" });
+
+  it("muestra el nombre comercial del PDF y avisa si Facturapi tiene un logotipo ajeno", async () => {
+    await renderPage(fiscal({ organization: { ...fiscal().organization!, has_logo: true } }));
+
+    expect(screen.getByText("Nombre comercial en el PDF").nextSibling).toHaveTextContent("Mi Empresa");
+    expect(screen.getByText(/Facturapi tiene un logotipo que no se subió desde aquí/)).toBeInTheDocument();
+  });
+
+  it("muestra la vista previa de la copia privada cuando hay logotipo", async () => {
+    vi.mocked(companyServices.getCompanyLogo).mockResolvedValue(new Blob(["x"], { type: "image/png" }));
+    await renderPage(fiscal({ logo: { available: true, updated_at: "2026-10-30T21:00:00Z" } }));
+
+    expect(await screen.findByRole("img", { name: "Logotipo actual de la empresa" })).toHaveAttribute("src", "blob:logo");
+    expect(screen.getByLabelText("Reemplazar logotipo")).toBeInTheDocument();
+  });
+
+  it("valida tipo y tamaño antes de subir", async () => {
+    await renderPage();
+
+    fireEvent.change(screen.getByLabelText("Subir logotipo"), { target: { files: [new File(["x"], "logo.pdf", { type: "application/pdf" })] } });
+    expect(screen.getByText("El logotipo debe ser una imagen JPG o PNG.")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Subir logotipo"), { target: { files: [png(500 * 1024 + 1)] } });
+    expect(screen.getByText("El logotipo no puede pesar más de 500 KB.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Subir logotipo" })).toBeDisabled();
+    expect(companyServices.uploadCompanyLogo).not.toHaveBeenCalled();
+  });
+
+  it("sube el logotipo, actualiza la pantalla y confirma", async () => {
+    const file = png();
+    vi.mocked(companyServices.uploadCompanyLogo).mockResolvedValue(fiscal({ logo: { available: true, updated_at: "2026-10-30T21:00:00Z" }, organization: { ...fiscal().organization!, has_logo: true } }));
+    vi.mocked(companyServices.getCompanyLogo).mockResolvedValue(new Blob(["x"], { type: "image/png" }));
+    await renderPage();
+
+    fireEvent.change(screen.getByLabelText("Subir logotipo"), { target: { files: [file] } });
+    fireEvent.click(screen.getByRole("button", { name: "Subir logotipo" }));
+
+    await waitFor(() => expect(companyServices.uploadCompanyLogo).toHaveBeenCalledWith(file));
+    expect(await screen.findByText("Logotipo guardado en Facturapi. Se usará en los PDF nuevos.")).toBeInTheDocument();
+    expect(await screen.findByRole("img", { name: "Logotipo actual de la empresa" })).toBeInTheDocument();
+    expect(screen.queryByText(/Facturapi tiene un logotipo que no se subió desde aquí/)).not.toBeInTheDocument();
+  });
+
+  it("muestra el rechazo de Facturapi sin cambiar la pantalla", async () => {
+    vi.mocked(companyServices.uploadCompanyLogo).mockRejectedValue(new CompanyApiError("Facturapi rechazó el logotipo: formato no válido", 422, "COMPANY_LOGO_REJECTED"));
+    await renderPage();
+
+    fireEvent.change(screen.getByLabelText("Subir logotipo"), { target: { files: [png()] } });
+    fireEvent.click(screen.getByRole("button", { name: "Subir logotipo" }));
+
+    expect(await screen.findByText("Facturapi rechazó el logotipo: formato no válido")).toBeInTheDocument();
+    expect(screen.getByText("Sin logotipo propio.")).toBeInTheDocument();
+  });
+
+  it("un contador ve el logotipo pero no puede cambiarlo", async () => {
+    await renderPage(fiscal({ can_edit: false }));
+
+    expect(screen.getByText("Sólo un administrador puede cambiar el logotipo.")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Subir logotipo")).not.toBeInTheDocument();
   });
 });

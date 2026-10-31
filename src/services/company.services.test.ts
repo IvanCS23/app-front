@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CompanyApiError, getCompanyFiscal, updateCompanyFiscal, uploadCompanyCsd } from "./company.services";
+import { CompanyApiError, getCompanyFiscal, getCompanyLogo, updateCompanyFiscal, uploadCompanyCsd, uploadCompanyLogo } from "./company.services";
 import type { CompanyFiscalInput } from "@/src/types/company";
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -91,5 +91,43 @@ describe("servicio de datos fiscales de la empresa (Fase 6.27b)", () => {
     expect(body.get("csd_password")).toBe("secreto-csd");
     expect([...body.keys()].sort()).toEqual(["cer", "csd_password", "key"]);
     expect((init?.headers as Record<string, string>)["Content-Type"]).toBeUndefined();
+  });
+});
+
+describe("logotipo del PDF (Fase 6.29)", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    localStorage.setItem("api_token", "token-empresa");
+    vi.restoreAllMocks();
+  });
+
+  it("sube el logotipo como multipart en el campo logo, con Bearer y sin Content-Type manual", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ logo: { available: true } }));
+    const file = new File(["png"], "logo.png", { type: "image/png" });
+
+    await uploadCompanyLogo(file);
+
+    const [url, init] = fetchMock.mock.calls[0];
+    const body = init?.body as FormData;
+    expect(String(url)).toMatch(/\/api\/company\/logo$/);
+    expect(init?.method).toBe("POST");
+    expect(body.get("logo")).toBe(file);
+    expect((init?.headers as Record<string, string>).Authorization).toBe("Bearer token-empresa");
+    expect((init?.headers as Record<string, string>)["Content-Type"]).toBeUndefined();
+  });
+
+  it("propaga el rechazo de Facturapi con su código", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ code: "COMPANY_LOGO_REJECTED", message: "Facturapi rechazó el logotipo: formato" }, 422));
+
+    await expect(uploadCompanyLogo(new File(["x"], "logo.png", { type: "image/png" }))).rejects.toMatchObject({ code: "COMPANY_LOGO_REJECTED", status: 422 });
+  });
+
+  it("la vista previa devuelve la imagen, o null si no hay logotipo", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(new Blob(["png"], { type: "image/png" }), { status: 200, headers: { "Content-Type": "image/png" } }))
+      .mockResolvedValueOnce(jsonResponse({ message: "La empresa no tiene un logotipo cargado." }, 404));
+
+    expect(await getCompanyLogo()).toBeInstanceOf(Blob);
+    expect(await getCompanyLogo()).toBeNull();
   });
 });

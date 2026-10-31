@@ -78,3 +78,32 @@ export async function uploadCompanyCsd(cer: File, key: File, password: string): 
 
   return (await response.json()) as CompanyFiscal;
 }
+
+/** Fase 6.29: límites de Facturapi para el logotipo del PDF. */
+export const LOGO_MAX_BYTES = 500 * 1024;
+export const LOGO_TYPES = ["image/png", "image/jpeg"];
+
+/**
+ * Fase 6.29: sube el logotipo del PDF. El backend lo envía primero a
+ * Facturapi y sólo guarda la copia local si Facturapi lo acepta.
+ */
+export async function uploadCompanyLogo(logo: File): Promise<CompanyFiscal> {
+  const body = new FormData();
+  body.append("logo", logo);
+
+  const response = await fetch(`${API_URL}/api/company/logo`, { method: "POST", headers: getAuthHeaders(), body });
+
+  if (!response.ok) throw await toError(response, "No fue posible subir el logotipo.");
+
+  return (await response.json()) as CompanyFiscal;
+}
+
+/** Fase 6.29: copia privada del logotipo para la vista previa; null si no hay. */
+export async function getCompanyLogo(): Promise<Blob | null> {
+  const response = await fetch(`${API_URL}/api/company/logo`, { headers: getAuthHeaders() });
+
+  if (response.status === 404) return null;
+  if (!response.ok) throw await toError(response, "No fue posible cargar el logotipo.");
+
+  return response.blob();
+}

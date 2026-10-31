@@ -14,6 +14,10 @@ export interface CompanyAddress {
 /** Copia local de la organización de Facturapi (sin llave ni id). */
 export interface CompanyOrganizationStatus {
   legal_name: string | null;
+  /** Fase 6.29: nombre comercial (legal.name) que imprime el PDF. */
+  trade_name: string | null;
+  /** Fase 6.29: Facturapi tiene un logotipo cargado (el que imprime el PDF). */
+  has_logo: boolean | null;
   legal_tax_id: string | null;
   legal_tax_system: string | null;
   legal_zip: string | null;
@@ -38,6 +42,8 @@ export interface CompanyFiscal {
   address: CompanyAddress;
   issues: FiscalIssue[];
   can_edit: boolean;
+  /** Fase 6.29: copia privada del logotipo subido desde aquí. */
+  logo: { available: boolean; updated_at: string | null };
   organization: CompanyOrganizationStatus | null;
 }
 

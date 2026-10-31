@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Building2, FileKey, Loader2, ShieldCheck } from "lucide-react";
 import AppLayout from "@/app/components/layout/AppLayout";
+import CompanyLogoCard from "@/app/components/settings/CompanyLogoCard";
 import Toast, { type ToastData } from "@/app/components/ui/Toast";
 import { CompanyApiError, getCompanyFiscal, updateCompanyFiscal } from "@/src/services/company.services";
 import { getSatCatalogs } from "@/src/services/sat.services";
@@ -249,6 +250,10 @@ export default function CompanyFiscalPage() {
                       <dd>{organization.legal_name ?? "—"}</dd>
                     </div>
                     <div>
+                      <dt className="font-semibold text-[#475569]">Nombre comercial en el PDF</dt>
+                      <dd>{organization.trade_name ?? "—"}</dd>
+                    </div>
+                    <div>
                       <dt className="font-semibold text-[#475569]">Régimen y C.P.</dt>
                       <dd>
                         {organization.legal_tax_system ?? "—"} · {organization.legal_zip ?? "—"}
@@ -275,6 +280,16 @@ export default function CompanyFiscalPage() {
                   <p className="text-sm text-[#64748B]">Sin CSD cargado. Se administra en Sellos digitales.</p>
                 )}
               </section>
+              {data && organization !== null && (
+                <CompanyLogoCard
+                  data={data}
+                  canEdit={canEdit}
+                  onUploaded={(next) => {
+                    setData(next);
+                    setToast({ message: "Logotipo guardado en Facturapi. Se usará en los PDF nuevos.", type: "success" });
+                  }}
+                />
+              )}
             </aside>
           </div>
         )}
