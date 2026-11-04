@@ -18,6 +18,9 @@ export interface Client {
   id?: number;
   name: string;
   email: string;
+  /** Fase 6.30: destinatarios adicionales al enviar facturas por correo. */
+  email_optional_1?: string | null;
+  email_optional_2?: string | null;
   rfc: string;
   codigo_postal: string;
   regimen_fiscal: string;

@@ -129,3 +129,50 @@ describe("Clientes sin funciones simuladas", () => {
     expect(screen.queryByRole("button", { name: /procesar archivos|eliminar todos/i })).not.toBeInTheDocument();
   });
 });
+
+/** Fase 6.30: los correos opcionales se guardan, se cargan al editar y se validan. */
+describe("Correos opcionales del cliente", () => {
+  beforeEach(() => {
+    vi.mocked(satServices.getSatCatalogs).mockResolvedValue(satCatalogsFixture());
+    vi.mocked(clientServices.getClients).mockResolvedValue([{ ...validClient, email_optional_1: "contador@example.com", email_optional_2: null }]);
+    vi.mocked(clientServices.createClient).mockReset().mockResolvedValue(validClient);
+    vi.mocked(clientServices.updateClient).mockReset().mockResolvedValue(validClient);
+  });
+
+  async function fillNewClient() {
+    render(<ClientsPage />);
+    fireEvent.click(await screen.findByRole("button", { name: /agregar cliente/i }));
+    await waitFor(() => expect(screen.getByLabelText("Régimen fiscal")).not.toBeDisabled());
+    fireEvent.change(screen.getByPlaceholderText("Nombre o razón social del cliente"), { target: { value: "Nuevo" } });
+    fireEvent.change(screen.getByPlaceholderText("RFC del cliente"), { target: { value: "DMI010203AB1" } });
+    fireEvent.change(screen.getByLabelText("Régimen fiscal"), { target: { value: "601" } });
+    fireEvent.change(screen.getByLabelText("Uso de la factura"), { target: { value: "G03" } });
+    fireEvent.change(screen.getAllByPlaceholderText("correo@ejemplo.com")[0], { target: { value: "n@example.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Código postal"), { target: { value: "85900" } });
+  }
+
+  it("envía los correos opcionales al crear", async () => {
+    await fillNewClient();
+    fireEvent.change(screen.getByLabelText("E-Mail opcional No.1"), { target: { value: " compras@example.com " } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar Cliente" }));
+
+    await waitFor(() => expect(clientServices.createClient).toHaveBeenCalledWith(expect.objectContaining({ email_optional_1: "compras@example.com", email_optional_2: "" })));
+  });
+
+  it("no envía un correo opcional con formato inválido", async () => {
+    await fillNewClient();
+    fireEvent.change(screen.getByLabelText("E-Mail opcional No.2"), { target: { value: "no-es-correo" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar Cliente" }));
+
+    expect((await screen.findAllByText("El E-Mail opcional No.2 no tiene un formato válido.")).length).toBeGreaterThan(0);
+    expect(clientServices.createClient).not.toHaveBeenCalled();
+  });
+
+  it("al editar carga los correos opcionales guardados", async () => {
+    render(<ClientsPage />);
+    fireEvent.click((await screen.findAllByTitle("Editar cliente"))[0]);
+
+    expect(screen.getByLabelText("E-Mail opcional No.1")).toHaveValue("contador@example.com");
+    expect(screen.getByLabelText("E-Mail opcional No.2")).toHaveValue("");
+  });
+});

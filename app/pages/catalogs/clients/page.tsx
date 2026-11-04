@@ -16,6 +16,7 @@ import {
   Client as ClientType
 } from "@/src/services/client.services";
 import { getSatCatalogs } from "@/src/services/sat.services";
+import { isEmailAddress } from "@/src/lib/email";
 import { clientFiscalErrors, regimesFor, usesFor, type ClientFiscalInput } from "@/src/lib/sat";
 import type { FiscalIssue, SatCatalogs } from "@/src/types/sat";
 
@@ -169,7 +170,7 @@ export default function CatalogoClientes() {
   // Fase 6.26: catálogos SAT, errores por campo y problemas del cliente guardado.
   const [satCatalogs, setSatCatalogs] = useState<SatCatalogs | null>(null);
   const [satCatalogsError, setSatCatalogsError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ClientFiscalInput, string>>>({});
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ClientFiscalInput | "email_optional_1" | "email_optional_2", string>>>({});
   const [savedFiscalIssues, setSavedFiscalIssues] = useState<FiscalIssue[]>([]);
 
   useEffect(() => {
@@ -239,6 +240,9 @@ export default function CatalogoClientes() {
       uso_cfdi: clientInvoiceUsage,
       regimen_fiscal: clientTaxRegime,
       email: clientEmail,
+      // Fase 6.30: vacío los borra (el API lo guarda como null).
+      email_optional_1: clientEmailOptional1.trim(),
+      email_optional_2: clientEmailOptional2.trim(),
       codigo_postal: clientCp,
       calle: clientStreet || undefined,
       no_exterior: clientExteriorNumber || undefined,
@@ -258,8 +262,8 @@ export default function CatalogoClientes() {
     setClientInvoiceUsage(client.uso_cfdi || '');
     setClientTaxRegime(client.regimen_fiscal || '');
     setClientEmail(client.email || '');
-    setClientEmailOptional1('');
-    setClientEmailOptional2('');
+    setClientEmailOptional1(client.email_optional_1 || '');
+    setClientEmailOptional2(client.email_optional_2 || '');
     setClientCp(client.codigo_postal || '');
     setClientStreet(client.calle || '');
     setClientExteriorNumber(client.no_exterior || '');
@@ -346,7 +350,10 @@ export default function CatalogoClientes() {
     }
 
     // Fase 6.26: mismas reglas SAT que el backend (formato, catálogo y matriz).
-    const errors = clientFiscalErrors(fiscalInput, satCatalogs);
+    const errors: Partial<Record<keyof ClientFiscalInput | "email_optional_1" | "email_optional_2", string>> = clientFiscalErrors(fiscalInput, satCatalogs);
+    // Fase 6.30: los correos opcionales, si se capturan, deben ser válidos.
+    if (clientEmailOptional1.trim() && !isEmailAddress(clientEmailOptional1)) errors.email_optional_1 = "El E-Mail opcional No.1 no tiene un formato válido.";
+    if (clientEmailOptional2.trim() && !isEmailAddress(clientEmailOptional2)) errors.email_optional_2 = "El E-Mail opcional No.2 no tiene un formato válido.";
     setFieldErrors(errors);
     const firstError = Object.values(errors)[0];
     if (firstError) {
@@ -803,7 +810,10 @@ export default function CatalogoClientes() {
                     placeholder="correo@ejemplo.com"
                     className={inputStyle}
                     disabled={isSaving}
+                    aria-label="E-Mail opcional No.1"
+                    aria-invalid={Boolean(fieldErrors.email_optional_1)}
                   />
+                  <FieldError message={fieldErrors.email_optional_1} />
                 </div>
 
                 <div>
@@ -815,7 +825,10 @@ export default function CatalogoClientes() {
                     placeholder="correo@ejemplo.com"
                     className={inputStyle}
                     disabled={isSaving}
+                    aria-label="E-Mail opcional No.2"
+                    aria-invalid={Boolean(fieldErrors.email_optional_2)}
                   />
+                  <FieldError message={fieldErrors.email_optional_2} />
                 </div>
 
                 <div>
