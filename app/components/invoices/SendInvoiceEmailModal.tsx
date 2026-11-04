@@ -17,7 +17,6 @@ export interface SendInvoiceEmailModalProps {
   maxRecipients: number;
   canEdit: boolean;
   testMode: boolean;
-  canceled: boolean;
   busy: boolean;
   onClose: () => void;
   /** null = los del cliente, sin cambios (lo que puede usar Ventas). */
@@ -35,7 +34,7 @@ export default function SendInvoiceEmailModal(props: SendInvoiceEmailModalProps)
   return <SendInvoiceEmailModalContent {...props} />;
 }
 
-function SendInvoiceEmailModalContent({ resend, defaultRecipients, maxRecipients, canEdit, testMode, canceled, busy, onClose, onConfirm }: SendInvoiceEmailModalProps) {
+function SendInvoiceEmailModalContent({ resend, defaultRecipients, maxRecipients, canEdit, testMode, busy, onClose, onConfirm }: SendInvoiceEmailModalProps) {
   const [recipients, setRecipients] = useState<string[]>(defaultRecipients);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +78,6 @@ function SendInvoiceEmailModalContent({ resend, defaultRecipients, maxRecipients
           <span><span className="font-semibold">Modo de pruebas:</span> el correo se envía de verdad a estas direcciones. Usa sólo correos propios o de prueba.</span>
         </p>
       )}
-      {canceled && <p className="rounded-lg bg-[#F8FAFC] p-3 text-[#0F172A]">Este CFDI está cancelado. El cliente recibirá el XML y el PDF del comprobante cancelado; el acuse de cancelación no se incluye.</p>}
 
       {recipients.length === 0 ? (
         <p className="text-[#64748B]">{canEdit ? "Agrega al menos un destinatario." : "El cliente no tiene un correo registrado. Pide a un administrador o contador que lo agregue en Clientes."}</p>

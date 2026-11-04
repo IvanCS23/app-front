@@ -59,6 +59,12 @@ function PanelShell({ embedded, children }: { embedded: boolean; children: React
   return embedded ? <>{children}</> : <AppLayout>{children}</AppLayout>;
 }
 
+/**
+ * Fase 6.30: verificado en TEST, Facturapi envía un CFDI cancelado sin ninguna
+ * marca de cancelación; por eso no se ofrece el envío.
+ */
+const CANCELED_EMAIL_NOTICE = "Las facturas canceladas no se envían por correo: Facturapi mandaría el CFDI sin ninguna marca de cancelación y el correo diría que se emitió un comprobante. Avisa al cliente de la cancelación por otro medio.";
+
 function publicErrorMessage(error: unknown): string {
   if (!(error instanceof InvoiceApiError)) return error instanceof Error ? error.message : "No fue posible completar la operación.";
   const messages: Record<string, string> = {
@@ -73,7 +79,8 @@ function publicErrorMessage(error: unknown): string {
     PAC_RECONCILIATION_REQUIRED: "El estado fiscal requiere reconciliación antes de continuar.",
     PAC_DRAFT_NOT_READY: "El proveedor fiscal indica que el comprobante aún no está listo para timbrarse. La factura sigue en Lista para emitir; revisa sus datos fiscales.",
     // Fase 6.30: envío por correo.
-    INVOICE_EMAIL_NOT_ALLOWED: "Sólo se puede enviar por correo una factura con CFDI vigente o cancelado.",
+    INVOICE_EMAIL_NOT_ALLOWED: "Sólo se puede enviar por correo una factura con CFDI vigente.",
+    INVOICE_EMAIL_CFDI_CANCELED: CANCELED_EMAIL_NOTICE,
     INVOICE_EMAIL_NO_RECIPIENTS: "El cliente no tiene un correo válido. Agrégalo en Clientes antes de enviar.",
     INVOICE_EMAIL_RECIPIENTS_LOCKED: "Tu rol sólo puede enviar la factura a los correos registrados del cliente.",
     INVOICE_EMAIL_DAILY_LIMIT: "La empresa alcanzó el límite diario de envíos por correo. Intenta mañana.",
@@ -119,6 +126,8 @@ export default function InvoiceFiscalPanel({
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const canManagePac = user?.role === "admin" || user?.role === "accountant";
+  // Fase 6.30: los roles que envían correos ven por qué una cancelada no se envía.
+  const canSendEmails = canManagePac || user?.role === "sales";
 
   const load = useCallback(async () => {
     setPageError(null);
@@ -262,6 +271,7 @@ export default function InvoiceFiscalPanel({
                 {canFetchArtifacts && <button type="button" onClick={() => void runAction("artifacts", () => fetchInvoiceArtifacts(invoiceId), "XML y PDF disponibles") } disabled={activeAction !== null} className="app-button-secondary">{activeAction === "artifacts" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}Obtener XML/PDF</button>}
                 {billing.cfdi.artifacts.xml_available && <button type="button" onClick={() => void download("cfdi-xml", () => downloadCfdiXml(invoiceId, folio))} disabled={activeDownload !== null} className="app-button-secondary">{activeDownload === "cfdi-xml" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Descargar XML</button>}
                 {billing.cfdi.artifacts.pdf_available && <button type="button" onClick={() => void download("cfdi-pdf", () => downloadCfdiPdf(invoiceId, folio))} disabled={activeDownload !== null} className="app-button-secondary">{activeDownload === "cfdi-pdf" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Descargar PDF</button>}
+                {canSendEmails && billing.pac.status === "canceled" && <p className="w-full text-sm text-[#64748B]">{CANCELED_EMAIL_NOTICE}</p>}
                 {billing.actions.can_send_email && billing.email && <button type="button" onClick={() => setEmailOpen(true)} disabled={activeAction !== null} className="app-button-secondary"><Mail className="h-4 w-4" />{billing.email.last_sent_at ? "Reenviar por correo" : "Enviar por correo"}</button>}
                 {billing.actions.can_cancel && <button type="button" onClick={() => setCancelOpen(true)} disabled={activeAction !== null} className="inline-flex h-10 items-center justify-center gap-2 rounded-[0.625rem] border border-red-200 bg-white px-4 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50"><XCircle className="h-4 w-4" />Cancelar factura</button>}
                 {canRequestReceipt && <button type="button" onClick={() => void runAction("receipt", () => fetchCancellationReceipt(invoiceId), "Acuse de cancelación actualizado") } disabled={activeAction !== null} className="app-button-secondary">{activeAction === "receipt" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}{receiptMismatch ? "Reintentar acuse" : "Obtener acuse"}</button>}
@@ -296,7 +306,6 @@ export default function InvoiceFiscalPanel({
           maxRecipients={billing.email.max_recipients}
           canEdit={billing.actions.can_edit_email_recipients}
           testMode={billing.pac.mode === "test"}
-          canceled={billing.pac.status === "canceled"}
           busy={activeAction === "email"}
           onClose={() => setEmailOpen(false)}
           onConfirm={(recipients) => void runAction("email", () => sendInvoiceEmail(invoiceId, recipients ?? undefined), "CFDI enviado por correo")}

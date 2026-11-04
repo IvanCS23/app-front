@@ -459,14 +459,31 @@ describe("envío del CFDI por correo", () => {
     expect(within(dialog).getAllByRole("listitem")).toHaveLength(5);
   });
 
-  it("en modo test avisa que el correo se envía de verdad; con CFDI cancelado lo explica", async () => {
+  it("en modo test avisa que el correo se envía de verdad", async () => {
     const user = userEvent.setup();
-    arrange(emailable({ pac: { ...fixture("valid").pac, mode: "test", status: "canceled", cancellation_status: "accepted" } }));
+    arrange(emailable());
 
     await user.click(await screen.findByRole("button", { name: "Enviar por correo" }));
-    const dialog = screen.getByRole("dialog", { name: "Enviar por correo" });
-    expect(within(dialog).getByRole("alert")).toHaveTextContent("el correo se envía de verdad");
-    expect(dialog).toHaveTextContent("Este CFDI está cancelado");
+    expect(within(screen.getByRole("dialog", { name: "Enviar por correo" })).getByRole("alert")).toHaveTextContent("el correo se envía de verdad");
+  });
+
+  it("con el CFDI cancelado no ofrece el envío y explica por qué", async () => {
+    // El backend ya responde can_send_email=false y email=null para una cancelada.
+    arrange(fixture("canceled"));
+
+    expect(await screen.findByText(/Las facturas canceladas no se envían por correo/)).toHaveTextContent("Facturapi mandaría el CFDI sin ninguna marca de cancelación");
+    expect(screen.queryByRole("button", { name: /por correo/ })).not.toBeInTheDocument();
+  });
+
+  it("si el backend rechaza una cancelada, muestra el mismo motivo", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.sendInvoiceEmail).mockRejectedValue(new api.InvoiceApiError("409", 409, "INVOICE_EMAIL_CFDI_CANCELED"));
+    arrange(emailable());
+
+    await user.click(await screen.findByRole("button", { name: "Enviar por correo" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Enviar por correo" })).getByRole("button", { name: "Enviar por correo" }));
+
+    expect((await screen.findAllByText(/Las facturas canceladas no se envían por correo/)).length).toBeGreaterThan(0);
   });
 
   it("un resultado incierto lo explica y recarga el historial", async () => {
