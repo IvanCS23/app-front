@@ -48,6 +48,7 @@ export const SCREEN_STATUS: Readonly<Record<string, ScreenStatus>> = {
   "/pages/settings/generalSettings": "demo",
   "/pages/settings/observations": "demo",
   "/pages/settings/sellos": "real",
+  "/pages/settings/correo": "real",
   "/pages/statistics/charts": "demo",
   "/pages/statistics/reports": "demo",
 
@@ -69,7 +70,6 @@ export const SCREEN_STATUS: Readonly<Record<string, ScreenStatus>> = {
   "/pages/settings/permisos": "unavailable",
   "/pages/settings/api": "unavailable",
   "/pages/settings/webhooks": "unavailable",
-  "/pages/settings/correo": "unavailable",
   "/pages/settings/sat": "unavailable",
   "/pages/settings/seguridad/password": "unavailable",
   "/pages/settings/seguridad/autenticacion": "unavailable",

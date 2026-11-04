@@ -1,6 +1,6 @@
 import { API_URL } from "@/src/config/api";
 import { FORBIDDEN_MESSAGE, getAuthHeaders, translateApiMessage } from "@/src/services/http";
-import type { CompanyFiscal, CompanyFiscalInput } from "@/src/types/company";
+import type { CompanyEmailSettings, CompanyFiscal, CompanyFiscalInput } from "@/src/types/company";
 import type { FiscalIssue } from "@/src/types/sat";
 
 /**
@@ -106,4 +106,26 @@ export async function getCompanyLogo(): Promise<Blob | null> {
   if (!response.ok) throw await toError(response, "No fue posible cargar el logotipo.");
 
   return response.blob();
+}
+
+/** Fase 6.30: configuración del envío de facturas por correo (Admin y Contador la consultan). */
+export async function getCompanyEmailSettings(): Promise<CompanyEmailSettings> {
+  const response = await fetch(`${API_URL}/api/company/email-settings`, { headers: getAuthHeaders() });
+
+  if (!response.ok) throw await toError(response, "No fue posible cargar la configuración de correo.");
+
+  return (await response.json()) as CompanyEmailSettings;
+}
+
+/** Fase 6.30: sólo Admin activa o desactiva el envío automático. */
+export async function updateCompanyEmailSettings(autoEmailInvoices: boolean): Promise<CompanyEmailSettings> {
+  const response = await fetch(`${API_URL}/api/company/email-settings`, {
+    method: "PUT",
+    headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ auto_email_invoices: autoEmailInvoices }),
+  });
+
+  if (!response.ok) throw await toError(response, "No fue posible guardar la configuración de correo.");
+
+  return (await response.json()) as CompanyEmailSettings;
 }

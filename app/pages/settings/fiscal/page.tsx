@@ -7,6 +7,7 @@ import CompanyLogoCard from "@/app/components/settings/CompanyLogoCard";
 import Toast, { type ToastData } from "@/app/components/ui/Toast";
 import { CompanyApiError, getCompanyFiscal, updateCompanyFiscal } from "@/src/services/company.services";
 import { getSatCatalogs } from "@/src/services/sat.services";
+import { isEmailAddress } from "@/src/lib/email";
 import { issuerFiscalErrors, regimesFor } from "@/src/lib/sat";
 import type { CompanyFiscal, CompanyFiscalInput } from "@/src/types/company";
 import type { SatCatalogs } from "@/src/types/sat";
@@ -32,6 +33,7 @@ function toInput(data: CompanyFiscal): CompanyFiscalInput {
   return {
     legal_name: data.legal_name ?? "",
     trade_name: data.trade_name ?? "",
+    email: data.email ?? "",
     rfc: data.rfc ?? "",
     fiscal_regime: data.fiscal_regime ?? "",
     postal_code: data.postal_code ?? "",
@@ -83,14 +85,20 @@ export default function CompanyFiscalPage() {
     getSatCatalogs().then(setCatalogs).catch(() => setCatalogs(null));
   }, []);
 
-  const clientErrors = useMemo(() => (values ? issuerFiscalErrors(values, catalogs) : {}), [values, catalogs]);
+  const clientErrors = useMemo((): Partial<Record<keyof CompanyFiscalInput, string>> => {
+    if (!values) return {};
+    const errors: Partial<Record<keyof CompanyFiscalInput, string>> = issuerFiscalErrors(values, catalogs);
+    // Fase 6.30: el correo de contacto es opcional, pero si se captura debe ser válido.
+    if (values.email.trim() && !isEmailAddress(values.email)) errors.email = "El correo de contacto no tiene un formato válido.";
+    return errors;
+  }, [values, catalogs]);
   const organization = data?.organization ?? null;
   const csdRfc = organization?.legal_tax_id ?? null;
   const canEdit = Boolean(data?.can_edit) && organization !== null;
   const regimes = catalogs && values ? regimesFor(catalogs, values.rfc) : [];
 
   const errorFor = (field: keyof CompanyFiscalInput): string | undefined =>
-    serverErrors[field] ?? (touched ? clientErrors[field as keyof typeof clientErrors] : undefined);
+    serverErrors[field] ?? (touched ? clientErrors[field] : undefined);
 
   const change = (field: keyof CompanyFiscalInput) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = event.target.value;
@@ -184,6 +192,9 @@ export default function CompanyFiscalPage() {
                 </Field>
                 <Field id="trade_name" label="Nombre comercial" error={errorFor("trade_name")}>
                   <input id="trade_name" className={inputStyle} value={values.trade_name} onChange={change("trade_name")} />
+                </Field>
+                <Field id="email" label="Correo de contacto" error={errorFor("email")} hint="Aparece en los PDF y en los correos que Facturapi envía a tus clientes, como contacto para aclaraciones.">
+                  <input id="email" type="email" className={inputStyle} value={values.email} onChange={change("email")} placeholder="facturacion@tuempresa.com" aria-invalid={Boolean(errorFor("email"))} />
                 </Field>
                 <Field id="rfc" label="RFC" error={errorFor("rfc")} hint={csdRfc ? `Debe ser el del CSD cargado en Facturapi: ${csdRfc}.` : "Facturapi lo confirmará al cargar el CSD."}>
                   <input id="rfc" className={`${inputStyle} uppercase`} value={values.rfc} onChange={change("rfc")} maxLength={13} aria-invalid={Boolean(errorFor("rfc"))} />

@@ -18,6 +18,7 @@ function fiscal(overrides: Partial<CompanyFiscal> = {}, certificate: Partial<Non
   return {
     legal_name: "XENON INDUSTRIAL ARTICLES",
     trade_name: "Xenon",
+    email: null,
     rfc: "XIA190128J61",
     fiscal_regime: "601",
     postal_code: "06010",

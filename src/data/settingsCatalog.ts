@@ -181,10 +181,10 @@ export const settingsCatalog: SettingCategory[] = [
       {
         id: "correo",
         title: "Correo",
-        description: "Configura el servidor de envío para notificaciones por correo.",
+        description: "Envío automático de las facturas timbradas a tus clientes.",
         icon: Mail,
         href: "/pages/settings/correo",
-        status: "coming-soon",
+        status: "available",
       },
       {
         id: "sat",

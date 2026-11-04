@@ -23,6 +23,7 @@ function fiscal(overrides: Partial<CompanyFiscal> = {}): CompanyFiscal {
   return {
     legal_name: "Mi Empresa",
     trade_name: "Mi Empresa",
+    email: null,
     rfc: "XAXX010101000",
     fiscal_regime: "601",
     postal_code: null,
@@ -218,5 +219,37 @@ describe("Logotipo del PDF (Fase 6.29)", () => {
 
     expect(screen.getByText("Sólo un administrador puede cambiar el logotipo.")).toBeInTheDocument();
     expect(screen.queryByLabelText("Subir logotipo")).not.toBeInTheDocument();
+  });
+});
+
+describe("Correo de contacto (Fase 6.30)", () => {
+  beforeEach(() => {
+    vi.mocked(companyServices.updateCompanyFiscal).mockReset();
+    vi.mocked(satServices.getSatCatalogs).mockResolvedValue(satCatalogsFixture());
+    vi.mocked(companyServices.getCompanyLogo).mockResolvedValue(null);
+  });
+
+  it("explica que aparece en los PDF y correos, y se envía al guardar", async () => {
+    const valid = fiscal({ rfc: "XIA190128J61", legal_name: "XENON INDUSTRIAL ARTICLES", postal_code: "06010", issues: [], email: "antes@example.com" });
+    vi.mocked(companyServices.updateCompanyFiscal).mockResolvedValue({ ...valid, email: "facturacion@example.com" });
+    await renderPage(valid);
+
+    expect(screen.getByLabelText("Correo de contacto")).toHaveValue("antes@example.com");
+    expect(screen.getByText(/Aparece en los PDF y en los correos que Facturapi envía a tus clientes/)).toBeInTheDocument();
+
+    fill("Correo de contacto", "facturacion@example.com");
+    fireEvent.click(screen.getByRole("button", { name: "Guardar datos fiscales" }));
+
+    await waitFor(() => expect(companyServices.updateCompanyFiscal).toHaveBeenCalledWith(expect.objectContaining({ email: "facturacion@example.com" })));
+  });
+
+  it("no guarda un correo de contacto inválido", async () => {
+    await renderPage(fiscal({ rfc: "XIA190128J61", legal_name: "XENON INDUSTRIAL ARTICLES", postal_code: "06010", issues: [] }));
+
+    fill("Correo de contacto", "no-es-correo");
+    fireEvent.click(screen.getByRole("button", { name: "Guardar datos fiscales" }));
+
+    expect(await screen.findByText("El correo de contacto no tiene un formato válido.")).toBeInTheDocument();
+    expect(companyServices.updateCompanyFiscal).not.toHaveBeenCalled();
   });
 });

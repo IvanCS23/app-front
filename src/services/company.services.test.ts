@@ -9,6 +9,7 @@ function jsonResponse(body: unknown, status = 200): Response {
 const input: CompanyFiscalInput = {
   legal_name: "XENON INDUSTRIAL ARTICLES",
   trade_name: "Xenon",
+  email: "",
   rfc: "XIA190128J61",
   fiscal_regime: "601",
   postal_code: "06010",

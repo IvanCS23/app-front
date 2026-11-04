@@ -36,6 +36,8 @@ export interface CompanyOrganizationStatus {
 export interface CompanyFiscal {
   legal_name: string | null;
   trade_name: string | null;
+  /** Fase 6.30: correo de contacto; Facturapi lo muestra en los PDF y correos. */
+  email: string | null;
   rfc: string | null;
   fiscal_regime: string | null;
   postal_code: string | null;
@@ -50,6 +52,7 @@ export interface CompanyFiscal {
 export interface CompanyFiscalInput {
   legal_name: string;
   trade_name: string;
+  email: string;
   rfc: string;
   fiscal_regime: string;
   postal_code: string;
@@ -60,4 +63,13 @@ export interface CompanyFiscalInput {
   city: string;
   municipality: string;
   state: string;
+}
+
+/** Fase 6.30: configuración del envío de facturas por correo. */
+export interface CompanyEmailSettings {
+  auto_email_invoices: boolean;
+  pac_mode: "test" | "live" | null;
+  daily_limit: number;
+  sent_last_24h: number;
+  can_edit: boolean;
 }
