@@ -62,7 +62,16 @@ export interface InvoiceBilling {
   pac: InvoicePacState;
   cfdi: InvoiceCfdiState;
   cancellation_receipt: InvoiceCancellationReceiptState;
+  /** Fase 6.30: sólo para quien puede enviar por correo; null para los demás. */
+  email: InvoiceEmailState | null;
   timeline: InvoicePacTimelineEvent[];
+}
+
+/** Fase 6.30: destinatarios por defecto (correos del cliente en nuestra base). */
+export interface InvoiceEmailState {
+  default_recipients: string[];
+  max_recipients: number;
+  last_sent_at: string | null;
 }
 
 export type InvoiceCancellationMode = "erp_only" | "pac" | "erp_convergence" | null;
@@ -78,6 +87,10 @@ export interface InvoiceBusinessActions {
   cancellation_mode: InvoiceCancellationMode;
   /** Fase 6.29: issued sin CFDI, con el timbrado rechazado: puede regresar a ready. */
   can_revert_issue: boolean;
+  /** Fase 6.30: CFDI vigente o cancelado; Admin, Contador y Ventas. */
+  can_send_email: boolean;
+  /** Fase 6.30: sólo Admin y Contador agregan o quitan destinatarios. */
+  can_edit_email_recipients: boolean;
 }
 
 export interface InvoiceSummary {

@@ -13,7 +13,7 @@ vi.mock("@/src/services/invoice-billing.services", async (importOriginal) => {
   return {
     ...original,
     getInvoiceBilling: vi.fn(), getInvoiceSummary: vi.fn(), issueInvoicePac: vi.fn(), issueInvoiceBusiness: vi.fn(),
-    reconcileInvoicePac: vi.fn(), revertInvoiceIssue: vi.fn(), fetchInvoiceArtifacts: vi.fn(), cancelInvoicePac: vi.fn(), cancelInvoiceBusiness: vi.fn(),
+    reconcileInvoicePac: vi.fn(), revertInvoiceIssue: vi.fn(), sendInvoiceEmail: vi.fn(), fetchInvoiceArtifacts: vi.fn(), cancelInvoicePac: vi.fn(), cancelInvoiceBusiness: vi.fn(),
     fetchCancellationReceipt: vi.fn(), downloadCfdiXml: vi.fn(), downloadCfdiPdf: vi.fn(),
     downloadCancellationReceiptXml: vi.fn(), downloadCancellationReceiptPdf: vi.fn(),
   };
@@ -24,21 +24,22 @@ const summary: InvoiceSummary = { id: 3, folio: "FAC-00000003", total: "1160.00"
 function fixture(kind: "valid" | "unstamped" | "canceled" | "reconcile" | "rejected" = "valid"): InvoiceBilling {
   const base: InvoiceBilling = {
     id: 3, folio: "FAC-00000003", status: "issued",
-    actions: { can_issue: false, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "pac", can_revert_issue: false },
+    actions: { can_issue: false, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "pac", can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false },
     pac: { mode: "test", provider: "facturapi", status: "valid", cancellation_status: null, issue_status: "succeeded", reconciliation_required: false, last_sync_at: "2026-08-13T12:00:00Z", organization_status: "current", organization_archived_at: null },
     cfdi: { uuid: "96013e83-154b-4153-8e61-c38b8966e560", stamped_at: "2026-08-13T12:00:00Z", artifacts: { status: "stored", xml_available: true, pdf_available: true, downloaded_at: "2026-08-13T12:01:00Z" } },
     cancellation_receipt: { status: null, available: false, downloaded_at: null, error_code: null },
+    email: null,
     timeline: [
       { id: 1, type: "draft_created", occurred_at: "2026-08-13T11:58:00Z", pac_status: null, cancellation_status: null, issue_status: null, pac_code: null, context: {} },
       { id: 2, type: "stamp_succeeded", occurred_at: "2026-08-13T12:00:00Z", pac_status: "valid", cancellation_status: null, issue_status: "succeeded", pac_code: null, context: {} },
       { id: 3, type: "future_event", occurred_at: "2026-08-13T12:01:00Z", pac_status: "valid", cancellation_status: null, issue_status: "succeeded", pac_code: null, context: {} },
     ],
   };
-  if (kind === "unstamped") return { ...base, status: "ready", actions: { can_issue: true, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "erp_only", can_revert_issue: false }, pac: { ...base.pac, status: null, issue_status: null }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
-  if (kind === "canceled") return { ...base, status: "cancelled", actions: { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false }, pac: { ...base.pac, status: "canceled", cancellation_status: "accepted" }, cancellation_receipt: { status: "stored", available: true, downloaded_at: "2026-08-13T13:00:00Z", error_code: null } };
-  if (kind === "reconcile") return { ...base, actions: { can_issue: false, can_cancel: false, can_reconcile: true, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false }, pac: { ...base.pac, status: "pending", issue_status: "reconciliation_required", reconciliation_required: true }, cfdi: { ...base.cfdi, uuid: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } } };
+  if (kind === "unstamped") return { ...base, status: "ready", actions: { can_issue: true, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "erp_only", can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false }, pac: { ...base.pac, status: null, issue_status: null }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
+  if (kind === "canceled") return { ...base, status: "cancelled", actions: { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false }, pac: { ...base.pac, status: "canceled", cancellation_status: "accepted" }, cancellation_receipt: { status: "stored", available: true, downloaded_at: "2026-08-13T13:00:00Z", error_code: null } };
+  if (kind === "reconcile") return { ...base, actions: { can_issue: false, can_cancel: false, can_reconcile: true, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false }, pac: { ...base.pac, status: "pending", issue_status: "reconciliation_required", reconciliation_required: true }, cfdi: { ...base.cfdi, uuid: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } } };
   // Fase 6.29: issued sin CFDI, con el timbrado rechazado.
-  if (kind === "rejected") return { ...base, status: "issued", actions: { can_issue: true, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: true }, pac: { ...base.pac, status: null, issue_status: "failed" }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
+  if (kind === "rejected") return { ...base, status: "issued", actions: { can_issue: true, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: true, can_send_email: false, can_edit_email_recipients: false }, pac: { ...base.pac, status: null, issue_status: "failed" }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
   return base;
 }
 
@@ -274,7 +275,7 @@ describe("panel fiscal de factura", () => {
   ] as const)("Fase 6.27: una factura de organización %s explica por qué no hay acciones fiscales", async (organization_status, title, description) => {
     const blocked = fixture("valid");
     blocked.pac = { ...blocked.pac, organization_status };
-    blocked.actions = { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false };
+    blocked.actions = { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false };
     arrange(blocked);
     const alert = await screen.findByRole("alert");
     expect(within(alert).getByText(title)).toBeInTheDocument();
@@ -379,5 +380,110 @@ describe("panel fiscal de factura", () => {
 
     await waitFor(() => expect(api.getInvoiceBilling).toHaveBeenCalledTimes(2));
     expect(await screen.findByRole("button", { name: "Emitir factura" })).toBeInTheDocument();
+  });
+});
+
+/** Fase 6.30: envío por correo desde el panel. */
+describe("envío del CFDI por correo", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  function emailable(overrides: Partial<InvoiceBilling> = {}, canEdit = true): InvoiceBilling {
+    const base = fixture("valid");
+    return {
+      ...base,
+      actions: { ...base.actions, can_send_email: true, can_edit_email_recipients: canEdit },
+      email: { default_recipients: ["principal@example.com", "contador@example.com"], max_recipients: 5, last_sent_at: null },
+      ...overrides,
+    };
+  }
+
+  it("Admin o Contador agrega y quita destinatarios y envía la lista final", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.sendInvoiceEmail).mockResolvedValue(emailable({ email: { default_recipients: ["principal@example.com", "contador@example.com"], max_recipients: 5, last_sent_at: "2026-11-03T12:00:00Z" } }));
+    arrange(emailable());
+
+    await user.click(await screen.findByRole("button", { name: "Enviar por correo" }));
+    const dialog = screen.getByRole("dialog", { name: "Enviar por correo" });
+    await user.click(within(dialog).getByRole("button", { name: "Quitar contador@example.com" }));
+    await user.type(within(dialog).getByLabelText("Agregar destinatario"), "otro@example.com{Enter}");
+    await user.click(within(dialog).getByRole("button", { name: "Enviar por correo" }));
+
+    await waitFor(() => expect(api.sendInvoiceEmail).toHaveBeenCalledWith(3, ["principal@example.com", "otro@example.com"]));
+    expect(await screen.findByText("CFDI enviado por correo")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reenviar por correo" })).toBeInTheDocument();
+  });
+
+  it("sin cambios en la lista envía sin destinatarios (los del cliente)", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.sendInvoiceEmail).mockResolvedValue(emailable());
+    arrange(emailable());
+
+    await user.click(await screen.findByRole("button", { name: "Enviar por correo" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Enviar por correo" })).getByRole("button", { name: "Enviar por correo" }));
+
+    await waitFor(() => expect(api.sendInvoiceEmail).toHaveBeenCalledWith(3, undefined));
+  });
+
+  it("Ventas ve los destinatarios del cliente pero no puede cambiarlos", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.sendInvoiceEmail).mockResolvedValue(emailable({}, false));
+    arrange(emailable({}, false));
+
+    await user.click(await screen.findByRole("button", { name: "Enviar por correo" }));
+    const dialog = screen.getByRole("dialog", { name: "Enviar por correo" });
+    expect(within(dialog).getByRole("list", { name: "Destinatarios" })).toHaveTextContent("principal@example.comcontador@example.com");
+    expect(within(dialog).queryByLabelText("Agregar destinatario")).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole("button", { name: /Quitar/ })).not.toBeInTheDocument();
+    expect(dialog).toHaveTextContent("Se usan los correos registrados del cliente");
+    await user.click(within(dialog).getByRole("button", { name: "Enviar por correo" }));
+
+    await waitFor(() => expect(api.sendInvoiceEmail).toHaveBeenCalledWith(3, undefined));
+  });
+
+  it("valida formato, repetidos y el máximo antes de enviar", async () => {
+    const user = userEvent.setup();
+    arrange(emailable({ email: { default_recipients: ["a@example.com", "b@example.com", "c@example.com", "d@example.com"], max_recipients: 5, last_sent_at: null } }));
+
+    await user.click(await screen.findByRole("button", { name: "Enviar por correo" }));
+    const dialog = screen.getByRole("dialog", { name: "Enviar por correo" });
+    const input = within(dialog).getByLabelText("Agregar destinatario");
+
+    await user.type(input, "no-es-correo{Enter}");
+    expect(within(dialog).getByText("Escribe un correo válido.")).toBeInTheDocument();
+    await user.clear(input);
+    await user.type(input, "A@example.com{Enter}");
+    expect(within(dialog).getByText("Ese correo ya está en la lista.")).toBeInTheDocument();
+    await user.clear(input);
+    await user.type(input, "e@example.com{Enter}");
+    expect(input).toBeDisabled();
+    expect(within(dialog).getAllByRole("listitem")).toHaveLength(5);
+  });
+
+  it("en modo test avisa que el correo se envía de verdad; con CFDI cancelado lo explica", async () => {
+    const user = userEvent.setup();
+    arrange(emailable({ pac: { ...fixture("valid").pac, mode: "test", status: "canceled", cancellation_status: "accepted" } }));
+
+    await user.click(await screen.findByRole("button", { name: "Enviar por correo" }));
+    const dialog = screen.getByRole("dialog", { name: "Enviar por correo" });
+    expect(within(dialog).getByRole("alert")).toHaveTextContent("el correo se envía de verdad");
+    expect(dialog).toHaveTextContent("Este CFDI está cancelado");
+  });
+
+  it("un resultado incierto lo explica y recarga el historial", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.sendInvoiceEmail).mockRejectedValue(new api.InvoiceApiError("502", 502, "INVOICE_EMAIL_UNCERTAIN"));
+    arrange(emailable());
+
+    await user.click(await screen.findByRole("button", { name: "Enviar por correo" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Enviar por correo" })).getByRole("button", { name: "Enviar por correo" }));
+
+    expect(await screen.findByText(/No se pudo confirmar si el correo se envió/)).toBeInTheDocument();
+    expect(api.getInvoiceBilling).toHaveBeenCalledTimes(2);
+  });
+
+  it("sin can_send_email no hay botón de correo", async () => {
+    arrange(fixture("valid"));
+    expect(await screen.findByRole("button", { name: "Descargar PDF" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /por correo/ })).not.toBeInTheDocument();
   });
 });

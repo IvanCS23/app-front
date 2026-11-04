@@ -16,10 +16,11 @@ function billing(overrides: Partial<InvoiceBilling> = {}): InvoiceBilling {
     id: 3,
     folio: "FAC-00000003",
     status: "issued",
-    actions: { can_issue: true, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false },
+    actions: { can_issue: true, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false },
     pac: { mode: "test", provider: "facturapi", status: null, cancellation_status: null, issue_status: null, reconciliation_required: false, last_sync_at: null, organization_status: "current", organization_archived_at: null },
     cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } },
     cancellation_receipt: { status: null, available: false, downloaded_at: null, error_code: null },
+    email: null,
     timeline: [],
     ...overrides,
   };
@@ -80,5 +81,15 @@ describe("mapeo fiscal", () => {
     expect(withOrganization("unknown")).toBeNull();
     expect(withOrganization(null)).toBeNull();
     expect(getTimelineLabel({ type: "organization_archived" } as InvoicePacTimelineEvent)).toBe("Factura archivada: organización fiscal inaccesible");
+  });
+});
+
+describe("historial del envío por correo (Fase 6.30)", () => {
+  const event = (type: string, context: InvoicePacTimelineEvent["context"]): InvoicePacTimelineEvent => ({ id: 9, type, occurred_at: null, pac_status: null, cancellation_status: null, issue_status: null, pac_code: null, context });
+
+  it("dice a quién se envió y si fue automático", () => {
+    expect(getTimelineLabel(event("email_sent", { recipients: ["a@example.com", "b@example.com"], trigger: "manual" }))).toBe("CFDI enviado por correo (a a@example.com, b@example.com)");
+    expect(getTimelineLabel(event("email_uncertain", { recipients: ["a@example.com"], trigger: "auto" }))).toBe("No se pudo confirmar el envío por correo (a a@example.com; automático)");
+    expect(getTimelineLabel(event("email_skipped", { trigger: "auto", reason: "no_recipients" }))).toBe("Envío automático por correo omitido (automático; el cliente no tiene un correo válido)");
   });
 });

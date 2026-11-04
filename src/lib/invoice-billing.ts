@@ -72,6 +72,10 @@ const timelineLabels: Record<string, string> = {
   organization_archived: "Factura archivada: organización fiscal inaccesible",
   cfdi_folio_mismatch: "El CFDI se timbró con un folio distinto al del ERP",
   issue_reverted: "La factura regresó a Lista para emitir",
+  email_sent: "CFDI enviado por correo",
+  email_failed: "El correo no se envió",
+  email_uncertain: "No se pudo confirmar el envío por correo",
+  email_skipped: "Envío automático por correo omitido",
 };
 
 /**
@@ -95,6 +99,11 @@ export function getOrganizationNotice(billing: InvoiceBilling): { title: string;
   return null;
 }
 
+const EMAIL_SKIP_REASONS: Record<string, string> = {
+  no_recipients: "el cliente no tiene un correo válido",
+  daily_limit: "se alcanzó el límite diario de envíos",
+};
+
 export function getTimelineLabel(event: InvoicePacTimelineEvent): string {
   const label = timelineLabels[event.type] ?? "Actividad fiscal actualizada";
   // Fase 6.28: el folio esperado y el timbrado explican la diferencia.
@@ -102,6 +111,12 @@ export function getTimelineLabel(event: InvoicePacTimelineEvent): string {
   const received = event.context?.received_folio;
   if (event.type === "cfdi_folio_mismatch" && typeof expected === "string" && typeof received === "string") {
     return `${label} (esperado ${expected}, timbrado ${received})`;
+  }
+  // Fase 6.30: a quién y si fue automático; o por qué se omitió.
+  if (event.type.startsWith("email_")) {
+    const recipients = Array.isArray(event.context?.recipients) ? event.context.recipients.filter((value): value is string => typeof value === "string") : [];
+    const parts = [recipients.length > 0 ? `a ${recipients.join(", ")}` : null, event.context?.trigger === "auto" ? "automático" : null, event.type === "email_skipped" ? EMAIL_SKIP_REASONS[String(event.context?.reason)] ?? null : null].filter(Boolean);
+    return parts.length > 0 ? `${label} (${parts.join("; ")})` : label;
   }
   return label;
 }

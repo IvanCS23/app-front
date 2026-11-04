@@ -87,6 +87,11 @@ export function revertInvoiceIssue(id: number): Promise<InvoiceBilling> {
   return requestJson(`/api/invoices/${id}/operations/revert-issue`, { method: "POST", body: JSON.stringify({ confirm: true }) });
 }
 
+/** Fase 6.30: envía el CFDI por correo; sin destinatarios usa los del cliente. */
+export function sendInvoiceEmail(id: number, recipients?: string[]): Promise<InvoiceBilling> {
+  return requestJson(`/api/invoices/${id}/operations/email`, { method: "POST", body: JSON.stringify({ confirm: true, ...(recipients ? { recipients } : {}) }) });
+}
+
 export function reconcileInvoicePac(id: number): Promise<InvoiceBilling> {
   return requestJson(`/api/invoices/${id}/pac/reconcile`, { method: "POST" });
 }

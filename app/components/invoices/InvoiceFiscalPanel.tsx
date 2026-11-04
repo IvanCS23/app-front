@@ -9,6 +9,7 @@ import {
   FileDown,
   Loader2,
   RefreshCw,
+  Mail,
   RotateCcw,
   Undo2,
   Send,
@@ -38,6 +39,7 @@ import {
   issueInvoiceBusiness,
   reconcileInvoicePac,
   revertInvoiceIssue,
+  sendInvoiceEmail,
 } from "@/src/services/invoice-billing.services";
 import type {
   CfdiCancellationMotive,
@@ -46,10 +48,11 @@ import type {
 } from "@/src/types/invoice-billing";
 import type { InvoiceStatus } from "@/src/types/invoice";
 import FiscalActionModal from "./FiscalActionModal";
+import SendInvoiceEmailModal from "./SendInvoiceEmailModal";
 import FiscalStatusCard from "./FiscalStatusCard";
 import FiscalTimeline from "./FiscalTimeline";
 
-type FiscalAction = "issue" | "reconcile" | "artifacts" | "cancel" | "receipt" | "revert";
+type FiscalAction = "issue" | "reconcile" | "artifacts" | "cancel" | "receipt" | "revert" | "email";
 type DownloadKind = "cfdi-xml" | "cfdi-pdf" | "receipt-xml" | "receipt-pdf";
 
 function PanelShell({ embedded, children }: { embedded: boolean; children: React.ReactNode }) {
@@ -69,6 +72,13 @@ function publicErrorMessage(error: unknown): string {
     PAC_CANCELLATION_IN_PROGRESS: "La cancelación ya está en proceso. Actualiza el estado antes de volver a intentar.",
     PAC_RECONCILIATION_REQUIRED: "El estado fiscal requiere reconciliación antes de continuar.",
     PAC_DRAFT_NOT_READY: "El proveedor fiscal indica que el comprobante aún no está listo para timbrarse. La factura sigue en Lista para emitir; revisa sus datos fiscales.",
+    // Fase 6.30: envío por correo.
+    INVOICE_EMAIL_NOT_ALLOWED: "Sólo se puede enviar por correo una factura con CFDI vigente o cancelado.",
+    INVOICE_EMAIL_NO_RECIPIENTS: "El cliente no tiene un correo válido. Agrégalo en Clientes antes de enviar.",
+    INVOICE_EMAIL_RECIPIENTS_LOCKED: "Tu rol sólo puede enviar la factura a los correos registrados del cliente.",
+    INVOICE_EMAIL_DAILY_LIMIT: "La empresa alcanzó el límite diario de envíos por correo. Intenta mañana.",
+    INVOICE_EMAIL_NOT_SENT: "El proveedor fiscal no envió el correo. Revisa los destinatarios e intenta de nuevo.",
+    INVOICE_EMAIL_UNCERTAIN: "No se pudo confirmar si el correo se envió. Revisa con el cliente antes de reenviar.",
     INVOICE_CANNOT_BE_REVERTED: "La factura ya no puede regresar a Lista para emitir: su estado fiscal cambió. Actualiza el estado y revisa el historial.",
     INVOICE_LIFECYCLE_INCONSISTENT: "Los estados ERP y fiscal requieren revisión antes de continuar.",
     INVOICE_CANCELLATION_NOT_COMPLETED: "La cancelación fiscal no fue aceptada; la factura ERP permanece activa.",
@@ -101,6 +111,7 @@ export default function InvoiceFiscalPanel({
   const [issueOpen, setIssueOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [revertOpen, setRevertOpen] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
   const [motive, setMotive] = useState<CfdiCancellationMotive>("02");
   const [substitutionUuid, setSubstitutionUuid] = useState("");
   const [copied, setCopied] = useState(false);
@@ -144,11 +155,13 @@ export default function InvoiceFiscalPanel({
       setIssueOpen(false);
       setCancelOpen(false);
       setRevertOpen(false);
+      setEmailOpen(false);
     } catch (error) {
       setToast({ type: "error", message: publicErrorMessage(error) });
       // Emitir, cancelar, reconciliar y regresar a lista pueden cambiar el
       // estado aunque fallen (p. ej. la sincronización del borrador remoto).
-      const mayHaveChangedState = action === "issue" || action === "cancel" || action === "reconcile" || action === "revert";
+      // Un correo fallido o incierto queda en el historial: también se recarga.
+      const mayHaveChangedState = action === "issue" || action === "cancel" || action === "reconcile" || action === "revert" || action === "email";
       if (mayHaveChangedState || (error instanceof InvoiceApiError && error.status === 409)) await load();
     } finally {
       setActiveAction(null);
@@ -249,11 +262,12 @@ export default function InvoiceFiscalPanel({
                 {canFetchArtifacts && <button type="button" onClick={() => void runAction("artifacts", () => fetchInvoiceArtifacts(invoiceId), "XML y PDF disponibles") } disabled={activeAction !== null} className="app-button-secondary">{activeAction === "artifacts" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}Obtener XML/PDF</button>}
                 {billing.cfdi.artifacts.xml_available && <button type="button" onClick={() => void download("cfdi-xml", () => downloadCfdiXml(invoiceId, folio))} disabled={activeDownload !== null} className="app-button-secondary">{activeDownload === "cfdi-xml" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Descargar XML</button>}
                 {billing.cfdi.artifacts.pdf_available && <button type="button" onClick={() => void download("cfdi-pdf", () => downloadCfdiPdf(invoiceId, folio))} disabled={activeDownload !== null} className="app-button-secondary">{activeDownload === "cfdi-pdf" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Descargar PDF</button>}
+                {billing.actions.can_send_email && billing.email && <button type="button" onClick={() => setEmailOpen(true)} disabled={activeAction !== null} className="app-button-secondary"><Mail className="h-4 w-4" />{billing.email.last_sent_at ? "Reenviar por correo" : "Enviar por correo"}</button>}
                 {billing.actions.can_cancel && <button type="button" onClick={() => setCancelOpen(true)} disabled={activeAction !== null} className="inline-flex h-10 items-center justify-center gap-2 rounded-[0.625rem] border border-red-200 bg-white px-4 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50"><XCircle className="h-4 w-4" />Cancelar factura</button>}
                 {canRequestReceipt && <button type="button" onClick={() => void runAction("receipt", () => fetchCancellationReceipt(invoiceId), "Acuse de cancelación actualizado") } disabled={activeAction !== null} className="app-button-secondary">{activeAction === "receipt" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}{receiptMismatch ? "Reintentar acuse" : "Obtener acuse"}</button>}
                 {billing.cancellation_receipt.available && <><button type="button" onClick={() => void download("receipt-xml", () => downloadCancellationReceiptXml(invoiceId, folio))} disabled={activeDownload !== null} className="app-button-secondary"><Download className="h-4 w-4" />Descargar XML acuse</button><button type="button" onClick={() => void download("receipt-pdf", () => downloadCancellationReceiptPdf(invoiceId, folio))} disabled={activeDownload !== null} className="app-button-secondary"><Download className="h-4 w-4" />Descargar PDF acuse</button></>}
                 {!canManagePac && <p className="text-sm text-[#64748B]">Puedes consultar y descargar los documentos disponibles. Las acciones que contactan al PAC requieren permisos de administración o contabilidad.</p>}
-                {canManagePac && billing.pac.issue_status === "succeeded" && !canFetchArtifacts && !billing.actions.can_cancel && !canRequestReceipt && !billing.cancellation_receipt.available && <p className="text-sm text-[#64748B]">No hay acciones fiscales pendientes.</p>}
+                {canManagePac && billing.pac.issue_status === "succeeded" && !canFetchArtifacts && !billing.actions.can_cancel && !canRequestReceipt && !billing.cancellation_receipt.available && !billing.actions.can_send_email && <p className="text-sm text-[#64748B]">No hay acciones fiscales pendientes.</p>}
               </div>
             </section>
           </div>
@@ -273,6 +287,21 @@ export default function InvoiceFiscalPanel({
         <div><label htmlFor="cancel-motive" className="mb-2 block text-sm font-semibold text-[#0F172A]">Motivo SAT</label><select id="cancel-motive" value={motive} onChange={(event) => setMotive(event.target.value as CfdiCancellationMotive)} className="box box-input">{cancellationMotives.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></div>
         {motive === "01" && <div><label htmlFor="substitution-uuid" className="mb-2 block text-sm font-semibold text-[#0F172A]">UUID CFDI sustituto</label><input id="substitution-uuid" value={substitutionUuid} onChange={(event) => setSubstitutionUuid(event.target.value)} className="app-input font-mono" placeholder="00000000-0000-0000-0000-000000000000" aria-invalid={substitutionInvalid} />{substitutionInvalid && <p className="mt-2 text-xs text-red-600">Ingresa un UUID válido del CFDI sustituto.</p>}</div>}</>}
       </FiscalActionModal>
+
+      {billing.email && (
+        <SendInvoiceEmailModal
+          open={emailOpen}
+          resend={billing.email.last_sent_at !== null}
+          defaultRecipients={billing.email.default_recipients}
+          maxRecipients={billing.email.max_recipients}
+          canEdit={billing.actions.can_edit_email_recipients}
+          testMode={billing.pac.mode === "test"}
+          canceled={billing.pac.status === "canceled"}
+          busy={activeAction === "email"}
+          onClose={() => setEmailOpen(false)}
+          onConfirm={(recipients) => void runAction("email", () => sendInvoiceEmail(invoiceId, recipients ?? undefined), "CFDI enviado por correo")}
+        />
+      )}
 
       <FiscalActionModal open={revertOpen} title="Regresar a lista" confirmLabel="Regresar a lista" busyLabel="Regresando a lista..." busy={activeAction === "revert"} onClose={() => setRevertOpen(false)} onConfirm={() => void runAction("revert", () => revertInvoiceIssue(invoiceId), "La factura regresó a Lista para emitir")}>
         <p>El timbrado de esta factura no se completó y no tiene CFDI. Regresará a <span className="font-semibold text-[#0F172A]">Lista para emitir</span> para que puedas corregirla —eliminarla y volver a facturar la venta con los datos corregidos— o intentar emitirla de nuevo.</p>
