@@ -21,6 +21,10 @@ export interface CompanyOrganizationStatus {
   legal_tax_id: string | null;
   legal_tax_system: string | null;
   legal_zip: string | null;
+  /** Fase 6.31: ambiente de la empresa. */
+  pac_environment: "test" | "live" | null;
+  /** Fase 6.31: el correo de contacto frente al de respuesta de Facturapi. */
+  contact_email_issue: "missing" | "mismatch" | null;
   /** null si Facturapi aún no tiene RFC (se toma del CSD). */
   rfc_matches: boolean | null;
   snapshot_at: string | null;

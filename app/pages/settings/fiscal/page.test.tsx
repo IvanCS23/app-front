@@ -38,6 +38,8 @@ function fiscal(overrides: Partial<CompanyFiscal> = {}): CompanyFiscal {
       legal_name: "TECNOLOGIAS S.A",
       trade_name: "Mi Empresa",
       has_logo: false,
+      pac_environment: "test",
+      contact_email_issue: null,
       legal_tax_id: "XIA190128J61",
       legal_tax_system: "601",
       legal_zip: "06010",
@@ -251,5 +253,30 @@ describe("Correo de contacto (Fase 6.30)", () => {
 
     expect(await screen.findByText("El correo de contacto no tiene un formato válido.")).toBeInTheDocument();
     expect(companyServices.updateCompanyFiscal).not.toHaveBeenCalled();
+  });
+});
+
+/** Fase 6.31: ambiente de la empresa y correo de contacto. */
+describe("Datos fiscales en producción", () => {
+  beforeEach(() => {
+    vi.mocked(satServices.getSatCatalogs).mockResolvedValue(satCatalogsFixture());
+  });
+
+  it("en producción marca el correo como obligatorio y explica que bloquea la emisión", async () => {
+    const base = fiscal();
+    await renderPage(fiscal({ organization: { ...base.organization!, pac_environment: "live", contact_email_issue: "missing" } }));
+
+    expect(screen.getByLabelText("Correo de contacto (obligatorio en producción)")).toBeInTheDocument();
+    expect(screen.getByText(/En producción no se puede emitir sin él/)).toBeInTheDocument();
+    expect(screen.getByText("Producción (los CFDI tienen validez fiscal)")).toBeInTheDocument();
+  });
+
+  it("en pruebas avisa que el correo de respuesta de Facturapi es otro sin exigirlo", async () => {
+    const base = fiscal();
+    await renderPage(fiscal({ email: "contacto@example.com", organization: { ...base.organization!, contact_email_issue: "mismatch" } }));
+
+    expect(screen.getByLabelText("Correo de contacto")).toBeInTheDocument();
+    expect(screen.getByText(/En producción será obligatorio que coincidan/)).toBeInTheDocument();
+    expect(screen.getByText("Pruebas")).toBeInTheDocument();
   });
 });

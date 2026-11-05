@@ -24,22 +24,23 @@ const summary: InvoiceSummary = { id: 3, folio: "FAC-00000003", total: "1160.00"
 function fixture(kind: "valid" | "unstamped" | "canceled" | "reconcile" | "rejected" = "valid"): InvoiceBilling {
   const base: InvoiceBilling = {
     id: 3, folio: "FAC-00000003", status: "issued",
-    actions: { can_issue: false, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "pac", can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false },
-    pac: { mode: "test", provider: "facturapi", status: "valid", cancellation_status: null, issue_status: "succeeded", reconciliation_required: false, last_sync_at: "2026-08-13T12:00:00Z", organization_status: "current", organization_archived_at: null },
+    actions: { can_issue: false, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "pac", cancellation_motives: ["01", "02", "03"], can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false },
+    pac: { mode: "test", provider: "facturapi", status: "valid", cancellation_status: null, issue_status: "succeeded", reconciliation_required: false, last_sync_at: "2026-08-13T12:00:00Z", organization_status: "current", organization_archived_at: null, environment_status: "bound" },
     cfdi: { uuid: "96013e83-154b-4153-8e61-c38b8966e560", stamped_at: "2026-08-13T12:00:00Z", artifacts: { status: "stored", xml_available: true, pdf_available: true, downloaded_at: "2026-08-13T12:01:00Z" } },
     cancellation_receipt: { status: null, available: false, downloaded_at: null, error_code: null },
     email: null,
+    issuer: { contact_email_issue: null },
     timeline: [
       { id: 1, type: "draft_created", occurred_at: "2026-08-13T11:58:00Z", pac_status: null, cancellation_status: null, issue_status: null, pac_code: null, context: {} },
       { id: 2, type: "stamp_succeeded", occurred_at: "2026-08-13T12:00:00Z", pac_status: "valid", cancellation_status: null, issue_status: "succeeded", pac_code: null, context: {} },
       { id: 3, type: "future_event", occurred_at: "2026-08-13T12:01:00Z", pac_status: "valid", cancellation_status: null, issue_status: "succeeded", pac_code: null, context: {} },
     ],
   };
-  if (kind === "unstamped") return { ...base, status: "ready", actions: { can_issue: true, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "erp_only", can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false }, pac: { ...base.pac, status: null, issue_status: null }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
-  if (kind === "canceled") return { ...base, status: "cancelled", actions: { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false }, pac: { ...base.pac, status: "canceled", cancellation_status: "accepted" }, cancellation_receipt: { status: "stored", available: true, downloaded_at: "2026-08-13T13:00:00Z", error_code: null } };
-  if (kind === "reconcile") return { ...base, actions: { can_issue: false, can_cancel: false, can_reconcile: true, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false }, pac: { ...base.pac, status: "pending", issue_status: "reconciliation_required", reconciliation_required: true }, cfdi: { ...base.cfdi, uuid: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } } };
+  if (kind === "unstamped") return { ...base, status: "ready", actions: { can_issue: true, can_cancel: true, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: "erp_only", can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false, cancellation_motives: [] }, pac: { ...base.pac, status: null, issue_status: null }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
+  if (kind === "canceled") return { ...base, status: "cancelled", actions: { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false, cancellation_motives: [] }, pac: { ...base.pac, status: "canceled", cancellation_status: "accepted" }, cancellation_receipt: { status: "stored", available: true, downloaded_at: "2026-08-13T13:00:00Z", error_code: null } };
+  if (kind === "reconcile") return { ...base, actions: { can_issue: false, can_cancel: false, can_reconcile: true, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false, cancellation_motives: [] }, pac: { ...base.pac, status: "pending", issue_status: "reconciliation_required", reconciliation_required: true }, cfdi: { ...base.cfdi, uuid: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } } };
   // Fase 6.29: issued sin CFDI, con el timbrado rechazado.
-  if (kind === "rejected") return { ...base, status: "issued", actions: { can_issue: true, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: true, can_send_email: false, can_edit_email_recipients: false }, pac: { ...base.pac, status: null, issue_status: "failed" }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
+  if (kind === "rejected") return { ...base, status: "issued", actions: { can_issue: true, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: true, can_send_email: false, can_edit_email_recipients: false, cancellation_motives: [] }, pac: { ...base.pac, status: null, issue_status: "failed" }, cfdi: { uuid: null, stamped_at: null, artifacts: { status: null, xml_available: false, pdf_available: false, downloaded_at: null } }, timeline: [] };
   return base;
 }
 
@@ -275,7 +276,7 @@ describe("panel fiscal de factura", () => {
   ] as const)("Fase 6.27: una factura de organización %s explica por qué no hay acciones fiscales", async (organization_status, title, description) => {
     const blocked = fixture("valid");
     blocked.pac = { ...blocked.pac, organization_status };
-    blocked.actions = { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false };
+    blocked.actions = { can_issue: false, can_cancel: false, can_reconcile: false, can_fetch_artifacts: false, can_fetch_cancellation_receipt: false, cancellation_mode: null, can_revert_issue: false, can_send_email: false, can_edit_email_recipients: false, cancellation_motives: [] };
     arrange(blocked);
     const alert = await screen.findByRole("alert");
     expect(within(alert).getByText(title)).toBeInTheDocument();
@@ -502,5 +503,68 @@ describe("envío del CFDI por correo", () => {
     arrange(fixture("valid"));
     expect(await screen.findByRole("button", { name: "Descargar PDF" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /por correo/ })).not.toBeInTheDocument();
+  });
+});
+
+/** Fase 6.31: ambiente del PAC (pruebas / producción). */
+describe("ambiente del PAC en el panel fiscal", () => {
+  beforeEach(() => { vi.clearAllMocks(); });
+
+  function live(value: InvoiceBilling): InvoiceBilling {
+    return { ...value, pac: { ...value.pac, mode: "live" }, actions: { ...value.actions, cancellation_motives: value.actions.cancellation_mode === "pac" ? ["02", "03"] : [] } };
+  }
+
+  it("etiqueta la factura como Pruebas o Producción", async () => {
+    const { unmount } = arrange();
+    expect(await screen.findByText("Pruebas")).toBeInTheDocument();
+    unmount();
+    arrange(live(fixture("valid")));
+    expect(await screen.findByText("Producción")).toBeInTheDocument();
+  });
+
+  it("en producción la emisión advierte la validez fiscal y el consumo de timbre", async () => {
+    const user = userEvent.setup();
+    arrange(live(fixture("unstamped")));
+    await user.click(await screen.findByRole("button", { name: "Emitir factura" }));
+    expect(within(screen.getByRole("dialog", { name: "Emitir factura" })).getByText(/validez fiscal ante el SAT/)).toBeInTheDocument();
+  });
+
+  it("en producción sólo ofrece los motivos 02 y 03 y explica el plazo del receptor", async () => {
+    const user = userEvent.setup();
+    arrange(live(fixture("valid")));
+    await user.click(await screen.findByRole("button", { name: "Cancelar factura" }));
+    const options = within(screen.getByLabelText("Motivo SAT")).getAllByRole("option").map((option) => option.getAttribute("value"));
+    expect(options).toEqual(["02", "03"]);
+    expect(screen.getByText(/tres días hábiles/)).toBeInTheDocument();
+  });
+
+  it("en pruebas el motivo 04 ya no aparece", async () => {
+    const user = userEvent.setup();
+    arrange();
+    await user.click(await screen.findByRole("button", { name: "Cancelar factura" }));
+    const options = within(screen.getByLabelText("Motivo SAT")).getAllByRole("option").map((option) => option.getAttribute("value"));
+    expect(options).toEqual(["01", "02", "03"]);
+  });
+
+  it("explica una factura de otro ambiente", async () => {
+    const value = fixture("valid");
+    arrange({ ...value, pac: { ...value.pac, environment_status: "mismatch" } });
+    expect(await screen.findByText("Factura de otro ambiente fiscal")).toBeInTheDocument();
+  });
+
+  it("avisa del correo de contacto faltante sin bloquear en pruebas", async () => {
+    arrange({ ...fixture("unstamped"), issuer: { contact_email_issue: "missing" } });
+    expect(await screen.findByText(/En producción será obligatorio/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Emitir factura" })).toBeEnabled();
+  });
+
+  it("traduce los errores nuevos de producción", async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.cancelInvoiceBusiness).mockRejectedValue(new api.InvoiceApiError("raw omitido", 422, "CANCELLATION_MOTIVE_UNAVAILABLE"));
+    arrange(live(fixture("valid")));
+    await user.click(await screen.findByRole("button", { name: "Cancelar factura" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Cancelar factura" })).getByRole("button", { name: "Cancelar factura" }));
+    expect(await screen.findByText(/sólo se puede cancelar con los motivos 02 y 03/)).toBeInTheDocument();
+    expect(api.cancelInvoiceBusiness).toHaveBeenCalledWith(3, { motive: "02", confirm: true });
   });
 });

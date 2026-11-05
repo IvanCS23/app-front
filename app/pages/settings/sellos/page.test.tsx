@@ -30,6 +30,8 @@ function fiscal(overrides: Partial<CompanyFiscal> = {}, certificate: Partial<Non
       legal_name: "XENON INDUSTRIAL ARTICLES",
       trade_name: "Mi Empresa",
       has_logo: false,
+      pac_environment: "test",
+      contact_email_issue: null,
       legal_tax_id: "XIA190128J61",
       legal_tax_system: "601",
       legal_zip: "06010",

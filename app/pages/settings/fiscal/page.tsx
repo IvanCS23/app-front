@@ -8,6 +8,7 @@ import Toast, { type ToastData } from "@/app/components/ui/Toast";
 import { CompanyApiError, getCompanyFiscal, updateCompanyFiscal } from "@/src/services/company.services";
 import { getSatCatalogs } from "@/src/services/sat.services";
 import { isEmailAddress } from "@/src/lib/email";
+import { getContactEmailNotice } from "@/src/lib/invoice-billing";
 import { issuerFiscalErrors, regimesFor } from "@/src/lib/sat";
 import type { CompanyFiscal, CompanyFiscalInput } from "@/src/types/company";
 import type { SatCatalogs } from "@/src/types/sat";
@@ -93,6 +94,10 @@ export default function CompanyFiscalPage() {
     return errors;
   }, [values, catalogs]);
   const organization = data?.organization ?? null;
+  // Fase 6.31: en producción el correo de contacto es obligatorio y debe ser
+  // el de respuesta de Facturapi; en pruebas sólo se avisa.
+  const live = organization?.pac_environment === "live";
+  const contactEmailNotice = organization ? getContactEmailNotice(organization.contact_email_issue, live) : null;
   const csdRfc = organization?.legal_tax_id ?? null;
   const canEdit = Boolean(data?.can_edit) && organization !== null;
   const regimes = catalogs && values ? regimesFor(catalogs, values.rfc) : [];
@@ -193,8 +198,9 @@ export default function CompanyFiscalPage() {
                 <Field id="trade_name" label="Nombre comercial" error={errorFor("trade_name")}>
                   <input id="trade_name" className={inputStyle} value={values.trade_name} onChange={change("trade_name")} />
                 </Field>
-                <Field id="email" label="Correo de contacto" error={errorFor("email")} hint="Aparece en los PDF y en los correos que Facturapi envía a tus clientes, como contacto para aclaraciones.">
+                <Field id="email" label={live ? "Correo de contacto (obligatorio en producción)" : "Correo de contacto"} error={errorFor("email")} hint="Aparece en los PDF y en los correos que Facturapi envía a tus clientes, como contacto para aclaraciones.">
                   <input id="email" type="email" className={inputStyle} value={values.email} onChange={change("email")} placeholder="facturacion@tuempresa.com" aria-invalid={Boolean(errorFor("email"))} />
+                  {contactEmailNotice && <p role="status" className="mt-2 flex gap-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-900"><AlertTriangle className="h-4 w-4 shrink-0" />{contactEmailNotice}</p>}
                 </Field>
                 <Field id="rfc" label="RFC" error={errorFor("rfc")} hint={csdRfc ? `Debe ser el del CSD cargado en Facturapi: ${csdRfc}.` : "Facturapi lo confirmará al cargar el CSD."}>
                   <input id="rfc" className={`${inputStyle} uppercase`} value={values.rfc} onChange={change("rfc")} maxLength={13} aria-invalid={Boolean(errorFor("rfc"))} />
@@ -252,6 +258,10 @@ export default function CompanyFiscalPage() {
                   <p className="text-sm text-[#64748B]">Sin organización vinculada.</p>
                 ) : (
                   <dl className="space-y-2 text-sm">
+                    <div>
+                      <dt className="font-semibold text-[#475569]">Ambiente</dt>
+                      <dd>{live ? "Producción (los CFDI tienen validez fiscal)" : organization.pac_environment === "test" ? "Pruebas" : "—"}</dd>
+                    </div>
                     <div>
                       <dt className="font-semibold text-[#475569]">RFC del CSD</dt>
                       <dd>{organization.legal_tax_id ?? "Aún sin RFC (se toma del CSD)"}</dd>

@@ -22,6 +22,9 @@ import { useAuth } from "@/src/hooks/useAuth";
 import {
   cancellationMotives,
   formatInvoiceTotal,
+  getContactEmailNotice,
+  getEnvironmentLabel,
+  getEnvironmentNotice,
   getOrganizationNotice,
   isUuid,
 } from "@/src/lib/invoice-billing";
@@ -90,6 +93,11 @@ function publicErrorMessage(error: unknown): string {
     INVOICE_LIFECYCLE_INCONSISTENT: "Los estados ERP y fiscal requieren revisión antes de continuar.",
     INVOICE_CANCELLATION_NOT_COMPLETED: "La cancelación fiscal no fue aceptada; la factura ERP permanece activa.",
     CANCELLATION_RECEIPT_UUID_MISMATCH: "El proveedor fiscal devolvió un acuse que no corresponde a este CFDI. El archivo fue bloqueado por seguridad.",
+    // Fase 6.31: ambientes del PAC (pruebas / producción).
+    PAC_ENVIRONMENT_MISMATCH: "La factura se operó en otro ambiente del proveedor fiscal (pruebas o producción) que el de esta empresa. No se contactó al proveedor fiscal.",
+    LEGACY_OPERATION_UNAVAILABLE: "Esta operación no está disponible para facturas en producción. Usa Emitir factura o Cancelar factura.",
+    CANCELLATION_MOTIVE_UNAVAILABLE: "Ese motivo de cancelación no está disponible. En producción sólo se puede cancelar con los motivos 02 y 03.",
+    CANCELLATION_RECEIPT_STATUS_REJECTED: "El acuse corresponde a este CFDI, pero el SAT no reporta la solicitud como procesada. El archivo no se guardó; requiere revisión.",
   };
   return error.code ? messages[error.code] ?? error.message : error.message;
 }
@@ -203,6 +211,7 @@ export default function InvoiceFiscalPanel({
   }, [billing?.cfdi.uuid]);
 
   const substitutionInvalid = useMemo(() => motive === "01" && !isUuid(substitutionUuid), [motive, substitutionUuid]);
+  const substitutionRequired = (selected: CfdiCancellationMotive) => selected === "01" && !isUuid(substitutionUuid);
 
   if (initialLoading) {
     return <PanelShell embedded={embedded}><div className="flex min-h-64 items-center justify-center" role="status"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /><span className="sr-only">Cargando información fiscal</span></div></PanelShell>;
@@ -226,6 +235,13 @@ export default function InvoiceFiscalPanel({
   const canRequestReceipt = billing.actions.can_fetch_cancellation_receipt;
   const cancellationMode = billing.actions.cancellation_mode;
   const fiscalCancellation = cancellationMode === "pac";
+  // Fase 6.31: ambiente de la factura y motivos que Laravel admite en él.
+  const environment = getEnvironmentLabel(billing);
+  const live = environment?.live === true;
+  const environmentNotice = getEnvironmentNotice(billing);
+  const contactEmailNotice = canManagePac ? getContactEmailNotice(billing.issuer.contact_email_issue, live) : null;
+  const availableMotives = cancellationMotives.filter((option) => billing.actions.cancellation_motives.includes(option.value));
+  const selectedMotive = availableMotives.some((option) => option.value === motive) ? motive : availableMotives[0]?.value ?? motive;
 
   return (
     <PanelShell embedded={embedded}>
@@ -250,6 +266,18 @@ export default function InvoiceFiscalPanel({
           <div className="space-y-6">
             <FiscalStatusCard billing={billing} copied={copied} onCopyUuid={() => void copyUuid()} />
 
+            {environmentNotice && (
+              <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900" role="alert">
+                <div className="flex items-start gap-3"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" /><div><p className="font-bold">{environmentNotice.title}</p><p className="mt-1">{environmentNotice.description}</p></div></div>
+              </div>
+            )}
+
+            {contactEmailNotice && (
+              <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900" role="status">
+                <div className="flex items-start gap-3"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" /><p>{contactEmailNotice}</p></div>
+              </div>
+            )}
+
             {organizationNotice && (
               <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900" role="alert">
                 <div className="flex items-start gap-3"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" /><div><p className="font-bold">{organizationNotice.title}</p><p className="mt-1">{organizationNotice.description}</p></div></div>
@@ -263,7 +291,7 @@ export default function InvoiceFiscalPanel({
             )}
 
             <section className="app-card overflow-hidden" aria-labelledby="fiscal-actions-title">
-              <div className="border-b border-[#E2E8F0] bg-[#F8FAFC] px-5 py-4 sm:px-6"><h2 id="fiscal-actions-title" className="font-bold text-[#0F172A]">Acciones de factura</h2><p className="mt-1 text-xs text-[#64748B]">Operaciones ERP/PAC orquestadas y validadas por Laravel</p></div>
+              <div className="flex items-start justify-between gap-3 border-b border-[#E2E8F0] bg-[#F8FAFC] px-5 py-4 sm:px-6"><div><h2 id="fiscal-actions-title" className="font-bold text-[#0F172A]">Acciones de factura</h2><p className="mt-1 text-xs text-[#64748B]">Operaciones ERP/PAC orquestadas y validadas por Laravel</p></div>{environment && <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${live ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-700"}`} title={live ? "Los CFDI tienen validez fiscal ante el SAT" : "Entorno de pruebas de Facturapi: los CFDI no tienen validez fiscal"}>{environment.label}</span>}</div>
               <div className="flex flex-col gap-3 p-5 sm:flex-row sm:flex-wrap sm:p-6">
                 {canManagePac && billing.actions.can_issue && <button type="button" onClick={() => setIssueOpen(true)} disabled={activeAction !== null} className="app-button-primary"><Send className="h-4 w-4" />Emitir factura</button>}
                 {canManagePac && billing.actions.can_reconcile && <button type="button" onClick={() => void runAction("reconcile", () => reconcileInvoicePac(invoiceId), "Estado fiscal reconciliado") } disabled={activeAction !== null} className="inline-flex h-10 items-center justify-center gap-2 rounded-[0.625rem] bg-amber-500 px-4 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50">{activeAction === "reconcile" ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}Reconciliar con PAC</button>}
@@ -287,15 +315,17 @@ export default function InvoiceFiscalPanel({
 
       <FiscalActionModal open={issueOpen} title="Emitir factura" confirmLabel="Emitir factura" busyLabel="Emitiendo factura..." busy={activeAction === "issue"} onClose={() => setIssueOpen(false)} onConfirm={() => void runAction("issue", () => issueInvoiceBusiness(invoiceId), "Factura emitida y CFDI confirmado correctamente")}>
         <p>Laravel preparará el estado ERP y enviará la factura al proveedor fiscal para su timbrado en una sola operación.</p>
+        {live && <p className="rounded-xl border border-red-200 bg-red-50 p-3 font-medium text-red-800">Producción: el CFDI tendrá validez fiscal ante el SAT y consume un timbre. Si tiene un error sólo se corrige cancelándolo.</p>}
         <div className="rounded-xl bg-[#F8FAFC] p-4"><p><span className="font-semibold text-[#0F172A]">Folio:</span> {folio}</p><p className="mt-1"><span className="font-semibold text-[#0F172A]">Total:</span> {formatInvoiceTotal(summary.total, summary.currency)}</p>{summary.client_name && <p className="mt-1"><span className="font-semibold text-[#0F172A]">Cliente:</span> {summary.client_name}</p>}</div>
       </FiscalActionModal>
 
-      <FiscalActionModal open={cancelOpen} title="Cancelar factura" confirmLabel="Cancelar factura" busyLabel="Procesando cancelación..." busy={activeAction === "cancel"} destructive confirmDisabled={fiscalCancellation && substitutionInvalid} onClose={() => setCancelOpen(false)} onConfirm={() => void runAction("cancel", () => cancelInvoiceBusiness(invoiceId, { ...(fiscalCancellation ? { motive, ...(motive === "01" ? { substitution_uuid: substitutionUuid.trim() } : {}) } : {}), confirm: true }), (next) => next.status === "cancelled" ? "Factura cancelada correctamente" : "La cancelación fiscal sigue en proceso; el ERP permanece activo") }>
+      <FiscalActionModal open={cancelOpen} title="Cancelar factura" confirmLabel="Cancelar factura" busyLabel="Procesando cancelación..." busy={activeAction === "cancel"} destructive confirmDisabled={fiscalCancellation && (availableMotives.length === 0 || substitutionRequired(selectedMotive))} onClose={() => setCancelOpen(false)} onConfirm={() => void runAction("cancel", () => cancelInvoiceBusiness(invoiceId, { ...(fiscalCancellation ? { motive: selectedMotive, ...(selectedMotive === "01" ? { substitution_uuid: substitutionUuid.trim() } : {}) } : {}), confirm: true }), (next) => next.status === "cancelled" ? "Factura cancelada correctamente" : "La cancelación fiscal sigue en proceso; el ERP permanece activo") }>
         {cancellationMode === "erp_only" && <p className="font-medium text-red-700">No existe un CFDI confirmado. Se cancelará únicamente el documento ERP.</p>}
         {cancellationMode === "erp_convergence" && <p className="font-medium text-red-700">El CFDI ya está cancelado. Se actualizará el estado ERP para completar la convergencia.</p>}
         {fiscalCancellation && <><p className="font-medium text-red-700">Existe un CFDI válido. Se solicitará la cancelación fiscal y el ERP sólo se marcará cancelado cuando el PAC la confirme.</p>
-        <div><label htmlFor="cancel-motive" className="mb-2 block text-sm font-semibold text-[#0F172A]">Motivo SAT</label><select id="cancel-motive" value={motive} onChange={(event) => setMotive(event.target.value as CfdiCancellationMotive)} className="box box-input">{cancellationMotives.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></div>
-        {motive === "01" && <div><label htmlFor="substitution-uuid" className="mb-2 block text-sm font-semibold text-[#0F172A]">UUID CFDI sustituto</label><input id="substitution-uuid" value={substitutionUuid} onChange={(event) => setSubstitutionUuid(event.target.value)} className="app-input font-mono" placeholder="00000000-0000-0000-0000-000000000000" aria-invalid={substitutionInvalid} />{substitutionInvalid && <p className="mt-2 text-xs text-red-600">Ingresa un UUID válido del CFDI sustituto.</p>}</div>}</>}
+        {live && <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-red-800">Producción: la cancelación se presenta ante el SAT. Si requiere aceptación del receptor, éste tiene tres días hábiles para responder; reconcilia la factura hasta conocer el resultado final.</p>}
+        <div><label htmlFor="cancel-motive" className="mb-2 block text-sm font-semibold text-[#0F172A]">Motivo SAT</label><select id="cancel-motive" value={selectedMotive} onChange={(event) => setMotive(event.target.value as CfdiCancellationMotive)} className="box box-input">{availableMotives.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></div>
+        {selectedMotive === "01" && <div><label htmlFor="substitution-uuid" className="mb-2 block text-sm font-semibold text-[#0F172A]">UUID CFDI sustituto</label><input id="substitution-uuid" value={substitutionUuid} onChange={(event) => setSubstitutionUuid(event.target.value)} className="app-input font-mono" placeholder="00000000-0000-0000-0000-000000000000" aria-invalid={substitutionInvalid} />{substitutionInvalid && <p className="mt-2 text-xs text-red-600">Ingresa un UUID válido del CFDI sustituto.</p>}</div>}</>}
       </FiscalActionModal>
 
       {billing.email && (

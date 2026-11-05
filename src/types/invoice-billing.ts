@@ -17,7 +17,17 @@ export interface InvoicePacState {
    */
   organization_status: InvoiceOrganizationStatus;
   organization_archived_at: string | null;
+  /**
+   * Fase 6.31: ambiente fijado de la factura frente al de su empresa (null si
+   * todavía no tiene ambiente ni operaciones del PAC).
+   */
+  environment_status: InvoiceEnvironmentStatus;
 }
+
+export type InvoiceEnvironmentStatus = "bound" | "mismatch" | "unbound" | null;
+
+/** Fase 6.31: el correo de contacto de la empresa frente al support_email de Facturapi. */
+export type ContactEmailIssue = "missing" | "mismatch" | null;
 
 export type InvoiceOrganizationStatus = "current" | "other" | "archived" | "unknown" | null;
 
@@ -60,6 +70,8 @@ export interface InvoiceBilling {
   status: InvoiceStatus | null;
   actions: InvoiceBusinessActions;
   pac: InvoicePacState;
+  /** Fase 6.31: aviso del emisor; en pruebas no bloquea, en producción sí. */
+  issuer: { contact_email_issue: ContactEmailIssue };
   cfdi: InvoiceCfdiState;
   cancellation_receipt: InvoiceCancellationReceiptState;
   /** Fase 6.30: sólo para quien puede enviar por correo; null para los demás. */
@@ -85,6 +97,8 @@ export interface InvoiceBusinessActions {
   /** Fase 6.22: acuse obtenible; en test se apaga tras el primer bloqueo de identidad, en live tras 3. */
   can_fetch_cancellation_receipt: boolean;
   cancellation_mode: InvoiceCancellationMode;
+  /** Fase 6.31: motivos SAT disponibles en el ambiente (producción: 02 y 03). */
+  cancellation_motives: CfdiCancellationMotive[];
   /** Fase 6.29: issued sin CFDI, con el timbrado rechazado: puede regresar a ready. */
   can_revert_issue: boolean;
   /** Fase 6.30: CFDI vigente o cancelado; Admin, Contador y Ventas. */
@@ -101,7 +115,8 @@ export interface InvoiceSummary {
   client_name: string | null;
 }
 
-export type CfdiCancellationMotive = "01" | "02" | "03" | "04";
+/** Fase 6.31: el 04 se retiró (exige sustitución y no hay facturas globales). */
+export type CfdiCancellationMotive = "01" | "02" | "03";
 
 export interface CancelInvoicePacPayload {
   motive: CfdiCancellationMotive;

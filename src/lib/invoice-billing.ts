@@ -16,8 +16,38 @@ export const cancellationMotives = [
   { value: "01", label: "01 — Comprobante emitido con errores con relación" },
   { value: "02", label: "02 — Comprobante emitido con errores sin relación" },
   { value: "03", label: "03 — No se llevó a cabo la operación" },
-  { value: "04", label: "04 — Operación nominativa relacionada en factura global" },
 ] as const;
+
+/** Fase 6.31: etiqueta del ambiente del PAC de la factura. */
+export function getEnvironmentLabel(billing: InvoiceBilling): { label: string; live: boolean } | null {
+  if (billing.pac.mode === "live") return { label: "Producción", live: true };
+  if (billing.pac.mode === "test") return { label: "Pruebas", live: false };
+  return null;
+}
+
+/** Fase 6.31: factura de otro ambiente o con operaciones sin ambiente registrado. */
+export function getEnvironmentNotice(billing: InvoiceBilling): { title: string; description: string } | null {
+  if (billing.pac.environment_status === "mismatch") {
+    return {
+      title: "Factura de otro ambiente fiscal",
+      description: "Se operó en un ambiente del proveedor fiscal (pruebas o producción) distinto del que usa ahora la empresa. Se conserva como registro; no admite acciones fiscales.",
+    };
+  }
+  if (billing.pac.environment_status === "unbound") {
+    return {
+      title: "Ambiente fiscal sin registrar",
+      description: "La factura tiene operaciones del proveedor fiscal anteriores al registro del ambiente. Un administrador debe registrarlo antes de continuar.",
+    };
+  }
+  return null;
+}
+
+/** Fase 6.31: aviso del correo de contacto (en pruebas no bloquea la emisión). */
+export function getContactEmailNotice(issue: "missing" | "mismatch" | null, live: boolean): string | null {
+  if (issue === "missing") return `La empresa no tiene correo de contacto: es la dirección a la que responden tus clientes.${live ? " En producción no se puede emitir sin él." : " En producción será obligatorio."} Captúralo en Configuración > Datos fiscales.`;
+  if (issue === "mismatch") return `El correo de respuesta de Facturapi no es el correo de contacto de la empresa.${live ? " En producción no se puede emitir así." : " En producción será obligatorio que coincidan."} Guarda de nuevo los Datos fiscales para sincronizarlo.`;
+  return null;
+}
 
 export function getFiscalStatus(billing: InvoiceBilling): HumanStatus {
   if (billing.pac.reconciliation_required || billing.pac.issue_status === "reconciliation_required") {
