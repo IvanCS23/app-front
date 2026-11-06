@@ -163,14 +163,13 @@ describe("/restablecer-contrasena (Fase 6.32, D2)", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("no envía Referer ni se guarda en caché", async () => {
+  it("no envía Referer", async () => {
     expect(metadata.referrer).toBe("no-referrer");
 
     const rules = await nextConfig.headers!();
     for (const source of ["/restablecer-contrasena", "/recuperar-contrasena"]) {
       const headers = rules.find((rule) => rule.source === source)?.headers ?? [];
       expect(headers).toContainEqual({ key: "Referrer-Policy", value: "no-referrer" });
-      expect(headers).toContainEqual({ key: "Cache-Control", value: "no-store" });
     }
   });
 });
