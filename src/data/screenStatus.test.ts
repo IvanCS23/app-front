@@ -118,6 +118,10 @@ describe("Configuración según el registro", () => {
     expect(items["Usuarios"]).toBe("available");
     // Fase 6.27b: Datos fiscales es una pantalla real.
     expect(items["Datos fiscales"]).toBe("available");
+    // Fase 6.32: cambiar la propia contraseña es real; 2FA y sesiones no.
+    expect(items["Contraseña"]).toBe("available");
+    expect(items["Autenticación"]).toBe("coming-soon");
+    expect(items["Sesiones"]).toBe("coming-soon");
   });
 
   it("con demos: las maquetas aparecen como demo", () => {

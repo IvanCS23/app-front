@@ -49,6 +49,8 @@ export const SCREEN_STATUS: Readonly<Record<string, ScreenStatus>> = {
   "/pages/settings/observations": "demo",
   "/pages/settings/sellos": "real",
   "/pages/settings/correo": "real",
+  // Fase 6.32: cambiar la propia contraseña (cualquier rol).
+  "/pages/settings/seguridad/password": "real",
   "/pages/statistics/charts": "demo",
   "/pages/statistics/reports": "demo",
 
@@ -71,7 +73,6 @@ export const SCREEN_STATUS: Readonly<Record<string, ScreenStatus>> = {
   "/pages/settings/api": "unavailable",
   "/pages/settings/webhooks": "unavailable",
   "/pages/settings/sat": "unavailable",
-  "/pages/settings/seguridad/password": "unavailable",
   "/pages/settings/seguridad/autenticacion": "unavailable",
   "/pages/settings/seguridad/sesiones": "unavailable",
 };

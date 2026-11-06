@@ -206,7 +206,7 @@ export const settingsCatalog: SettingCategory[] = [
         description: "Actualiza la contraseña de acceso a tu cuenta.",
         icon: KeyRound,
         href: "/pages/settings/seguridad/password",
-        status: "coming-soon",
+        status: "available",
       },
       {
         id: "autenticacion",
