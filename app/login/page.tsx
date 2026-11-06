@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/src/hooks/useAuth";
 import {
@@ -259,12 +260,12 @@ export default function LoginPage() {
                     >
                       Contraseña
                     </label>
-                    <button
-                      type="button"
+                    <Link
+                      href="/recuperar-contrasena"
                       className="text-xs font-medium text-[#2563EB] transition-colors hover:text-[#1D4ED8]"
                     >
                       ¿Olvidó su contraseña?
-                    </button>
+                    </Link>
                   </div>
                   <div className="relative">
                     <Lock

@@ -143,6 +143,48 @@ export async function changeMyPasswordRequest(token: string, payload: ChangeMyPa
   return (await res.json()) as LoginResponse;
 }
 
+/**
+ * Fase 6.32: POST /api/password/forgot. Laravel responde lo mismo exista o
+ * no el correo; se muestra tal cual.
+ */
+export async function forgotPasswordRequest(email: string): Promise<string> {
+  const res = await fetch(`${API_URL}/api/password/forgot`, {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!res.ok) {
+    throw await accountFormError(res, "No se pudo enviar el enlace. Intenta de nuevo más tarde.");
+  }
+
+  const data = (await res.json().catch(() => null)) as { message?: string } | null;
+  return data?.message ?? "Si el correo está registrado, te enviamos un enlace para restablecer tu contraseña.";
+}
+
+export interface ResetPasswordPayload {
+  email: string;
+  token: string;
+  password: string;
+  password_confirmation: string;
+}
+
+/** Fase 6.32: POST /api/password/reset con el token del enlace del correo. */
+export async function resetPasswordRequest(payload: ResetPasswordPayload): Promise<string> {
+  const res = await fetch(`${API_URL}/api/password/reset`, {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw await accountFormError(res, "No se pudo restablecer la contraseña.");
+  }
+
+  const data = (await res.json().catch(() => null)) as { message?: string } | null;
+  return data?.message ?? "Tu contraseña se restableció. Inicia sesión con la nueva.";
+}
+
 export function saveSession(token: string, user: AuthUser): void {
   localStorage.setItem("api_token", token);
   localStorage.setItem("auth_user", JSON.stringify(user));
