@@ -34,3 +34,47 @@ export function translateApiMessage(message: unknown, status?: number, fallback?
 
   return fallback ?? (status === 403 ? FORBIDDEN_MESSAGE : "No fue posible completar la operación.");
 }
+
+/** Fase 6.32: código del 403 de Laravel mientras la contraseña sea temporal. */
+export const PASSWORD_CHANGE_REQUIRED = "PASSWORD_CHANGE_REQUIRED";
+
+function requestUrl(input: RequestInfo | URL): string {
+  if (typeof input === "string") return input;
+  if (input instanceof URL) return input.href;
+  return input.url;
+}
+
+/**
+ * Fase 6.32: mientras must_change_password esté activo, Laravel responde
+ * 403 PASSWORD_CHANGE_REQUIRED a casi todas las rutas. Cada servicio ya
+ * muestra el mensaje (en español); esto además avisa a la sesión para
+ * llevar al usuario a /cambiar-contrasena, venga de donde venga la llamada.
+ *
+ * Es sólo experiencia de usuario (D7): quien decide es el backend. Devuelve
+ * la función que deshace la envoltura de fetch.
+ */
+export function watchPasswordChangeRequired(apiUrl: string, onRequired: () => void): () => void {
+  const original = window.fetch;
+
+  const wrapped: typeof fetch = async (input, init) => {
+    const response = await original.call(window, input, init);
+
+    if (response.status === 403 && requestUrl(input).startsWith(apiUrl)) {
+      response
+        .clone()
+        .json()
+        .then((body: { code?: unknown } | null) => {
+          if (body?.code === PASSWORD_CHANGE_REQUIRED) onRequired();
+        })
+        .catch(() => undefined);
+    }
+
+    return response;
+  };
+
+  window.fetch = wrapped;
+
+  return () => {
+    if (window.fetch === wrapped) window.fetch = original;
+  };
+}

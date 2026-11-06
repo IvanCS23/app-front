@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { usePathname } from "next/navigation"; // ← Importar usePathname
+import { usePathname, useRouter } from "next/navigation"; // ← Importar usePathname
+import { useAuth } from "@/src/hooks/useAuth";
+import { getToken } from "@/src/services/auth.services";
+import { sessionRedirect } from "@/src/services/sessionGuard";
 import Navbar from "@/app/components/layout/Navbar";
 import Sidebar from "@/app/components/layout/Sidebar";
 import { menuItems } from "@/app/components/layout/MenuItems";
@@ -12,6 +15,8 @@ type AppLayoutProps = {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname(); // ← Obtener la ruta actual
+  const router = useRouter();
+  const { user, loading } = useAuth();
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -58,6 +63,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
     setActiveItem(newActiveItem);
   }, [pathname]);
 
+  // Fase 6.32 (D7): guardia mínima, sólo experiencia de usuario; el backend
+  // sigue siendo la autoridad. Sin token, al login; con contraseña temporal,
+  // a cambiarla.
+  const redirectTo = isClient && !loading ? sessionRedirect(getToken(), user) : null;
+
+  useEffect(() => {
+    if (redirectTo) router.replace(redirectTo);
+  }, [redirectTo, router]);
+
   // Cargar estado del sidebar
   useEffect(() => {
     const saved = localStorage.getItem("sidebarCollapsed");
@@ -73,14 +87,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
     localStorage.setItem("sidebarCollapsed", String(newState));
   };
 
-  // Mostrar layout estático mientras carga
-  if (!isClient) {
+  // Mostrar layout estático mientras carga (sin contenido si se va a redirigir)
+  if (!isClient || redirectTo) {
     return (
       <div className="min-h-screen bg-[#F8FAFC]">
         <div className="fixed left-0 top-0 z-50 h-screen w-72 border-r border-gray-200 bg-white" />
         <div className="xl:ml-72">
           <div className="sticky top-0 z-30 h-[70px] border-b border-[#E2E8F0] bg-white" />
-          <main className="p-6">{children}</main>
+          <main className="p-6">{redirectTo ? null : children}</main>
         </div>
       </div>
     );

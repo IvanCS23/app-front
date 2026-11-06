@@ -172,8 +172,9 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      await login({ email, password });
-      router.push("/pages/dashboard");
+      const loggedIn = await login({ email, password });
+      // Fase 6.32: con contraseña temporal, directo a cambiarla.
+      router.push(loggedIn.must_change_password ? "/cambiar-contrasena" : "/pages/dashboard");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Error al iniciar sesión.");
     } finally {

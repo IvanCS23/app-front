@@ -1,4 +1,5 @@
 import { API_URL } from "@/src/config/api";
+import { translateApiMessage } from "@/src/services/http";
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -20,6 +21,8 @@ export interface AuthUser {
   email: string;
   avatar: string | null;
   role: string;
+  /** Fase 6.32: contraseña temporal; Laravel bloquea casi todo hasta cambiarla. */
+  must_change_password?: boolean;
   company: AuthCompany | null;
 }
 
@@ -92,6 +95,52 @@ export async function logoutRequest(token: string): Promise<void> {
       (data as ApiError)?.message ?? "No se pudo cerrar sesión.";
     throw new Error(message);
   }
+}
+
+/**
+ * Fase 6.32: error de un formulario de la cuenta. Trae los errores por campo
+ * del 422 de Laravel para mostrarlos junto a cada campo.
+ */
+export class AccountFormError extends Error {
+  status: number;
+  errors: Record<string, string[]>;
+
+  constructor(message: string, status: number, errors: Record<string, string[]> = {}) {
+    super(message);
+    this.name = "AccountFormError";
+    this.status = status;
+    this.errors = errors;
+  }
+}
+
+async function accountFormError(res: Response, fallback: string): Promise<AccountFormError> {
+  const data = (await res.json().catch(() => null)) as ApiError | null;
+
+  return new AccountFormError(translateApiMessage(data?.message, res.status, fallback), res.status, data?.errors ?? {});
+}
+
+export interface ChangeMyPasswordPayload {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+}
+
+/**
+ * Fase 6.32: PUT /api/me/password. El token rota (D1): la respuesta trae uno
+ * nuevo y el anterior deja de servir en cualquier cliente.
+ */
+export async function changeMyPasswordRequest(token: string, payload: ChangeMyPasswordPayload): Promise<LoginResponse> {
+  const res = await fetch(`${API_URL}/api/me/password`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw await accountFormError(res, "No se pudo cambiar la contraseña.");
+  }
+
+  return (await res.json()) as LoginResponse;
 }
 
 export function saveSession(token: string, user: AuthUser): void {
