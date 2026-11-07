@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import AuthCard from "@/app/components/auth/AuthCard";
 import PasswordField from "@/app/components/auth/PasswordField";
-import { PASSWORD_HINT } from "@/app/components/auth/ChangePasswordForm";
+import { PASSWORD_HINT } from "@/src/lib/passwordRules";
 import { AccountFormError, clearSession, resetPasswordRequest } from "@/src/services/auth.services";
 
 export const INCOMPLETE_LINK_MESSAGE = "El enlace no es válido o está incompleto. Solicita uno nuevo.";

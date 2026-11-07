@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { PASSWORD_HINT, PASSWORD_PLACEHOLDER } from "@/src/lib/passwordRules";
 import { Eye, EyeOff, Upload } from "lucide-react";
 import UserAvatar from "@/app/components/users/UserAvatar";
 import {
@@ -207,7 +208,7 @@ export default function UserForm({
                   type={showPassword ? "text" : "password"}
                   value={values.password}
                   onChange={(e) => onChange("password", e.target.value)}
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder={PASSWORD_PLACEHOLDER}
                   className={`${inputStyle} pr-12`}
                   disabled={disabled}
                 />
@@ -219,6 +220,8 @@ export default function UserForm({
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {/* Fase 6.32: la temporal sigue las reglas de cualquier contraseña. */}
+              <p className="mt-1.5 text-xs text-[#64748B]">{PASSWORD_HINT}</p>
               <FieldError messages={errors.password} />
             </div>
 

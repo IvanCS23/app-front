@@ -4,8 +4,8 @@ import { useState, type FormEvent } from "react";
 import PasswordField from "@/app/components/auth/PasswordField";
 import { useAuth } from "@/src/hooks/useAuth";
 import { AccountFormError } from "@/src/services/auth.services";
+import { PASSWORD_HINT } from "@/src/lib/passwordRules";
 
-export const PASSWORD_HINT = "Al menos 12 caracteres, con mayúsculas, minúsculas, números y símbolos.";
 export const PASSWORD_CHANGED_MESSAGE = "Tu contraseña se actualizó. Se cerraron las demás sesiones abiertas con tu cuenta.";
 
 type FieldErrors = Partial<Record<"current_password" | "password" | "password_confirmation", string>>;

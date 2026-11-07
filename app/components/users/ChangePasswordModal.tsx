@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { PASSWORD_HINT, PASSWORD_PLACEHOLDER } from "@/src/lib/passwordRules";
 import { Loader2, X } from "lucide-react";
 import { ValidationError } from "@/src/services/users";
 import type { User } from "@/src/types/user";
@@ -94,10 +95,11 @@ export default function ChangePasswordModal({
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mínimo 8 caracteres"
+              placeholder={PASSWORD_PLACEHOLDER}
               className={inputStyle}
               disabled={isSaving}
             />
+            <p className="mt-1.5 text-xs text-[#64748B]">{PASSWORD_HINT}</p>
             {errors.password && (
               <p className="mt-1 text-xs font-medium text-red-500">{errors.password[0]}</p>
             )}
