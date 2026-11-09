@@ -1,0 +1,14 @@
+{
+  "_doc": "Fase 6.33: avisos de seguridad aceptados (npm audit). Cada entrada: id (GHSA), package, severity, scope (production o development), reason, accepted_on y review_by (AAAA-MM-DD). CI (scripts/audit-gate.mjs) audita sólo producción (--omit=dev) y falla con avisos altos o críticos que no estén aquí y con aceptaciones vencidas. Los de desarrollo se listan aquí para que queden documentados con su fecha de revisión.",
+  "npm": [
+    {
+      "id": "GHSA-g3hv-75wg-m249",
+      "package": "minimatch",
+      "severity": "moderate",
+      "scope": "development",
+      "reason": "DoS por amplificación de globparts en minimatch 10.2.x, que llega por eslint-config-next -> typescript-eslint -> @typescript-eslint/typescript-estree (pide ^10.2.2; la corrección es 11.0.1). Sin corrección dentro de los rangos ni en la última versión de typescript-eslint (8.72.2). Sólo corre en ESLint sobre nuestro propio código; no va en el build ni en producción. npm audit fix --force bajaría eslint-config-next a 15.5.29 (mayor hacia atrás). Arrastra los 7 avisos moderados de la cadena typescript-eslint y eslint-config-next.",
+      "accepted_on": "2026-11-09",
+      "review_by": "2027-02-09"
+    }
+  ]
+}

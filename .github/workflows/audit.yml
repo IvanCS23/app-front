@@ -1,0 +1,46 @@
+name: audit
+
+# Fase 6.33: avisos de seguridad de las dependencias de producción. Falla
+# sólo con avisos altos o críticos que no estén en
+# security/accepted-advisories.json, o con aceptaciones vencidas. Corre
+# también cada lunes: los avisos nuevos aparecen sin cambiar el código.
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+      - master
+  pull_request:
+    branches:
+      - develop
+      - main
+      - master
+  schedule:
+    - cron: '0 13 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  npm-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      # npm audit lee package-lock.json; no hace falta instalar. Sale con
+      # código distinto de 0 si hay avisos de cualquier severidad; la
+      # compuerta decide. Si npm no corre, el JSON queda vacío y falla.
+      - name: npm audit (producción)
+        run: npm audit --omit=dev --json > npm-audit.json || true
+
+      - name: Compuerta (altos y críticos de producción)
+        run: node scripts/audit-gate.mjs npm-audit.json security/accepted-advisories.json
