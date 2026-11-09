@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Permite HMR cuando el servidor de desarrollo se abre por Tailscale.
-  // Next compara hosts (sin protocolo ni puerto) en esta lista.
-  allowedDevOrigins: ["100.69.34.116"],
+  // Fase 6.33 (mitigación): el servidor de desarrollo ya no se abre por
+  // Tailscale (sin allowedDevOrigins; `npm run dev` escucha sólo en
+  // 127.0.0.1) hasta actualizar Next por sus avisos de seguridad.
 
   // Fase 6.32 (D2): las pantallas de recuperación no envían Referer. El
   // token del enlace va después de `#` (nunca llega al servidor ni al HTML)
