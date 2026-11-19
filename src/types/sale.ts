@@ -1,11 +1,13 @@
 import type { InvoiceStatus } from "@/src/types/invoice";
+import type { LineTaxFields } from "@/src/types/tax";
 
 /** Fase 6.25 — contrato de las ventas (api-v1 SaleResource). */
 export type SaleStatus = "draft" | "pending" | "confirmed" | "cancelled";
 
 export type PaymentMethod = "PUE" | "PPD";
 
-export interface SaleItem {
+/** Fase 6.34: con su importe exacto e impuestos por línea (LineTaxFields). */
+export interface SaleItem extends LineTaxFields {
   id: number;
   sale_id: number;
   product_id: number | null;
@@ -42,6 +44,9 @@ export interface Sale {
   subtotal: string;
   discount_total: string;
   tax_total: string;
+  /** Fase 6.34: trasladados y retenidos (tax_total = trasladados). */
+  taxes_transferred?: string;
+  taxes_withheld?: string;
   total: string;
   notes: string | null;
   confirmed_at: string | null;
@@ -85,6 +90,11 @@ export interface ReadinessIssue {
   code: string;
   field: string;
   message: string;
+  /** Fase 6.34: en SALE_TOTALS_WILL_BE_RECALCULATED. */
+  previous_total?: string;
+  new_total?: string;
+  /** Fase 6.34: avisos legales de retención, pendientes de contador. */
+  pending_accountant?: boolean;
 }
 
 export interface SaleBillingReadiness {

@@ -1,3 +1,4 @@
+import { formatInvoiceMoney } from "@/src/lib/invoice";
 import type { PaymentMethod, SaleStatus } from "@/src/types/sale";
 
 /** Fase 6.25 — utilidades de presentación de ventas. */
@@ -111,7 +112,18 @@ const READINESS_VIEWS: Record<string, ReadinessIssueView> = {
 };
 
 /** Mensaje claro y, si aplica, dónde corregirlo; si el código es nuevo, usa el del backend. */
-export function readinessIssueView(issue: { code: string; message: string }): ReadinessIssueView {
+export function readinessIssueView(
+  issue: { code: string; message: string; previous_total?: string; new_total?: string },
+  currency = "MXN",
+): ReadinessIssueView {
+  // Fase 6.34: la venta se recalcula al facturar con el cálculo del CFDI; se
+  // muestran ambos totales con formato de moneda.
+  if (issue.code === "SALE_TOTALS_WILL_BE_RECALCULATED" && issue.previous_total && issue.new_total) {
+    return {
+      message: `Al facturar, la venta se recalcula con el cálculo del CFDI: el total pasa de ${formatInvoiceMoney(issue.previous_total, currency)} a ${formatInvoiceMoney(issue.new_total, currency)}.`,
+    };
+  }
+
   return READINESS_VIEWS[issue.code] ?? { message: issue.message };
 }
 

@@ -241,3 +241,32 @@ describe("detalle comercial de factura", () => {
     expect(invoices.getInvoiceDetail).not.toHaveBeenCalled();
   });
 });
+
+describe("cálculo estilo CFDI (Fase 6.34)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    navigation.id = "3";
+    fiscal.label = "No timbrado";
+    vi.mocked(invoices.getInvoiceDetail).mockResolvedValue(invoiceDetailFixture());
+  });
+
+  it("caso H: totales del backend, nota junto al total y el exacto de cada línea", async () => {
+    const base = invoiceDetailFixture();
+    const tax = { tax: "002", kind: "traslado" as const, factor: "tasa" as const, rate: "0.160000", ieps_mode: null, position: 0, amount: "0.052800" };
+    const line = (id: number) => ({ ...base.items[0], id, description: `Concepto ${id}`, subtotal: "0.33", subtotal_exact: "0.330000", tax_total: "0.05", total: "0.38", taxes: [tax] });
+    vi.mocked(invoices.getInvoiceDetail).mockResolvedValue(invoiceDetailFixture({ subtotal: "0.99", tax_total: "0.16", total: "1.15", items: [line(1), line(2), line(3)] }));
+    render(<InvoiceDetailPage />);
+
+    expect(await screen.findByTestId("rounding-note")).toHaveTextContent("como en el CFDI");
+    expect(screen.getByRole("button", { name: /Importe de Concepto 2: \$0\.38/ })).toHaveAttribute("title", "Importe exacto: 0.33\nIVA 16 %: 0.0528");
+  });
+
+  it("sin diferencia no muestra la nota", async () => {
+    render(<InvoiceDetailPage />);
+
+    // Línea sin importe exacto (anterior a la 6.34): se muestra sin detalle.
+    expect(await screen.findAllByText("$1,160.00")).not.toHaveLength(0);
+    expect(screen.queryByRole("button", { name: /Importe de / })).not.toBeInTheDocument();
+    expect(screen.queryByTestId("rounding-note")).not.toBeInTheDocument();
+  });
+});

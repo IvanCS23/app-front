@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Loader2, Save, Trash2 } from "lucide-react";
+import ExactAmount from "@/app/components/ui/ExactAmount";
+import { lineExactDetails, lineTaxLabel } from "@/src/lib/amounts";
 import { formatInvoiceMoney } from "@/src/lib/invoice";
 import type { SaleItem, TaxRate } from "@/src/types/sale";
 
@@ -11,6 +13,8 @@ type ItemActions = {
 };
 
 function taxName(item: SaleItem, taxRates: TaxRate[]): string {
+  // Fase 6.34: los impuestos de la línea; si no tiene filas, la tasa anterior.
+  if (item.taxes && item.taxes.length > 0) return item.taxes.map(lineTaxLabel).join(", ");
   if (item.tax_rate_id === null) return "Sin impuesto";
   return taxRates.find((taxRate) => taxRate.id === item.tax_rate_id)?.name ?? `Tasa #${item.tax_rate_id}`;
 }
@@ -71,7 +75,7 @@ export default function SaleItems({ items, currency, taxRates, ...actions }: { i
           <li key={item.id} data-testid="sale-item-card" className="space-y-3 p-4">
             <div className="flex items-start justify-between gap-3">
               <p className="font-semibold text-[#0F172A]">{item.description}</p>
-              <p className="shrink-0 font-bold tabular-nums">{formatInvoiceMoney(item.total, currency)}</p>
+              <ExactAmount display={formatInvoiceMoney(item.total, currency)} details={lineExactDetails(item)} label={`Importe de ${item.description}`} className="shrink-0 font-bold" />
             </div>
             <dl className="grid grid-cols-2 gap-2 text-sm">
               <div><dt className="text-xs text-[#64748B]">Cantidad</dt><dd><QuantityEditor item={item} actions={actions} /></dd></div>
@@ -103,7 +107,7 @@ export default function SaleItems({ items, currency, taxRates, ...actions }: { i
                 <td className="px-3 py-3 text-right"><QuantityEditor item={item} actions={actions} /></td>
                 <td className="px-3 py-3 text-right tabular-nums">{formatInvoiceMoney(item.unit_price, currency)}</td>
                 <td className="px-3 py-3 text-[#475569]">{taxName(item, taxRates)}</td>
-                <td className="px-3 py-3 text-right font-semibold tabular-nums">{formatInvoiceMoney(item.total, currency)}</td>
+                <td className="px-3 py-3 text-right font-semibold"><ExactAmount display={formatInvoiceMoney(item.total, currency)} details={lineExactDetails(item)} label={`Importe de ${item.description}`} /></td>
                 {actions.editable && <td className="px-5 py-3 text-right"><RemoveButton item={item} actions={actions} /></td>}
               </tr>
             ))}

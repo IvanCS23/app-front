@@ -3,8 +3,8 @@ import { AlertTriangle, CheckCircle2, Info } from "lucide-react";
 import { readinessIssueItemId, readinessIssueView } from "@/src/lib/sale";
 import type { ReadinessIssue, SaleItem } from "@/src/types/sale";
 
-function IssueRow({ issue, items, tone }: { issue: ReadinessIssue; items: SaleItem[]; tone: "error" | "warning" }) {
-  const view = readinessIssueView(issue);
+function IssueRow({ issue, items, tone, currency }: { issue: ReadinessIssue; items: SaleItem[]; tone: "error" | "warning"; currency: string }) {
+  const view = readinessIssueView(issue, currency);
   const itemId = readinessIssueItemId(issue.field);
   const item = itemId !== null ? items.find((candidate) => candidate.id === itemId) : undefined;
 
@@ -32,11 +32,13 @@ export default function SaleReadinessPanel({
   warnings,
   items,
   loading,
+  currency = "MXN",
 }: {
   errors: ReadinessIssue[];
   warnings: ReadinessIssue[];
   items: SaleItem[];
   loading: boolean;
+  currency?: string;
 }) {
   return (
     <section className="app-card overflow-hidden" aria-labelledby="sale-readiness-title" aria-busy={loading}>
@@ -53,7 +55,7 @@ export default function SaleReadinessPanel({
           <>
             <p className="flex items-center gap-2 text-sm font-semibold text-red-700"><AlertTriangle className="h-5 w-5" />Corrige lo siguiente para poder facturar:</p>
             <ul className="space-y-2" aria-label="Problemas para facturar">
-              {errors.map((issue, index) => <IssueRow key={`${issue.code}-${issue.field}-${index}`} issue={issue} items={items} tone="error" />)}
+              {errors.map((issue, index) => <IssueRow key={`${issue.code}-${issue.field}-${index}`} issue={issue} items={items} tone="error" currency={currency} />)}
             </ul>
           </>
         )}
@@ -61,7 +63,7 @@ export default function SaleReadinessPanel({
           <>
             <p className="flex items-center gap-2 pt-1 text-sm font-semibold text-amber-800"><Info className="h-4 w-4" />Avisos (no impiden facturar):</p>
             <ul className="space-y-2" aria-label="Avisos">
-              {warnings.map((issue, index) => <IssueRow key={`${issue.code}-${issue.field}-${index}`} issue={issue} items={items} tone="warning" />)}
+              {warnings.map((issue, index) => <IssueRow key={`${issue.code}-${issue.field}-${index}`} issue={issue} items={items} tone="warning" currency={currency} />)}
             </ul>
           </>
         )}

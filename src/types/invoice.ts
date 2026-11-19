@@ -1,3 +1,5 @@
+import type { LineTaxFields } from "@/src/types/tax";
+
 export type InvoiceStatus = "draft" | "ready" | "issued" | "cancelled";
 
 export interface InvoiceListItem {
@@ -19,6 +21,9 @@ export interface InvoiceListItem {
   subtotal: string;
   discount_total: string;
   tax_total: string;
+  /** Fase 6.34: trasladados y retenidos (tax_total = trasladados). */
+  taxes_transferred?: string;
+  taxes_withheld?: string;
   total: string;
   currency: string;
   notes: string | null;
@@ -30,7 +35,8 @@ export interface InvoiceListItem {
   updated_at: string;
 }
 
-export interface InvoiceItem {
+/** Fase 6.34: con su importe exacto e impuestos por línea (LineTaxFields). */
+export interface InvoiceItem extends LineTaxFields {
   id: number;
   invoice_id: number;
   product_id: number | null;

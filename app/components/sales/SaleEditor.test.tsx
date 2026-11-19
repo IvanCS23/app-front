@@ -228,3 +228,45 @@ describe("venta existente", () => {
     expect(screen.queryByRole("form", { name: "Agregar concepto" })).not.toBeInTheDocument();
   });
 });
+
+describe("cálculo estilo CFDI (Fase 6.34)", () => {
+  const ivaTax = { tax: "002", kind: "traslado" as const, factor: "tasa" as const, rate: "0.160000", ieps_mode: null, position: 0, base: "0.330000", amount: "0.052800", amount_rounded: "0.05" };
+  const caseHItem = (id: number) => saleItemFixture({ id, description: `Concepto ${id}`, quantity: "1.000", unit_price: "0.33", subtotal: "0.33", subtotal_exact: "0.330000", tax_total: "0.05", total: "0.38", taxes: [ivaTax] });
+  const caseH = () => saleFixture({ subtotal: "0.99", tax_total: "0.16", taxes_transferred: "0.16", taxes_withheld: "0.00", total: "1.15", items: [caseHItem(1), caseHItem(2), caseHItem(3)] });
+
+  it("caso H: muestra los totales del backend y la nota junto al total", async () => {
+    vi.mocked(sales.getSale).mockResolvedValue(caseH());
+    render(<SaleEditor saleId={7} />);
+
+    expect(await screen.findByTestId("rounding-note")).toHaveTextContent("Los impuestos se calculan sobre los importes exactos de cada concepto y se redondean al final, como en el CFDI.");
+    expect(screen.getAllByText("$1.15").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("IVA 16 %").length).toBeGreaterThan(0);
+  });
+
+  it("caso H: el importe de la línea muestra el exacto al tocarlo", async () => {
+    vi.mocked(sales.getSale).mockResolvedValue(caseH());
+    render(<SaleEditor saleId={7} />);
+
+    const [amount] = await screen.findAllByRole("button", { name: /Importe de Concepto 1: \$0\.38/ });
+    expect(amount).toHaveAttribute("title", "Importe exacto: 0.33\nIVA 16 %: 0.0528");
+    fireEvent.click(amount);
+    const note = screen.getAllByRole("note").find((element) => element.textContent?.includes("Importes exactos"));
+    expect(note).toHaveTextContent("0.0528");
+  });
+
+  it("sin diferencia entre la suma visible y el total no muestra la nota", async () => {
+    render(<SaleEditor saleId={7} />);
+
+    expect(await screen.findAllByText("$116.00")).not.toHaveLength(0);
+    expect(screen.queryByTestId("rounding-note")).not.toBeInTheDocument();
+  });
+
+  it("muestra el aviso de recálculo con ambos totales", async () => {
+    vi.mocked(sales.getSaleBillingReadiness).mockResolvedValue(readinessFixture({
+      warnings: [{ code: "SALE_TOTALS_WILL_BE_RECALCULATED", field: "total", message: "…", previous_total: "1.14", new_total: "1.15" }],
+    }));
+    render(<SaleEditor saleId={7} />);
+
+    expect(await screen.findByText("Al facturar, la venta se recalcula con el cálculo del CFDI: el total pasa de $1.14 a $1.15.")).toBeInTheDocument();
+  });
+});

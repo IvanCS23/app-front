@@ -8,6 +8,7 @@ import AppLayout from "@/app/components/layout/AppLayout";
 import Toast, { type ToastData } from "@/app/components/ui/Toast";
 import SaleItems from "@/app/components/sales/SaleItems";
 import SaleReadinessPanel from "@/app/components/sales/SaleReadinessPanel";
+import { ROUNDING_NOTE, toCents, visibleLinesDifferFromTotal } from "@/src/lib/amounts";
 import { formatInvoiceMoney } from "@/src/lib/invoice";
 import {
   defaultTaxRateId,
@@ -349,13 +350,21 @@ export default function SaleEditor({ saleId }: { saleId?: number }) {
               <div className="flex justify-between"><dt className="text-[#64748B]">Subtotal</dt><dd className="tabular-nums">{formatInvoiceMoney(sale.subtotal, sale.currency)}</dd></div>
               <div className="flex justify-between"><dt className="text-[#64748B]">Descuento</dt><dd className="tabular-nums">{formatInvoiceMoney(sale.discount_total, sale.currency)}</dd></div>
               <div className="flex justify-between"><dt className="text-[#64748B]">Impuestos</dt><dd className="tabular-nums">{formatInvoiceMoney(sale.tax_total, sale.currency)}</dd></div>
+              {toCents(sale.taxes_withheld) !== 0 && (
+                <div className="flex justify-between"><dt className="text-[#64748B]">Retenciones</dt><dd className="tabular-nums">−{formatInvoiceMoney(sale.taxes_withheld ?? "0", sale.currency)}</dd></div>
+              )}
               <div className="flex justify-between border-t border-[#CBD5E1] pt-2 font-bold"><dt>Total</dt><dd className="tabular-nums text-emerald-600">{formatInvoiceMoney(sale.total, sale.currency)}</dd></div>
+              {/* Fase 6.34: los totales son del backend (estilo CFDI); si la suma
+                  visible de las líneas no coincide, se explica junto al total. */}
+              {visibleLinesDifferFromTotal((sale.items ?? []).map((item) => item.total), sale.total) && (
+                <p className="text-xs leading-snug text-[#64748B]" data-testid="rounding-note">{ROUNDING_NOTE}</p>
+              )}
             </dl>
           </section>
         )}
 
         {sale && !sale.invoice && sale.status !== "cancelled" && (
-          <SaleReadinessPanel errors={readiness.errors} warnings={readiness.warnings} items={sale.items ?? []} loading={readinessLoading} />
+          <SaleReadinessPanel errors={readiness.errors} warnings={readiness.warnings} items={sale.items ?? []} loading={readinessLoading} currency={sale.currency} />
         )}
 
         {sale && sale.status === "cancelled" && (
