@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { API_URL } from "@/src/config/api";
 import { watchPasswordChangeRequired } from "@/src/services/http";
 import {
+  AuthRequestError,
   changeMyPasswordRequest,
   clearSession,
   getMeRequest,
@@ -67,9 +68,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUserState(freshUser);
         saveUser(freshUser);
       })
-      .catch(() => {
-        clearSession();
-        setUserState(null);
+      .catch((error: unknown) => {
+        // Fase 6.35 (D10): sólo un 401 cierra la sesión. Un 429 (límite de
+        // peticiones), un 5xx o un error de red conservan el token y el
+        // usuario guardado; la siguiente llamada lo vuelve a intentar.
+        if (error instanceof AuthRequestError && error.status === 401) {
+          clearSession();
+          setUserState(null);
+        }
       })
       .finally(() => setLoading(false));
   }, []);

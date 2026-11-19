@@ -60,20 +60,37 @@ export async function loginRequest(
   return data as LoginResponse;
 }
 
+/**
+ * Fase 6.35 (D10): error de GET /api/user con su código HTTP (null si no
+ * hubo respuesta: error de red). Sólo un 401 significa que la sesión
+ * terminó; un 429 o un 5xx no.
+ */
+export class AuthRequestError extends Error {
+  constructor(message: string, public readonly status: number | null) {
+    super(message);
+    this.name = "AuthRequestError";
+  }
+}
+
 export async function getMeRequest(token: string): Promise<AuthUser> {
-  const res = await fetch(`${API_URL}/api/user`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/api/user`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+  } catch {
+    throw new AuthRequestError("No se pudo conectar con el servidor.", null);
+  }
 
   if (!res.ok) {
     const data = await res.json().catch(() => null);
     const message =
       (data as ApiError)?.message ?? "No se pudo obtener el usuario.";
-    throw new Error(message);
+    throw new AuthRequestError(message, res.status);
   }
 
   const data = (await res.json()) as { user: AuthUser };

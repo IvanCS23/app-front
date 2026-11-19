@@ -1,12 +1,16 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-import MaintenancePage from "./page";
+import { describe, expect, it, vi } from "vitest";
+import Home from "./page";
+
+const navigation = vi.hoisted(() => ({ redirect: vi.fn() }));
+
+vi.mock("next/navigation", () => ({ redirect: navigation.redirect }));
 
 describe("entrada al sistema", () => {
-  it("muestra un enlace semántico y claro hacia el login", () => {
-    render(<MaintenancePage />);
+  // Desde 740dbe9 ("Pagina principal") la raíz ya no muestra la página de
+  // mantenimiento: redirige directo al login.
+  it("la raíz lleva al login", () => {
+    Home();
 
-    expect(screen.getByRole("link", { name: "Iniciar sesión" })).toHaveAttribute("href", "/login");
-    expect(screen.queryByRole("button", { name: "Teal to Lime" })).not.toBeInTheDocument();
+    expect(navigation.redirect).toHaveBeenCalledWith("/login");
   });
 });
